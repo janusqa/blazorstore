@@ -1,0 +1,65 @@
+@page "/demo/blazorjs"
+@rendermode InteractiveServer
+
+@inject IJSRuntime _ijsr
+
+<h3>Javascript in Blazor</h3>
+
+<div clas="row">
+    <button class="btn btn-secondary" @onclick="TestConfirmBox">Test Confirm Button</button>
+</div>
+
+<div>
+    @if (confirmResult)
+    {
+        <p>Confirmation has been made!</p>
+    }
+    else
+    {
+        <p>Confirmation pending!</p>
+    }
+</div>
+
+<div clas="row">
+    <button class="btn btn-success" @onclick="ToastrSuccess">Toastr Success</button>
+    <button class="btn btn-danger" @onclick="ToastrFailure">Toastr Failure</button>
+</div>
+<br />
+<div clas="row">
+    <button class="btn btn-success" @onclick="SweetSuccess">Sweet Alert Success</button>
+    <button class="btn btn-danger" @onclick="SweetFailure">Sweet Alert Failure</button>
+</div>
+
+@code {
+
+    private string? ConfirmMessage = "Are you sure you want to click?";
+    private bool confirmResult;
+
+    private async Task TestConfirmBox()
+    {
+        // returns a bool since this is a confirmation box, its eiter confirm (true) otherwise false
+        confirmResult = await _ijsr.InvokeAsync<bool>("confirm", ConfirmMessage);
+    }
+
+    private async Task ToastrSuccess()
+    {
+        // returns a bool since this is a confirmation box, its eiter confirm (true) otherwise false
+        await _ijsr.ToastrSuccess("It's a success");
+    }
+    private async Task ToastrFailure()
+    {
+        // returns a bool since this is a confirmation box, its eiter confirm (true) otherwise false
+        await _ijsr.ToastrFailure("It's a failure");
+    }
+
+    private async Task SweetSuccess()
+    {
+        // returns a bool since this is a confirmation box, its eiter confirm (true) otherwise false
+        await _ijsr.InvokeVoidAsync("ShowSweetAlert", "success", "It's a success");
+    }
+    private async Task SweetFailure()
+    {
+        // returns a bool since this is a confirmation box, its eiter confirm (true) otherwise false
+        await _ijsr.InvokeVoidAsync("ShowSweetAlert", "error", "It's a failure");
+    }
+}

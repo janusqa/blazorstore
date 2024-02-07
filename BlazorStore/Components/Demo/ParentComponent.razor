@@ -1,0 +1,38 @@
+@page "/demo/parentcomponent"
+@rendermode InteractiveServer
+
+<h3>Parent Child Relation</h3>
+
+<CascadingValue Value="@MessageForGrandChild" Name="MessageForGrandChild">
+    <CascadingValue Value="@LuckyNumber" Name="LuckyNumber">
+        <ChildComponent @ref="childComponentRef" OnButtonClick="ShowMessage"
+            Title="This title is passed as parameter from Parent Component">
+            Render Fragment from Parent! WooHOO!
+        </ChildComponent>
+    </CascadingValue>
+</CascadingValue>
+<p><strong>@messageText</strong></p>
+<AnotherChildComponent placeholder="Enter your name" maxLength=2 style="background-color:#e7ff14;" />
+<br />
+<div class="row">
+    @if (childComponentRef is not null)
+    {
+        <button class="btn btn-success" @onclick="childComponentRef.ToastrSuccess">Show ToastrAlert</button>
+    }
+</div>
+
+@* <ChildComponent Title="This is second child component"></ChildComponent> *@
+
+@code {
+    private string messageText = "";
+    private string? MessageForGrandChild = "This message is from your grand parent (Parent Component)";
+    private string? LuckyNumber = "7";
+
+    private void ShowMessage()
+    {
+        messageText = "BlazorStore button clicked";
+    }
+
+    // referencing a component so we can use its methods
+    private ChildComponent? childComponentRef;
+}

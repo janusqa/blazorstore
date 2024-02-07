@@ -1,0 +1,38 @@
+@if (product is not null)
+{
+    <div class="col-5 border m-1 p-2 bg-light" @onclick="OnSelectProduct">
+    <h4 class="text-secondary">Product - @product.Id</h4>
+    <p><input type="checkbox" @onchange="OnFavorited" /> Add to Favorite</p>
+    Name - @product.Name<br />
+    @if (ChildContent is not null)
+        {
+            <span>RF from Parent @ChildContent</span>
+            <br />
+        }
+        Show Properties: <input type="checkbox" @bind="product.IsActive"><br />
+        @if (product.IsActive && product.ProductProps is not null)
+        {
+            @foreach (var props in product.ProductProps)
+            {
+                @($"{props.Key} - {props.Value}")
+
+                <br />
+            }
+        }
+        <EditDeleteButton IsActive="@product.IsActive" />
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Product? product { get; set; }
+
+    [Parameter]
+    public EventCallback<ChangeEventArgs> OnFavorited { get; set; }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnSelectProduct { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

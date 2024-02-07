@@ -1,0 +1,16 @@
+{
+    "terminal.integrated.fontFamily": "'JetBrains Mono'",
+    "terminal.integrated.gpuAcceleration": "off"
+
+    // "dotnet.dotnetPath": "/usr/share/dotnet",
+    // "dotnetAcquisitionExtension.existingDotnetPath": [
+    //     {
+    //         "extensionId": "ms-dotnettools.csharp",
+    //         "path": "/usr/share/dotnet/dotnet"
+    //     },
+    //     {
+    //         "extensionId": "ms-dotnettools.csdevkit",
+    //         "path": "/usr/share/dotnet/dotnet"
+    //     }
+    // ]
+}

@@ -1,0 +1,17 @@
+@page "/demo/product"
+@rendermode InteractiveServer
+
+<h2 class="text-primary">Product</h2>
+<p>Favourites Total: @Favorited</p>
+<p>Last Selected Product: @LastSelctedProduct</p>
+<div class="border p-2 mt-2" style="background-color:azure">
+    <div class="row">
+        @foreach (var (product, idx) in products.Select((product, idx) => (product, idx)))
+        {
+            <ProductItem product="@product" OnFavorited="(e)=>UpdateFavorited((bool)e.Value!)"
+                OnSelectProduct="(e)=>UpdateLastSelectedProduct(product.Name!)">
+                #@($"{idx + 1}")
+            </ProductItem>
+        }
+    </div>
+</div>

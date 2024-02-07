@@ -1,0 +1,14 @@
+<div>
+    <h4 class="text-primary pt-3">Another Child Component</h4>
+    <input id="name" placeholder="@Placeholder" @attributes="AdditionalAttributes" /> @*splatting*@
+</div>
+
+@code {
+    // object splatting - taking all params passed into component that were not directly mentions and spreading
+    // them out in the compoent. Note you can also pass in single properties as usual
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter]
+    public string? Placeholder { get; set; } = "Initial text";
+}

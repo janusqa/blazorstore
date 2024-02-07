@@ -1,0 +1,43 @@
+@page "/demo/routing/{parameter1:int?}"
+@page "/demo/routing/{parameter1:int}/{parameter2:int?}"
+@page "/routing"
+@rendermode InteractiveServer
+
+@inject NavigationManager _nm
+
+<p>Parameter1: @parameter1</p>
+<p>Parameter2: @parameter2</p>
+<p><a href="/demo/routing/22/33?param1=blazorstore&param2=blazor" class="btn btn-primary">Navigate to query
+        parameter</a></p>
+<p><button class="btn btn-success" @onclick="LoadParameters">Load parameters</button></p>
+<h3>Query String Parameters:</h3>
+<p>Param1: @param1</p>
+<p>Param2: @param2</p>
+<p><button @onclick="NavigateToQueryParam" class="btn btn-primary">Navigate to query
+        parameter</button></p>
+
+
+@code {
+    // these two params are for reading path params
+    [Parameter]
+    public int parameter1 { get; set; }
+    [Parameter]
+    public int parameter2 { get; set; }
+
+    private string? param1;
+    private string? param2;
+    private void LoadParameters()
+    {
+        // Reading Query params using navigation manager
+        var absoluteUri = new Uri(_nm.Uri);
+        var queryParam = System.Web.HttpUtility.ParseQueryString(absoluteUri.Query);
+        param1 = queryParam["param1"];
+        param2 = queryParam["param2"];
+    }
+
+    private void NavigateToQueryParam()
+    {
+        // we can also navigate programatically using Navigation parameter
+        _nm.NavigateTo("/demo/routing/22/33?param1=blazorstore&param2=blazor");
+    }
+}

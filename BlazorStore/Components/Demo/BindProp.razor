@@ -1,0 +1,70 @@
+@page "/demo/bindprop"
+@rendermode InteractiveServer
+
+<h2 class="text-success">Individual Product</h2>
+<div class="row">
+    <div class="col-6 border p-3">
+        <h3 class="text-primary">Product Playground</h3>
+        <hr />
+        <p>Active: <input type="checkbox" @bind="@product.IsActive" /></p>
+        <p>
+            Product Properties:<br />
+            <select @bind="selectedProp">
+                <option value="" disabled>-- Select an option --</option>
+                @if (product.ProductProps is not null)
+                {
+                    @foreach (var prop in product.ProductProps)
+                    {
+                        <option value="@prop.Key">@prop.Key</option>
+                    }
+                }
+            </select>
+        </p>
+        <p>Price: <input type="number" @bind="@product.Price" @bind:event="oninput" /></p>
+    </div>
+    <div class="col-6 border p-3">
+        <h3 class="text-primary">Product Summary</h3>
+        <hr />
+        <p>Name: @product.Name</p>
+        <p>Active: @product.IsActive</p>
+        <p>Price: @product.Price</p>
+        <p>This product is: @(product.IsActive ? "Active" : "Inactive")</p>
+        <p>Property selected: @selectedProp</p>
+        @if (!string.IsNullOrWhiteSpace(selectedProp))
+        {
+            <p>Property Value: @product.ProductProps?.FirstOrDefault(prop => prop.Key == selectedProp)?.Value</p>
+        }
+    </div>
+</div>
+
+<div class="col-12 pt-4">
+    <h2 class="text-success">Product Table</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Price</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in products)
+            {
+                <tr>
+                    <th scope="row"><input type="text" @bind="product.Name" @bind:event="oninput"></th>
+                    <td><input type="number" @bind="product.Price" @bind:event="oninput"></td>
+                    <td>
+                        <input type="checkbox" @bind="product.IsActive" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div>
+        <h3 class="text-primary">Product Summary</h3>
+        @foreach (var product in products)
+        {
+            <p>@product.Name [@product.Price] is @(product.IsActive ? "Active" : "Inactive")</p>
+        }
+    </div>
+</div>
