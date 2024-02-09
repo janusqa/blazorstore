@@ -23,14 +23,16 @@ namespace BlazorStore.DataAccess.Data
             base.OnModelCreating(modelBuilder);
 
             // set created date in tables
-            foreach (var table in SD.dbTables)
+            foreach (var (Model, _) in SD.dbEntity)
             {
-                var tableType = Type.GetType(table);
-                if (tableType is not null)
+                var entityType = Type.GetType($"{SD.modelsAssembly}.{SD.modelsNamespace}.{Model}, {SD.modelsAssembly}");
+                if (entityType is not null)
                 {
-                    var method = this.GetType().GetMethod("SetCreatedDate")?.MakeGenericMethod();
-                    method?.Invoke(this, [modelBuilder]);
+                    var entity = modelBuilder.Entity(entityType);
+                    entity.Property("CreatedDate").HasDefaultValueSql("DATETIME('now')");
+                    entity.Property("UpdatedDate").HasDefaultValueSql("DATETIME('now')");
                 }
+
             }
         }
 
@@ -38,11 +40,6 @@ namespace BlazorStore.DataAccess.Data
         {
             optionsBuilder.EnableDetailedErrors(); // Enable detailed error messages
 
-        }
-
-        private static void SetCreatedDate<T>(ModelBuilder modelBuilder) where T : class, IBaseEntity
-        {
-            modelBuilder.Entity<T>().Property(e => e.UpdatedDate).HasDefaultValueSql("GETDATE()");
         }
     }
 }

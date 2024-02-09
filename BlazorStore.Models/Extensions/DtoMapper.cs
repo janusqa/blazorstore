@@ -13,19 +13,20 @@ namespace BlazorStore.Models.Extensions
         // aka it is syntactic sugar over the static method.
         public static CategoryDto ToDto(this Category category)
         {
-            return new CategoryDto(
-                Id: category.Id,
-                Name: category.Name
-            );
+            return new CategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name
+            };
         }
 
         public static UpdateCategoryDto ToUpdateDto(this Category category)
         {
-            return new UpdateCategoryDto(
-                Id: category.Id,
-                Name: category.Name
-
-            );
+            return new UpdateCategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name
+            };
         }
     }
 }

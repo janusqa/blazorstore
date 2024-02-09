@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BlazorStore.Models\BlazorStore.Models.csproj" />
     <ProjectReference Include="..\BlazorStore.DataAccess\BlazorStore.DataAccess.csproj" />
+    <ProjectReference Include="..\BlazorStore.Dto\BlazorStore.Dto.csproj" />
   </ItemGroup>
 
 </Project>

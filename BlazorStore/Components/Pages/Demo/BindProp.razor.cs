@@ -1,7 +1,7 @@
 
 using BlazorStore.Models.Domain;
 
-namespace BlazorStore.Components.Demo
+namespace BlazorStore.Components.Pages.Demo
 {
     public partial class BindProp
     {

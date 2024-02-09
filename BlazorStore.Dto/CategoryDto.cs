@@ -9,17 +9,29 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BlazorStore.Dto
 {
-    public record CategoryDto(
-        int Id,
-        [Required][MaxLength(30)] string Name
-    );
+    public record CategoryDto
+    {
+        public int Id { get; set; }
 
-    public record CreateCategoryDto(
-        [Required][MaxLength(30)] string Name
-    );
+        [Required]
+        [MaxLength(30)]
+        public string? Name { get; set; }
+    };
 
-    public record UpdateCategoryDto(
-        [Required] int Id,
-        [Required][MaxLength(30)] string Name
-    );
+    public record CreateCategoryDto
+    {
+        [Required]
+        [MaxLength(30)]
+        public string? Name { get; set; }
+    };
+
+    public record UpdateCategoryDto
+    {
+        [Required]
+        public int Id { get; set; }
+
+        [Required]
+        [MaxLength(30)]
+        public string? Name { get; set; }
+    };
 }

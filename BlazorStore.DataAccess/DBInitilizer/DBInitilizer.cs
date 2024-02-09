@@ -41,16 +41,16 @@ namespace BlazorStore.DataAccess.DBInitilizer
             // ****
             var triggers = new List<string>();
 
-            foreach (var table in SD.dbTables)
+            foreach (var (_, Table) in SD.dbEntity)
             {
                 triggers.Add($@"
-                    DROP TRIGGER IF EXISTS {table}_update_updated_date;
-                    CREATE TRIGGER {table}_update_updated_date 
-                    AFTER UPDATE ON {table}
+                    DROP TRIGGER IF EXISTS {Table}_update_updated_date;
+                    CREATE TRIGGER {Table}_update_updated_date 
+                    AFTER UPDATE ON {Table}
                     BEGIN
-                        UPDATE {table} 
+                        UPDATE {Table} 
                         SET 
-                            UpdatedDate = datetime('now') 
+                            UpdatedDate = DATETIME('now') 
                         WHERE id = NEW.id;
                     END;      
                 ");
