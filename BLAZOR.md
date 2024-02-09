@@ -11,4 +11,14 @@ https://learn.microsoft.com/en-us/aspnet/core/blazor/tooling?view=aspnetcore-8.0
 3. dotnet new tool-manifest
 4. dotnet tool install dotnet-ef 
 5. dotnet tool update dotnet-ef
-6. dotnet run --project [<PROJECTNAME>] --launch-profile https  
+6. dotnet add BlazorStore.DataAccess package Microsoft.EntityFrameworkCore
+7. dotnet add BlazorStore.DataAccess package Microsoft.EntityFrameworkCore.SqlServer 
+   OR dotnet add BlazorStore.DataAccess package Microsoft.EntityFrameworkCore.Sqlite
+8. dotnet add BlazorStore.DataAccess package Microsoft.EntityFrameworkCore.Relational
+9. dotnet add BlazorStore.DataAccess package Microsoft.EntityFrameworkCore.Tools
+10. dotnet add BlazorStore.DataAccess package Microsoft.EntityFrameworkCore.Design
+11. dotnet add BlazorStore.DataAccess package Microsoft.Extensions.Configuration
+12. dotnet add BlazorStore.DataAccess package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+13. dotnet add BlazorStore.Models package Microsoft.Extensions.Identity.Stores
+14. dotnet add BlazorStore package Microsoft.EntityFrameworkCore.Design
+15. dotnet run --project [<PROJECTNAME>] --launch-profile https  

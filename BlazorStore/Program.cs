@@ -1,5 +1,9 @@
-using BlazorStore.Client.Pages;
 using BlazorStore.Components;
+using BlazorStore.DataAccess.Data;
+using BlazorStore.DataAccess.DBInitilizer;
+using BlazorStore.DataAccess.Repository;
+using BlazorStore.DataAccess.UnitOfWork.IUnitOfWork;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +12,18 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+
+// add custom services
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IDBInitilizer, DBInitilizer>();
+
 var app = builder.Build();
+
+//seed the db
+await SeedDatabase();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -33,3 +48,12 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(BlazorStore.Client._Imports).Assembly);
 
 app.Run();
+
+async Task SeedDatabase()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitilizer = scope.ServiceProvider.GetRequiredService<IDBInitilizer>();
+        await dbInitilizer.Initilize();
+    }
+}

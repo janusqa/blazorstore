@@ -92,7 +92,7 @@ EventType.Add("OnAfterRenderAsync is called");
     // HasStateChanged
     private void StartCountdown()
     {
-        var timer = new Timer(TimeCallBack, null, 1000, 1000);
+        var timer = new Timer(TimeCallBack!, null, 1000, 1000);
     }
 
     private void TimeCallBack(object state)
