@@ -6,6 +6,8 @@ namespace BlazorStore.Models.Domain
     {
         [Key]
         public int Id { get; set; }
+        [Required]
+        [MaxLength(30)]
         public required string Name { get; set; }
     }
 }

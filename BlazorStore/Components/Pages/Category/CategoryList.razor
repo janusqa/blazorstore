@@ -1,4 +1,7 @@
 @page "/category"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@attribute [StreamRendering(true)]
+@inject IUnitOfWork _uow
 
 <div class="row mt-4">
     <div class="col-6">
@@ -7,8 +10,57 @@
     <div class="col-4 offset-2">
         <a href="/category/create" class="btn btn-primary form-control">Add New Category</a>
     </div>
+    <div class="col-12">
+        <QuickGrid @ref="quickGridRef" ItemsProvider="categoryProvider" Class="table" Pagination="@pagination">
+            <PropertyColumn Property="category => category.Name" />
+            <TemplateColumn Context="category" Title="Actions">
+                <div class="d-flex gap-2">
+                    <NavLink href="@($"/category/edit/{category.Id}")" class="btn btn-primary">Edit</NavLink>
+                    <form @formname="@($"delete-{category.Id}")" @onsubmit="async () => await Delete(category.Id)"
+                        method="POST">
+                        <AntiforgeryToken />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </TemplateColumn>
+        </QuickGrid>
+        <Paginator State="@pagination" />
+    </div>
 </div>
 
-@code {
 
+@code {
+    private PaginationState pagination = new PaginationState { ItemsPerPage = SD.paginationSize };
+    private GridItemsProvider<CategoryDto>? categoryProvider;
+    private QuickGrid<CategoryDto>? quickGridRef;
+
+    protected override void OnInitialized()
+    {
+        categoryProvider = async request =>
+        {
+            var response = await List(request.StartIndex, request.Count);
+            return GridItemsProviderResult.From(items: response.Data.ToList(), totalItemCount: response.Count);
+        };
+    }
+
+    private async Task<(IEnumerable<CategoryDto> Data, int Count)> List(int offset = SD.paginationDefaultPage, int? limit =
+    SD.paginationDefaultSize)
+    {
+        var numRecords = (await _uow.Categories.SqlQueryAsync<int>(@"SELECT COUNT(Id) FROM Categories;", [])).FirstOrDefault();
+
+        var data = (await _uow.Categories.FromSqlAsync(@"
+SELECT slow.* FROM Categories AS slow
+INNER JOIN (SELECT Id FROM Categories LIMIT @Limit OFFSET @Offset) AS fast
+USING (Id);",
+        [new SqliteParameter("Offset", offset), new SqliteParameter("Limit", limit)]))
+        .Select(c => c.ToDto());
+
+        return (data, numRecords);
+    }
+
+    private async Task Delete(int entityId)
+    {
+        await _uow.Categories.ExecuteSqlAsync(@"DELETE FROM Categories WHERE Id = @Id;", [new SqliteParameter("Id", entityId)]);
+        if (quickGridRef is not null) await quickGridRef.RefreshDataAsync();
+    }
 }

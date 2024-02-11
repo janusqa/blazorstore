@@ -24,15 +24,20 @@
     [Parameter]
     public int parameter2 { get; set; }
 
-    private string? param1;
-    private string? param2;
+    [SupplyParameterFromQuery(Name = "param1")]
+    public string? param1 { get; set; }
+    [SupplyParameterFromQuery(Name = "param2")]
+    public string? param2 { get; set; }
+
+    private string? param3;
+    private string? param4;
     private void LoadParameters()
     {
         // Reading Query params using navigation manager
         var absoluteUri = new Uri(_nm.Uri);
         var queryParam = System.Web.HttpUtility.ParseQueryString(absoluteUri.Query);
-        param1 = queryParam["param1"];
-        param2 = queryParam["param2"];
+        param3 = queryParam["param1"];
+        param4 = queryParam["param2"];
     }
 
     private void NavigateToQueryParam()
