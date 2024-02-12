@@ -10,7 +10,7 @@ namespace BlazorStore.Components.Pages.Category
         private string? message;
 
         [Parameter]
-        public int entityId { get; set; }
+        public int EntityId { get; set; }
 
         [SupplyParameterFromForm(FormName = "category-upsert")]
         public CategoryDto CategoryDto { get; set; } = new();
@@ -19,7 +19,7 @@ namespace BlazorStore.Components.Pages.Category
 
         protected override void OnInitialized()
         {
-            if (entityId != 0)
+            if (EntityId != 0)
             {
                 Title = "Update";
             }
@@ -30,11 +30,12 @@ namespace BlazorStore.Components.Pages.Category
         }
         protected override async Task OnParametersSetAsync()
         {
-            if (entityId != 0)
+            if (EntityId != 0)
             {
-                var category = await Get(entityId);
+                var category = await Get(EntityId);
                 if (category is not null)
                 {
+                    CategoryDto.Id = category.Id;
                     CategoryDto.Name ??= category.Name;
                 }
             }
@@ -53,7 +54,7 @@ namespace BlazorStore.Components.Pages.Category
                     Name = EXCLUDED.Name;"
                 , [
                     new SqliteParameter("Name", CategoryDto.Name),
-                    new SqliteParameter("Id",entityId !=0 ? entityId : (object)DBNull.Value),
+                    new SqliteParameter("Id", EntityId !=0 ? EntityId : (object)DBNull.Value),
                 ]);
 
                 message = "Saved!";

@@ -1,0 +1,77 @@
+@page "/product/create"
+@page "/product/edit/{entityId:int}"
+@attribute [StreamRendering]
+
+@inject IUnitOfWork _uow
+@inject NavigationManager _nm
+
+<div class="row my-2">
+    <h3 class="card-title text-primary mb-3 ml-3">@Title Product</h3>
+    <div class="col-10">
+        @if (EntityId != 0 && ProductDto is null)
+        {
+            <div class="text-center">
+                <img src="/images/loading.gif">
+            </div>
+        }
+        else if (ProductDto is not null)
+        {
+            <EditForm Model="ProductDto" OnValidSubmit="Upsert" FormName="product-upsert" method="POST">
+                <DataAnnotationsValidator />
+                @* <ValidationSummary /> *@
+                <div class="form-group">
+                    <label>Name:</label>
+                    <InputText @bind-Value="ProductDto.Name" class="form-control" />
+                    <ValidationMessage For="()=>ProductDto.Name"></ValidationMessage>
+
+                </div>
+
+                <div class="form-group">
+                    <label>Description:</label>
+                    <InputTextArea @bind-Value="ProductDto.Description" class="form-control"></InputTextArea>
+                    <ValidationMessage For="()=>ProductDto.Description"></ValidationMessage>
+                </div>
+
+                <div class="form-group">
+                    <label>Color:</label>
+                    <InputText @bind-Value="ProductDto.Color" class="form-control" />
+                    <ValidationMessage For="()=>ProductDto.Color"></ValidationMessage>
+                </div>
+
+                <div class="row pt-3">
+                    <div class="form-group col-4">
+                        <div class="form-check">
+                            <InputCheckbox @bind-Value="ProductDto.ShopFavorites" class="form-check-input" />
+                            <label class="form-check-label">Is Shop Favorite:</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-4">
+                        <div class="form-check">
+                            <InputCheckbox @bind-Value="ProductDto.CustomerFavorites" class="form-check-input" />
+                            <label class="form-check-label">Is Customer Favorite:</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-4">
+                        <label class="form-check-label">Category:</label>
+                        <InputSelect @bind-Value="ProductDto.CategoryId" class="form-select">
+                            <option value="0" disabled selected>-- Select Category --</option>
+                            @foreach (var category in Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="()=>ProductDto.CategoryId"></ValidationMessage>
+                    </div>
+                </div>
+
+                <div class="form-group py-2"><button type="submit" class="btn btn-primary">@Title</button>
+                    <NavLink href="/product" class="btn btn-secondary">Back to products</NavLink>
+                </div>
+            </EditForm>
+            <div>@message</div>
+        }
+    </div>
+</div>
+<Spinner />

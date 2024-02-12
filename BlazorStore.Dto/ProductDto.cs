@@ -5,6 +5,7 @@
 // a CreatedDate field we may not want to send this back
 // So in our controller we gaurd the info the model returns
 // Via a DTO.
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlazorStore.Dto
@@ -16,7 +17,10 @@ namespace BlazorStore.Dto
         public required string Name { get; set; }
         [Required]
         public required string Description { get; set; }
+        [DisplayName("Shop Favorites")]
         public bool ShopFavorites { get; set; }
+        [DisplayName("Customer Favorites")]
+
         public bool CustomerFavorites { get; set; }
         public string? Color { get; set; }
         public string? ImageUrl { get; set; }

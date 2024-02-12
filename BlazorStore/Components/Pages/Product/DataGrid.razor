@@ -3,16 +3,19 @@
 @inject IJSRuntime _ijsr
 
 <div class="col-11">
-    <h4 class="card-title text-primary">Categories</h4>
+    <h4 class="card-title text-primary">Products</h4>
 </div>
 <div class="col-1">
-    <a href="/category/create" class="btn btn-primary"><i class="bi bi-plus-circle"></i></a>
+    <a href="/product/create" class="btn btn-primary"><i class="bi bi-plus-circle"></i></a>
 </div>
 <div class="col-12">
     <QuickGrid @ref="quickGridRef" ItemsProvider="entityProvider" Class="table" Pagination="@pagination">
         <PropertyColumn Property="entity => entity.Name" />
+        <PropertyColumn Property="entity => entity.ShopFavorites" title="Shop Favorites" />
+        <PropertyColumn Property="entity => entity.CustomerFavorites" title="Customer Favorites" />
+        <PropertyColumn Property=" entity=> entity.CategoryDto!.Name" />
         <TemplateColumn Context="entity" Title="Actions">
-            <NavLink href="@($"/category/edit/{entity.Id}")" class="btn btn-primary"><i class="bi bi-pencil-square"></i>
+            <NavLink href="@($"/product/edit/{entity.Id}")" class="btn btn-primary"><i class="bi bi-pencil-square"></i>
             </NavLink>
             @* When there is no interactivity and using ssr only use forms
             <form @formname="@($"delete-{entity.Id}")" @onsubmit="async () => await Delete(entity.Id)"
