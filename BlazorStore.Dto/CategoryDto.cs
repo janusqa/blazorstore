@@ -18,20 +18,4 @@ namespace BlazorStore.Dto
         public string? Name { get; set; }
     };
 
-    public record CreateCategoryDto
-    {
-        [Required]
-        [MaxLength(30)]
-        public string? Name { get; set; }
-    };
-
-    public record UpdateCategoryDto
-    {
-        [Required]
-        public int Id { get; set; }
-
-        [Required]
-        [MaxLength(30)]
-        public string? Name { get; set; }
-    };
 }

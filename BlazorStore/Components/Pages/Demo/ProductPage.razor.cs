@@ -4,7 +4,7 @@ namespace BlazorStore.Components.Pages.Demo
 {
     public partial class ProductPage
     {
-        private List<Product> products = new List<Product>();
+        private List<ProductDemo> products = new List<ProductDemo>();
         private int Favorited { get; set; } = 0;
         private string LastSelctedProduct { get; set; } = "";
 

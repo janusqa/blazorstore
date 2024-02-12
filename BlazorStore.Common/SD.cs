@@ -7,7 +7,8 @@ namespace BlazorStore.Common
         public const string modelsNamespace = "Domain";
         public const string dbName = "";
         public static readonly (string Model, string Table)[] dbEntity = [
-            ("Category","Categories")
+            ("Category","Categories"),
+            ("Product","Products"),
         ];
 
         // Pagination

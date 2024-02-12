@@ -12,12 +12,16 @@ namespace BlazorStore.DataAccess.Repository
 
         public ICategoryRepository Categories { get; init; }
 
+        public IProductRepository Products { get; init; }
+
 
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;
 
             Categories = new CategoryRepository(_db);
+            Products = new ProductRepository(_db);
+
         }
 
         public async Task<int> Complete()

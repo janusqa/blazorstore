@@ -20,12 +20,19 @@ namespace BlazorStore.Models.Extensions
             };
         }
 
-        public static UpdateCategoryDto ToUpdateDto(this Category category)
+        public static ProductDto ToDto(this Product product)
         {
-            return new UpdateCategoryDto
+            return new ProductDto
             {
-                Id = category.Id,
-                Name = category.Name
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                ShopFavorites = product.ShopFavorites,
+                CustomerFavorites = product.CustomerFavorites,
+                Color = product.Color,
+                ImageUrl = product.ImageUrl,
+                CategoryId = product.CategoryId,
+                CategoryDto = product.Category?.ToDto()
             };
         }
     }

@@ -14,6 +14,7 @@ namespace BlazorStore.DataAccess.Data
         }
 
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Product> Products { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,7 +33,6 @@ namespace BlazorStore.DataAccess.Data
                     entity.Property("CreatedDate").HasDefaultValueSql("DATETIME('now')");
                     entity.Property("UpdatedDate").HasDefaultValueSql("DATETIME('now')");
                 }
-
             }
         }
 

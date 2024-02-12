@@ -6,7 +6,7 @@ namespace BlazorStore.Components.Pages.Demo
     public partial class BindProp
     {
         private string? selectedProp = "";
-        Product product = new Product
+        ProductDemo product = new ProductDemo
         {
             Id = 1,
             Name = "Rose Candle",
@@ -20,7 +20,7 @@ namespace BlazorStore.Components.Pages.Demo
             }
         };
 
-        List<Product> products = new List<Product>();
+        List<ProductDemo> products = new List<ProductDemo>();
 
         protected override void OnInitialized()
         {
