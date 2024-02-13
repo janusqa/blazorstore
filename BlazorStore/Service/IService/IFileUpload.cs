@@ -6,6 +6,6 @@ namespace BlazorStore.Service.IService
     {
         Task<string> PostFile(IBrowserFile file, string? existingImageUrl = null);
         Task<string> PostFileSSR(IFormFile Image, string? existingImageUrl = null);
-        bool DeleteFile(string existingImageUrl);
+        bool DeleteFile(string? existingImageUrl);
     }
 }

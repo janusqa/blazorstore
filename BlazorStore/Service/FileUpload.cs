@@ -12,9 +12,9 @@ namespace BlazorStore.Service
             _whe = whe;
         }
 
-        public bool DeleteFile(string existingImageUrl)
+        public bool DeleteFile(string? existingImageUrl)
         {
-            if (existingImageUrl is not null && existingImageUrl != "")
+            if (existingImageUrl is not null && existingImageUrl != "" && !existingImageUrl.Contains("default.png"))
             {
                 string wwwRootPath = _whe.WebRootPath;
                 var existingImage = Path.Combine(wwwRootPath, existingImageUrl[1..]);
@@ -48,11 +48,8 @@ namespace BlazorStore.Service
                 // we need to repalce the existing file by first deleting 
                 // it and then copying in the new file. Otherwise, just
                 // copy in the new file
-                if (existingImageUrl is not null && existingImageUrl != "")
-                {
-                    var existingImage = Path.Combine(wwwRootPath, existingImageUrl[1..]);
-                    if (System.IO.File.Exists(existingImage)) System.IO.File.Delete(existingImage);
-                }
+                DeleteFile(existingImageUrl);
+
 
                 using (FileStream writer = new(filePath, FileMode.Create))
                 {
@@ -95,14 +92,7 @@ namespace BlazorStore.Service
                 // we need to repalce the existing file by first deleting 
                 // it and then copying in the new file. Otherwise, just
                 // copy in the new file
-                Console.WriteLine("***");
-                Console.WriteLine(existingImageUrl);
-                Console.WriteLine("***");
-                if (existingImageUrl is not null && existingImageUrl != "")
-                {
-                    var existingImage = Path.Combine(wwwRootPath, existingImageUrl[1..]);
-                    if (System.IO.File.Exists(existingImage)) System.IO.File.Delete(existingImage);
-                }
+                DeleteFile(existingImageUrl);
 
                 using (FileStream writer = new(filePath, FileMode.Create))
                 {

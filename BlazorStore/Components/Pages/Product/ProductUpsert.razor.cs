@@ -44,7 +44,7 @@ namespace BlazorStore.Components.Pages.Product
             }
             else
             {
-                ProductDto ??= new() { Name = string.Empty, Description = string.Empty };
+                ProductDto ??= new() { Name = string.Empty, Description = string.Empty, ImageUrl = "/images/product/default.png" };
             }
         }
 

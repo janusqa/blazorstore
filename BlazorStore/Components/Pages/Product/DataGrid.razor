@@ -12,8 +12,14 @@
 <div class="col-12">
     <QuickGrid @ref="quickGridRef" ItemsProvider="entityProvider" Class="table" Pagination="@pagination">
         <PropertyColumn Property="entity => entity.Name" />
-        <PropertyColumn Property="entity => entity.ShopFavorites" title="Shop Favorites" />
-        <PropertyColumn Property="entity => entity.CustomerFavorites" title="Customer Favorites" />
+        @* <PropertyColumn Property="entity => entity.ShopFavorites" title="Shop Favorites" />
+        <PropertyColumn Property="entity => entity.CustomerFavorites" title="Customer Favorites" /> *@
+        <TemplateColumn Context="entity" Title="Shop Favorites" Align="Align.Center">
+            <input type="checkbox" checked="@(entity.ShopFavorites)" onclick="return false;" />
+        </TemplateColumn>
+        <TemplateColumn Context="entity" Title="Customer Favorites" Align="Align.Center">
+            <input type="checkbox" checked="@(entity.CustomerFavorites)" onclick="return false;" />
+        </TemplateColumn>
         <PropertyColumn Property=" entity=> entity.CategoryDto!.Name" />
         <TemplateColumn Context="entity" Title="Actions">
             <NavLink href="@($"/product/edit/{entity.Id}")" class="btn btn-primary"><i class="bi bi-pencil-square"></i>
