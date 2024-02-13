@@ -54,6 +54,11 @@ namespace BlazorStore.Components.Pages.Product
             {
                 message = "Saving...";
 
+                if (ProductDto.Image is not null)
+                {
+                    ProductDto.ImageUrl = await PostImageSSR(ProductDto.Image, ProductDto.ImageUrl);
+                }
+
                 await _uow.Products.ExecuteSqlAsync(@"
                     INSERT INTO products 
                     (Id, Name, Description, ShopFavorites, CustomerFavorites, Color, ImageUrl, CategoryId)
@@ -119,32 +124,64 @@ namespace BlazorStore.Components.Pages.Product
             return (await _uow.Categories.FromSqlAsync($@"SELECT * FROM Categories;", [])).Select(c => c.ToDto());
         }
 
-        private async Task PostImage(InputFileChangeEventArgs e, string? existingImageUrl)
+        private async Task<string?> PostImageSSR(IFormFile Image, string? existingImageUrl)
         {
             try
             {
-                if (e.GetMultipleFiles().Count > 0)
+                if (Image is not null)
                 {
-                    foreach (var file in e.GetMultipleFiles())
+                    if (
+                        Path.GetExtension(Image.FileName) == ".jpg" ||
+                        Path.GetExtension(Image.FileName) == ".png" ||
+                        Path.GetExtension(Image.FileName) == ".jpeg"
+                    )
                     {
-                        if (
-                            Path.GetExtension(file.Name) == ".jpg" ||
-                            Path.GetExtension(file.Name) == ".png" ||
-                            Path.GetExtension(file.Name) == ".jpeg"
-                        )
-                        {
-                            // ProductDto.ImageUrl = await _fu.PostFile(file, existingImageUrl);
-                        }
-                        else
-                        {
-                            await _ijsr.InvokeVoidAsync("ShowToastr", "error", "Please select .jpg, .jpeg or .png file only");
-                        }
+                        return await _fu.PostFileSSR(Image, existingImageUrl);
                     }
+                    else
+                    {
+                        await _ijsr.InvokeVoidAsync("ShowToastr", "error", "Please select .jpg, .jpeg or .png file only");
+                    }
+
                 }
             }
             catch (Exception ex)
             {
                 await _ijsr.InvokeVoidAsync("ShowToastr", "error", ex.Message);
+            }
+
+            return null;
+        }
+
+        private async Task PostImage(InputFileChangeEventArgs e, string? existingImageUrl)
+        {
+            if (ProductDto is not null)
+            {
+                try
+                {
+                    if (e.GetMultipleFiles().Count > 0)
+                    {
+                        foreach (var file in e.GetMultipleFiles())
+                        {
+                            if (
+                                Path.GetExtension(file.Name) == ".jpg" ||
+                                Path.GetExtension(file.Name) == ".png" ||
+                                Path.GetExtension(file.Name) == ".jpeg"
+                            )
+                            {
+                                ProductDto.ImageUrl = await _fu.PostFile(file, existingImageUrl);
+                            }
+                            else
+                            {
+                                await _ijsr.InvokeVoidAsync("ShowToastr", "error", "Please select .jpg, .jpeg or .png file only");
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await _ijsr.InvokeVoidAsync("ShowToastr", "error", ex.Message);
+                }
             }
         }
     }

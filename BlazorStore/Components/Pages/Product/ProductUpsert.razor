@@ -1,7 +1,6 @@
 @page "/product/create"
 @page "/product/edit/{entityId:int}"
 @attribute [StreamRendering]
-@* @rendermode InteractiveServer *@
 
 @inject IUnitOfWork _uow
 @inject NavigationManager _nm
@@ -19,7 +18,8 @@
         }
         else if (ProductDto is not null)
         {
-            <EditForm Model="ProductDto" OnValidSubmit="Upsert" FormName="product-upsert" method="POST">
+            <EditForm Model="ProductDto" OnValidSubmit="Upsert" FormName="product-upsert" method="POST"
+                enctype="multipart/form-data">
                 <DataAnnotationsValidator />
                 @* <ValidationSummary /> *@
                 <div class="form-group">
@@ -70,7 +70,14 @@
                     </div>
                     <div class="form-group col-6">
                         <label style="display:block;">Image upload:</label>
-                        <InputFile OnChange="(e)=> PostImage(e, ProductDto?.ImageUrl)" />
+                        <InputFile name="ProductDto.Image" @bind-Value="ProductDto.Image" />
+                        <input type="hidden" name="ProductDto.ImageUrl" @bind="ProductDto.ImageUrl" />
+                        <!-- This below should work but there is a bug so need to use "name" insstead of "bind-Value" -->
+                        @* <InputFile @bind-Value="ProductDto.Image" /> *@
+                        <!-- This below is for multiple file uploads -->
+                        @* <InputFile @bind-Value="ProductDto.Image" multipe/> *@
+                        <!-- This below is for interactiveServer or interactiveWebassebmly mode -->
+                        @* <InputFile OnChange="(e)=> PostImage(e, ProductDto?.ImageUrl)" /> *@
                     </div>
 
                 </div>
