@@ -20,10 +20,10 @@ namespace BlazorStore.Dto
         [DisplayName("Shop Favorites")]
         public bool ShopFavorites { get; set; }
         [DisplayName("Customer Favorites")]
-
         public bool CustomerFavorites { get; set; }
         public string? Color { get; set; }
         public string? ImageUrl { get; set; }
+        [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Please select a category")]
         public int CategoryId { get; set; }
         public CategoryDto? CategoryDto { get; set; }

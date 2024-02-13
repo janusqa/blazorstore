@@ -1,7 +1,9 @@
 using BlazorStore.Dto;
 using BlazorStore.Models.Extensions;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Data.Sqlite;
+using Microsoft.JSInterop;
 
 namespace BlazorStore.Components.Pages.Product
 {
@@ -13,7 +15,7 @@ namespace BlazorStore.Components.Pages.Product
         public int EntityId { get; set; }
 
         [SupplyParameterFromForm(FormName = "product-upsert")]
-        public ProductDto ProductDto { get; set; } = new() { Name = string.Empty, Description = string.Empty };
+        public ProductDto? ProductDto { get; set; }
 
         private string Title { get; set; } = "Create";
         private IEnumerable<CategoryDto> Categories { get; set; } = [];
@@ -37,16 +39,12 @@ namespace BlazorStore.Components.Pages.Product
                 var product = await Get(EntityId);
                 if (product is not null)
                 {
-                    ProductDto.Id = product.Id;
-                    ProductDto.Name ??= product.Name;
-                    ProductDto.Description ??= product.Description;
-                    ProductDto.ShopFavorites = product.ShopFavorites;
-                    ProductDto.CustomerFavorites = product.CustomerFavorites;
-                    ProductDto.Color ??= product.Color;
-                    ProductDto.ImageUrl ??= product.ImageUrl;
-                    ProductDto.CategoryId = product.CategoryId;
-                    ProductDto.CategoryDto ??= product.CategoryDto;
+                    ProductDto ??= product;
                 }
+            }
+            else
+            {
+                ProductDto ??= new() { Name = string.Empty, Description = string.Empty };
             }
         }
 
@@ -57,18 +55,31 @@ namespace BlazorStore.Components.Pages.Product
                 message = "Saving...";
 
                 await _uow.Products.ExecuteSqlAsync(@"
-                    INSERT INTO categories (Id, Name)
-                    VALUES (@Id, @Name)
+                    INSERT INTO products 
+                    (Id, Name, Description, ShopFavorites, CustomerFavorites, Color, ImageUrl, CategoryId)
+                    VALUES (@Id, @Name, @Description, @ShopFavorites, @CustomerFavorites, @Color, @ImageUrl, @CategoryId)
                     ON CONFLICT(Id) DO UPDATE SET
-                    Name = EXCLUDED.Name;"
+                        Name = EXCLUDED.Name,
+                        Description = EXCLUDED.Description,
+                        ShopFavorites = EXCLUDED.ShopFavorites,
+                        CustomerFavorites = EXCLUDED.CustomerFavorites,
+                        Color = EXCLUDED.Color,
+                        ImageUrl = EXCLUDED.ImageUrl,
+                        CategoryId = EXCLUDED.CategoryId;"
                 , [
-                    new SqliteParameter("Name", ProductDto.Name),
                     new SqliteParameter("Id",EntityId !=0 ? EntityId : (object)DBNull.Value),
+                    new SqliteParameter("Name", ProductDto.Name),
+                    new SqliteParameter("Description", ProductDto.Description),
+                    new SqliteParameter("ShopFavorites", ProductDto.ShopFavorites),
+                    new SqliteParameter("CustomerFavorites", ProductDto.CustomerFavorites),
+                    new SqliteParameter("Color", ProductDto.Color),
+                    new SqliteParameter("ImageUrl", ProductDto.ImageUrl ?? string.Empty),
+                    new SqliteParameter("CategoryId", ProductDto.CategoryId),
                 ]);
 
                 message = "Saved!";
 
-                _nm.NavigateTo("/category");
+                _nm.NavigateTo("/product");
             }
             else
             {
@@ -91,6 +102,7 @@ namespace BlazorStore.Components.Pages.Product
                         ShopFavorites = p.ShopFavorites,
                         CustomerFavorites = p.CustomerFavorites,
                         Color = p.Color,
+                        CategoryId = p.CategoryId,
                         ImageUrl = p.ImageUrl,
                         Category = new Models.Domain.Category
                         {
@@ -105,6 +117,35 @@ namespace BlazorStore.Components.Pages.Product
         private async Task<IEnumerable<CategoryDto>> GetCategories()
         {
             return (await _uow.Categories.FromSqlAsync($@"SELECT * FROM Categories;", [])).Select(c => c.ToDto());
+        }
+
+        private async Task PostImage(InputFileChangeEventArgs e, string? existingImageUrl)
+        {
+            try
+            {
+                if (e.GetMultipleFiles().Count > 0)
+                {
+                    foreach (var file in e.GetMultipleFiles())
+                    {
+                        if (
+                            Path.GetExtension(file.Name) == ".jpg" ||
+                            Path.GetExtension(file.Name) == ".png" ||
+                            Path.GetExtension(file.Name) == ".jpeg"
+                        )
+                        {
+                            // ProductDto.ImageUrl = await _fu.PostFile(file, existingImageUrl);
+                        }
+                        else
+                        {
+                            await _ijsr.InvokeVoidAsync("ShowToastr", "error", "Please select .jpg, .jpeg or .png file only");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await _ijsr.InvokeVoidAsync("ShowToastr", "error", ex.Message);
+            }
         }
     }
 }

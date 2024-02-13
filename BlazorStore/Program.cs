@@ -3,6 +3,8 @@ using BlazorStore.DataAccess.Data;
 using BlazorStore.DataAccess.DBInitilizer;
 using BlazorStore.DataAccess.Repository;
 using BlazorStore.DataAccess.UnitOfWork.IUnitOfWork;
+using BlazorStore.Service;
+using BlazorStore.Service.IService;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +21,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // add custom services
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDBInitilizer, DBInitilizer>();
+builder.Services.AddScoped<IFileUpload, FileUpload>();
 
 var app = builder.Build();
 

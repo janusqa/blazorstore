@@ -67,9 +67,17 @@ namespace BlazorStore.Components.Pages.Product
             if (confirmed)
             {
                 await _ijsr.InvokeVoidAsync("Spinner", true);
-                await _uow.Products.ExecuteSqlAsync($@"DELETE FROM Products WHERE Id = @Id;",
-                [new SqliteParameter("Id", entityId)]);
+
+                var existingImageUrl = (await _uow.Products.SqlQueryAsync<string>($@"DELETE FROM Products WHERE Id = @Id RETURNING ImageUrl;",
+                [new SqliteParameter("Id", entityId)])).FirstOrDefault();
+
+                if (existingImageUrl is not null && !string.IsNullOrWhiteSpace(existingImageUrl))
+                {
+                    _fu.DeleteFile(existingImageUrl);
+                }
+
                 if (quickGridRef is not null) await quickGridRef.RefreshDataAsync();
+
                 await _ijsr.InvokeVoidAsync("Spinner", false);
             }
         }

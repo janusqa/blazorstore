@@ -13,7 +13,7 @@ namespace BlazorStore.Components.Pages.Category
         public int EntityId { get; set; }
 
         [SupplyParameterFromForm(FormName = "category-upsert")]
-        public CategoryDto CategoryDto { get; set; } = new();
+        public CategoryDto? CategoryDto { get; set; }
 
         private string Title { get; set; } = "Create";
 
@@ -35,9 +35,12 @@ namespace BlazorStore.Components.Pages.Category
                 var category = await Get(EntityId);
                 if (category is not null)
                 {
-                    CategoryDto.Id = category.Id;
-                    CategoryDto.Name ??= category.Name;
+                    CategoryDto ??= category;
                 }
+            }
+            else
+            {
+                CategoryDto ??= new();
             }
         }
 
@@ -51,10 +54,10 @@ namespace BlazorStore.Components.Pages.Category
                     INSERT INTO categories (Id, Name)
                     VALUES (@Id, @Name)
                     ON CONFLICT(Id) DO UPDATE SET
-                    Name = EXCLUDED.Name;"
+                        Name = EXCLUDED.Name;"
                 , [
-                    new SqliteParameter("Name", CategoryDto.Name),
                     new SqliteParameter("Id", EntityId !=0 ? EntityId : (object)DBNull.Value),
+                    new SqliteParameter("Name", CategoryDto.Name),
                 ]);
 
                 message = "Saved!";

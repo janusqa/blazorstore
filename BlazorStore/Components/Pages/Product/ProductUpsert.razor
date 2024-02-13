@@ -1,9 +1,12 @@
 @page "/product/create"
 @page "/product/edit/{entityId:int}"
 @attribute [StreamRendering]
+@* @rendermode InteractiveServer *@
 
 @inject IUnitOfWork _uow
 @inject NavigationManager _nm
+@inject IFileUpload _fu
+@inject IJSRuntime _ijsr
 
 <div class="row my-2">
     <h3 class="card-title text-primary mb-3 ml-3">@Title Product</h3>
@@ -39,31 +42,37 @@
                 </div>
 
                 <div class="row pt-3">
-                    <div class="form-group col-4">
+                    <div class="form-group col-6">
                         <div class="form-check">
                             <InputCheckbox @bind-Value="ProductDto.ShopFavorites" class="form-check-input" />
                             <label class="form-check-label">Is Shop Favorite:</label>
                         </div>
                     </div>
 
-                    <div class="form-group col-4">
+                    <div class="form-group col-6">
                         <div class="form-check">
                             <InputCheckbox @bind-Value="ProductDto.CustomerFavorites" class="form-check-input" />
                             <label class="form-check-label">Is Customer Favorite:</label>
                         </div>
                     </div>
 
-                    <div class="form-group col-4">
-                        <label class="form-check-label">Category:</label>
+                    <div class="form-group col-6">
+                        <label>Category:</label>
                         <InputSelect @bind-Value="ProductDto.CategoryId" class="form-select">
                             <option value="0" disabled selected>-- Select Category --</option>
                             @foreach (var category in Categories)
                             {
-                                <option value="@category.Id">@category.Name</option>
+                                <option value="@category.Id">@category.Name
+                                </option>
                             }
                         </InputSelect>
                         <ValidationMessage For="()=>ProductDto.CategoryId"></ValidationMessage>
                     </div>
+                    <div class="form-group col-6">
+                        <label style="display:block;">Image upload:</label>
+                        <InputFile OnChange="(e)=> PostImage(e, ProductDto?.ImageUrl)" />
+                    </div>
+
                 </div>
 
                 <div class="form-group py-2"><button type="submit" class="btn btn-primary">@Title</button>
