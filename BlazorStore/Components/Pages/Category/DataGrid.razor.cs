@@ -46,11 +46,20 @@ namespace BlazorStore.Components.Pages.Category
             "Delete");
             if (confirmed)
             {
-                await _ijsr.InvokeVoidAsync("Spinner", true);
-                await _uow.Categories.ExecuteSqlAsync($@"DELETE FROM Categories WHERE Id = @Id;",
-                [new SqliteParameter("Id", entityId)]);
-                if (quickGridRef is not null) await quickGridRef.RefreshDataAsync();
-                await _ijsr.InvokeVoidAsync("Spinner", false);
+                try
+                {
+                    await _ijsr.InvokeVoidAsync("Spinner", true);
+                    await _uow.Categories.ExecuteSqlAsync($@"DELETE FROM Categories WHERE Id = @Id;",
+                    [new SqliteParameter("Id", entityId)]);
+                    if (quickGridRef is not null) await quickGridRef.RefreshDataAsync();
+                    await _ijsr.InvokeVoidAsync("Spinner", false);
+                    await _ijsr.InvokeVoidAsync("ShowToastr", "success", "Deleted successfully");
+                }
+                catch (Exception ex)
+                {
+                    await _ijsr.InvokeVoidAsync("Spinner", false);
+                    await _ijsr.InvokeVoidAsync("ShowToastr", "error", ex.Message);
+                }
             }
         }
     }

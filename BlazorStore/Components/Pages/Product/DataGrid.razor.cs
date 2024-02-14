@@ -67,18 +67,25 @@ namespace BlazorStore.Components.Pages.Product
             if (confirmed)
             {
                 await _ijsr.InvokeVoidAsync("Spinner", true);
-
-                var existingImageUrl = (await _uow.Products.SqlQueryAsync<string>($@"DELETE FROM Products WHERE Id = @Id RETURNING ImageUrl;",
-                [new SqliteParameter("Id", entityId)])).FirstOrDefault();
-
-                if (existingImageUrl is not null && !string.IsNullOrWhiteSpace(existingImageUrl))
+                try
                 {
-                    _fu.DeleteFile(existingImageUrl);
+                    var existingImageUrl = (await _uow.Products.SqlQueryAsync<string>($@"DELETE FROM Products WHERE Id = @Id RETURNING ImageUrl;",
+                    [new SqliteParameter("Id", entityId)])).FirstOrDefault();
+
+                    if (existingImageUrl is not null && !string.IsNullOrWhiteSpace(existingImageUrl))
+                    {
+                        _fu.DeleteFile(existingImageUrl);
+                    }
+
+                    if (quickGridRef is not null) await quickGridRef.RefreshDataAsync();
+                    await _ijsr.InvokeVoidAsync("Spinner", false);
+                    await _ijsr.InvokeVoidAsync("ShowToastr", "success", "Deleted successfully");
                 }
-
-                if (quickGridRef is not null) await quickGridRef.RefreshDataAsync();
-
-                await _ijsr.InvokeVoidAsync("Spinner", false);
+                catch (Exception ex)
+                {
+                    await _ijsr.InvokeVoidAsync("Spinner", false);
+                    await _ijsr.InvokeVoidAsync("ShowToastr", "error", ex.Message);
+                }
             }
         }
     }

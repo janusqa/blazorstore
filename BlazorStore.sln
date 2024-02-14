@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorStore.DataAccess", "B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorStore.Dto", "BlazorStore.Dto\BlazorStore.Dto.csproj", "{11EE4971-C1FD-4E41-BA90-E837337EDA25}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorStore.PageScript", "BlazorStore.PageScript\BlazorStore.PageScript.csproj", "{66D9D7BD-0737-485C-BABD-4E1F74779364}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +112,18 @@ Global
 		{11EE4971-C1FD-4E41-BA90-E837337EDA25}.Release|x64.Build.0 = Release|Any CPU
 		{11EE4971-C1FD-4E41-BA90-E837337EDA25}.Release|x86.ActiveCfg = Release|Any CPU
 		{11EE4971-C1FD-4E41-BA90-E837337EDA25}.Release|x86.Build.0 = Release|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Debug|x64.Build.0 = Debug|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Debug|x86.Build.0 = Debug|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Release|x64.ActiveCfg = Release|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Release|x64.Build.0 = Release|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Release|x86.ActiveCfg = Release|Any CPU
+		{66D9D7BD-0737-485C-BABD-4E1F74779364}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

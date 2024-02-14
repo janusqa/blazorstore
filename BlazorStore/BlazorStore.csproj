@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>2938abfd-fd6a-40fb-b803-7c2b862299eb</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +21,7 @@
     <ProjectReference Include="..\BlazorStore.Models\BlazorStore.Models.csproj" />
     <ProjectReference Include="..\BlazorStore.DataAccess\BlazorStore.DataAccess.csproj" />
     <ProjectReference Include="..\BlazorStore.Dto\BlazorStore.Dto.csproj" />
+    <ProjectReference Include="..\BlazorStore.PageScript\BlazorStore.PageScript.csproj" />
   </ItemGroup>
 
 </Project>
