@@ -1,11 +1,11 @@
 export function onLoad() {
-    // console.log('Loaded');
     TinyMceInit('ProductDto_Description');
+    console.log('Loaded');
 }
 
 export function onUpdate() {
-    // console.log('Updated');
     TinyMceInit('ProductDto_Description');
+    console.log('Updated');
 }
 
 export function onDispose() {
