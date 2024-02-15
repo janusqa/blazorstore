@@ -14,6 +14,7 @@ namespace BlazorStore.DataAccess.Repository
 
         public IProductRepository Products { get; init; }
 
+        public IProductPriceRepository ProductPrices { get; init; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -21,7 +22,7 @@ namespace BlazorStore.DataAccess.Repository
 
             Categories = new CategoryRepository(_db);
             Products = new ProductRepository(_db);
-
+            ProductPrices = new ProductPriceRepository(_db);
         }
 
         public async Task<int> Complete()

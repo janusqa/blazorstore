@@ -24,6 +24,8 @@
         <TemplateColumn Context="entity" Title="Actions">
             <NavLink href="@($"/product/edit/{entity.Id}")" class="btn btn-primary"><i class="bi bi-pencil-square"></i>
             </NavLink>
+            <NavLink href="@($"/product/price/{entity.Id}")" class="btn btn-success"><i class="bi bi-tags-fill"></i>
+            </NavLink>
             @* When there is no interactivity and using ssr only use forms
             <form @formname="@($"delete-{entity.Id}")" @onsubmit="async () => await Delete(entity.Id)"
             method="POST">

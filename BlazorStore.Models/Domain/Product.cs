@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace BlazorStore.Models.Domain
 {
@@ -19,5 +20,8 @@ namespace BlazorStore.Models.Domain
         public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
         public Category? Category { get; set; }
+        [ValidateNever]
+        [NotMapped]
+        public ICollection<ProductPrice>? ProductPrices { get; set; }
     }
 }

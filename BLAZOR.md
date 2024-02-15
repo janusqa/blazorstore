@@ -3,7 +3,7 @@ Tooling for ASP.NET Core Blazor
 https://learn.microsoft.com/en-us/aspnet/core/blazor/tooling?view=aspnetcore-8.0&pivots=windows
    
 1. Create Project
-   1. NB THIS WILL CREATE THE ACTUAL ROOT PROJECT FOLDER FOR YOU, SO DO NOT START FROM WITHING A ROOT FOLDER PER SAY OR YOU WILL GET ERRORS AND WARNINGS!!!
+   1. NB THIS WILL CREATE THE ACTUAL ROOT PROJECT FOLDER FOR YOU, SO DO NOT START FROM WITHIN A ROOT FOLDER PER SAY OR YOU WILL GET ERRORS AND WARNINGS!!!
    2. dotnet new blazor -o [<PROJECTNAME>] (for interactive server-side rendering aka blazor server) ... OR ...
    3. dotnet new blazor -int WebAssembly -o [<PROJECTNAME>] (for client-side rendering ONLY aka blazor wasm) ... OR ...
    4. dotnet new blazor -int Auto -o [<PROJECTNAME>] (for client-side and server-side rendering crated at same time)
@@ -22,3 +22,6 @@ https://learn.microsoft.com/en-us/aspnet/core/blazor/tooling?view=aspnetcore-8.0
 13. dotnet add BlazorStore.Models package Microsoft.Extensions.Identity.Stores
 14. dotnet add BlazorStore package Microsoft.EntityFrameworkCore.Design
 15. dotnet run --project [<PROJECTNAME>] --launch-profile https  
+
+Razor Class Library
+dotnet new razorclasslib -o BlazorStore.PageScript

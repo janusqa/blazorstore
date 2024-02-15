@@ -8,6 +8,8 @@ namespace BlazorStore.DataAccess.UnitOfWork.IUnitOfWork
         ICategoryRepository Categories { get; init; }
         IProductRepository Products { get; init; }
 
+        IProductPriceRepository ProductPrices { get; init; }
+
         Task<int> Complete();
 
         IDbContextTransaction Transaction();

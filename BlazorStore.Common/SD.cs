@@ -9,10 +9,11 @@ namespace BlazorStore.Common
         public static readonly (string Model, string Table)[] dbEntity = [
             ("Category","Categories"),
             ("Product","Products"),
+            ("ProductPrice", "ProductPrices")
         ];
 
         // Pagination
-        public const int paginationSize = 5;
+        public const int paginationSize = 20;
         public const int paginationDefaultPage = 0;
         public const int paginationDefaultSize = 10;
     }

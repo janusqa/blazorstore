@@ -48,7 +48,6 @@ function Spinner(visible = false) {
 }
 
 TinyMceInit = function (selector) {
-    console.log(tinymce);
     tinymce.remove(`textarea#${selector}`);
     tinymce.init({
         selector: `textarea#${selector}`,
@@ -56,18 +55,5 @@ TinyMceInit = function (selector) {
             'anchor autolink charmap codesample emoticons lists table visualblocks wordcount',
         toolbar:
             'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | align lineheight | numlist bullist indent outdent',
-        // tinycomments_mode: 'embedded',
-        // tinycomments_author: 'Author name',
-        // mergetags_list: [
-        //     { value: 'First.Name', title: 'First Name' },
-        //     { value: 'Email', title: 'Email' },
-        // ],
-        // ai_request: (request, respondWith) =>
-        //     respondWith.string(() =>
-        //         Promise.reject('See docs to implement AI Assistant')
-        //     ),
-        init_instance_callback: function (editor) {
-            console.log('Editor: ' + editor.id + ' is now initialized.');
-        },
     });
 };

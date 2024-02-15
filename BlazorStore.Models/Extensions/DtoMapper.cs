@@ -35,5 +35,16 @@ namespace BlazorStore.Models.Extensions
                 CategoryDto = product.Category?.ToDto()
             };
         }
+
+        public static ProductPriceDto ToDto(this ProductPrice productPrice)
+        {
+            return new ProductPriceDto
+            {
+                Id = productPrice.Id,
+                ProductId = productPrice.ProductId,
+                Size = productPrice.Size,
+                Price = productPrice.Price
+            };
+        }
     }
 }
