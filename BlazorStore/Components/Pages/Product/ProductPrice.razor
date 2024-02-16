@@ -1,8 +1,55 @@
 @page "/product/price/{entityId:int}"
+@attribute [StreamRendering]
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
-@code {
-    [Parameter]
-    public int EntityId { get; set; }
+@using Syncfusion.Blazor.Grids
 
+@inject IUnitOfWork _uow
 
-}
+<div>
+    <h3 class="card-title text-primary mb-3 ml-3">Product Price Management</h3>
+    @if (ProductDto is null)
+    {
+        <div class="text-center">
+            <img src="/images/loading.gif">
+        </div>
+    }
+    else
+    {
+        <div class="row border p-2 mb-4">
+            <div class="col-md-11">
+                <div class="card-body">
+                    <h4>@ProductDto.Name</h4>
+                    <span style="display:block;">Category : @ProductDto.CategoryDto?.Name</span>
+                    <span style="display:block;">Description : @((MarkupString)ProductDto.Description)</span>
+                </div>
+            </div>
+            <div class="col-md-1">
+                <img src="@($"https://localhost:7036{ProductDto.ImageUrl}")" class="w-100" alt="@ProductDto.Name" />
+            </div>
+        </div>
+
+        @if (ProductDto.ProductPrices is not null)
+        {
+            <SfGrid @ref="sfGridRef" DataSource="@ProductDto.ProductPrices" AllowPaging="true"
+                Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Cancel", "Update" })">
+                <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" ShowDeleteConfirmDialog="true"
+                    Mode="EditMode.Normal" />
+                <GridEvents OnActionBegin="async (args) => await SfGridActions(args)" TValue="ProductPriceDto" />
+                <GridColumns>
+                    <GridColumn Field=@nameof(ProductPriceDto.Id) HeaderText="Id" IsPrimaryKey="true" Visible="false"
+                        AllowAdding="false" />
+                    <GridColumn Field=@nameof(ProductPriceDto.ProductId) HeaderText="ProductId" Visible="false"
+                        AllowAdding="false" />
+                    <GridColumn Field=@nameof(ProductPriceDto.Size) HeaderText="Size">
+                        <EditTemplate>
+                            <Syncfusion.Blazor.DropDowns.SfDropDownList DataSource="Sizes" TItem="string" TValue="string"
+                                @bind-Value="((context as ProductPriceDto)!.Size)" />
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field=@nameof(ProductPriceDto.Price) HeaderText="Price" Format="C2" />
+                </GridColumns>
+            </SfGrid>
+        }
+    }
+</div>

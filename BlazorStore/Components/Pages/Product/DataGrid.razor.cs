@@ -27,7 +27,7 @@ namespace BlazorStore.Components.Pages.Product
         {
             var numRecords = (await _uow.Products.SqlQueryAsync<int>($@"SELECT COUNT(Id) FROM Products;", [])).FirstOrDefault();
 
-            var data = (await _uow.Products.SqlQueryAsync<Models.Helper.ProductWithIncluded>($@"
+            var data = (await _uow.Products.SqlQueryAsync<Models.Helper.ProductWithCategory>($@"
                 SELECT p.*, c.Name AS CategoryName
                 FROM Products p INNER JOIN (SELECT Id FROM Products LIMIT @Limit OFFSET @Offset) AS fast USING (Id)
                 INNER JOIN Categories c ON (p.categoryId = c.Id);",

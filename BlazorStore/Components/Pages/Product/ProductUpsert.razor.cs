@@ -22,7 +22,7 @@ namespace BlazorStore.Components.Pages.Product
 
         protected override async Task OnInitializedAsync()
         {
-            if (EntityId != 0)
+            if (EntityId > 0)
             {
                 Title = "Update";
             }
@@ -34,7 +34,7 @@ namespace BlazorStore.Components.Pages.Product
         }
         protected override async Task OnParametersSetAsync()
         {
-            if (EntityId != 0)
+            if (EntityId > 0)
             {
                 var product = await Get(EntityId);
                 if (product is not null)
@@ -72,7 +72,7 @@ namespace BlazorStore.Components.Pages.Product
                         ImageUrl = EXCLUDED.ImageUrl,
                         CategoryId = EXCLUDED.CategoryId;"
                 , [
-                    new SqliteParameter("Id",EntityId !=0 ? EntityId : (object)DBNull.Value),
+                    new SqliteParameter("Id", EntityId > 0 ? EntityId : (object)DBNull.Value),
                     new SqliteParameter("Name", ProductDto.Name),
                     new SqliteParameter("Description", ProductDto.Description),
                     new SqliteParameter("ShopFavorites", ProductDto.ShopFavorites),
@@ -94,7 +94,7 @@ namespace BlazorStore.Components.Pages.Product
 
         private async Task<ProductDto?> Get(int entityId)
         {
-            return (await _uow.Products.SqlQueryAsync<Models.Helper.ProductWithIncluded>(@"
+            return (await _uow.Products.SqlQueryAsync<Models.Helper.ProductWithCategory>(@"
                 SELECT p.*, c.Name AS CategoryName 
                 FROM Products p INNER JOIN Categories c ON (p.CategoryId = c.Id) WHERE p.Id = @Id;"
                 , [new SqliteParameter("Id", entityId)]))

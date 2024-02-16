@@ -24,4 +24,20 @@ https://learn.microsoft.com/en-us/aspnet/core/blazor/tooling?view=aspnetcore-8.0
 15. dotnet run --project [<PROJECTNAME>] --launch-profile https  
 
 Razor Class Library
+---
 dotnet new razorclasslib -o BlazorStore.PageScript
+
+SyncFusion
+---
+dotnet add BlazorStore package Syncfusion.Blazor.Themes
+dotnet add BlazorStore package Syncfusion.Blazor.Grid 
+
+Place in App.razor
+---
+<link href="_content/Syncfusion.Blazor.Themes/bookstrap5.css" rel="stylesheet" /> or <link href="https://cdn.syncfusion.com/blazor/19.3.43/styles/bootstrap5.css" rel="stylesheet" /> 
+
+Place in program.cs
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("YOUR LICENSE KEY");
+builder.Services.AddSyncfusionBlazor();
+
+<SfRichTextEditor @bind-Value="ProductDto.Description"></SfRichTextEditor>

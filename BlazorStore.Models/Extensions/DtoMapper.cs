@@ -1,6 +1,7 @@
 
 using BlazorStore.Dto;
 using BlazorStore.Models.Domain;
+using BlazorStore.Models.Helper;
 
 namespace BlazorStore.Models.Extensions
 {
@@ -32,7 +33,8 @@ namespace BlazorStore.Models.Extensions
                 Color = product.Color,
                 ImageUrl = product.ImageUrl,
                 CategoryId = product.CategoryId,
-                CategoryDto = product.Category?.ToDto()
+                CategoryDto = product.Category?.ToDto(),
+                ProductPrices = product.ProductPrices?.Select(pp => pp.ToDto())
             };
         }
 

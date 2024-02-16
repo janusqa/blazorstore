@@ -19,7 +19,7 @@ namespace BlazorStore.Components.Pages.Category
 
         protected override void OnInitialized()
         {
-            if (EntityId != 0)
+            if (EntityId > 0)
             {
                 Title = "Update";
             }
@@ -30,7 +30,7 @@ namespace BlazorStore.Components.Pages.Category
         }
         protected override async Task OnParametersSetAsync()
         {
-            if (EntityId != 0)
+            if (EntityId > 0)
             {
                 var category = await Get(EntityId);
                 if (category is not null)
@@ -56,7 +56,7 @@ namespace BlazorStore.Components.Pages.Category
                     ON CONFLICT(Id) DO UPDATE SET
                         Name = EXCLUDED.Name;"
                 , [
-                    new SqliteParameter("Id", EntityId !=0 ? EntityId : (object)DBNull.Value),
+                    new SqliteParameter("Id", EntityId > 0 ? EntityId : (object)DBNull.Value),
                     new SqliteParameter("Name", CategoryDto.Name),
                 ]);
 

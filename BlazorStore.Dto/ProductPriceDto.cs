@@ -6,7 +6,6 @@ namespace BlazorStore.Dto
     {
         public int Id { get; set; }
         [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Invalid Product")]
         public int ProductId { get; set; }
         [Required]
         public required string Size { get; set; }

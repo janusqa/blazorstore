@@ -6,6 +6,7 @@ using BlazorStore.DataAccess.UnitOfWork.IUnitOfWork;
 using BlazorStore.Service;
 using BlazorStore.Service.IService;
 using Microsoft.EntityFrameworkCore;
+using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDBInitilizer, DBInitilizer>();
 builder.Services.AddScoped<IFileUpload, FileUpload>();
+
+// add sync fusion
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configuration.GetValue<string>("SyncFusion:ApiKey"));
+builder.Services.AddSyncfusionBlazor();
 
 var app = builder.Build();
 
