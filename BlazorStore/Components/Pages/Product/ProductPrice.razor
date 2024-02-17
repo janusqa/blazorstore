@@ -31,16 +31,18 @@
 
         @if (ProductDto.ProductPrices is not null)
         {
-            <SfGrid @ref="sfGridRef" DataSource="@ProductDto.ProductPrices" AllowPaging="true"
-                Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Cancel", "Update" })">
+            <SfGrid @ref="sfGridRef" DataSource="@ProductPrices" AllowPaging="true" AllowFiltering="true" AllowSorting="true"
+                Toolbar="@(new List<string>() { "Add", "Cancel", "Update" })">
+                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
+                <GridPageSettings PageSize="@SD.paginationDefaultSize" PageCount="5" PageSizes="true" />
                 <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" ShowDeleteConfirmDialog="true"
                     Mode="EditMode.Normal" />
-                <GridEvents OnActionBegin="async (args) => await SfGridActions(args)" TValue="ProductPriceDto" />
+                <GridEvents OnActionBegin="async (args) => await OnGridActionBegin(args)"
+                    OnActionComplete="async (args) => await OnGridActionComplete(args)" TValue="ProductPriceDto" />
                 <GridColumns>
-                    <GridColumn Field=@nameof(ProductPriceDto.Id) HeaderText="Id" IsPrimaryKey="true" Visible="false"
-                        AllowAdding="false" />
-                    <GridColumn Field=@nameof(ProductPriceDto.ProductId) HeaderText="ProductId" Visible="false"
-                        AllowAdding="false" />
+                    <GridColumn Field=@nameof(ProductPriceDto.Id) HeaderText="Id" IsPrimaryKey="true" IsIdentity="true"
+                        Visible="false" />
+                    <GridColumn Field=@nameof(ProductPriceDto.ProductId) HeaderText="ProductId" Visible="false" />
                     <GridColumn Field=@nameof(ProductPriceDto.Size) HeaderText="Size">
                         <EditTemplate>
                             <Syncfusion.Blazor.DropDowns.SfDropDownList DataSource="Sizes" TItem="string" TValue="string"
@@ -48,6 +50,22 @@
                         </EditTemplate>
                     </GridColumn>
                     <GridColumn Field=@nameof(ProductPriceDto.Price) HeaderText="Price" Format="C2" />
+                    <GridColumn HeaderText="Manage">
+                        <GridCommandColumns>
+                            <GridCommandColumn Type="CommandButtonType.Edit"
+                                ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-edit", CssClass="e-flat" })">
+                            </GridCommandColumn>
+                            <GridCommandColumn Type="CommandButtonType.Delete"
+                                ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-delete", CssClass="e-flat" })">
+                            </GridCommandColumn>
+                            <GridCommandColumn Type="CommandButtonType.Save"
+                                ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-save", CssClass="e-flat" })">
+                            </GridCommandColumn>
+                            <GridCommandColumn Type="CommandButtonType.Cancel"
+                                ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-cancel-icon", CssClass="e-flat" })">
+                            </GridCommandColumn>
+                        </GridCommandColumns>
+                    </GridColumn>
                 </GridColumns>
             </SfGrid>
         }

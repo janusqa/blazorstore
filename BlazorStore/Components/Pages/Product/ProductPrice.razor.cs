@@ -12,6 +12,7 @@ namespace BlazorStore.Components.Pages.Product
         public int EntityId { get; set; }
 
         private ProductDto? ProductDto { get; set; }
+        private List<ProductPriceDto>? ProductPrices { get; set; }
 
         private SfGrid<ProductPriceDto>? sfGridRef;
 
@@ -27,6 +28,7 @@ namespace BlazorStore.Components.Pages.Product
                 if (product is not null)
                 {
                     ProductDto ??= product;
+                    ProductPrices ??= product.ProductPrices?.ToList();
                 }
             }
         }
@@ -81,8 +83,19 @@ namespace BlazorStore.Components.Pages.Product
                     .Select(p => new Models.Domain.ProductPrice { Id = p.ProductPriceId ?? 0, Size = p.Size ?? string.Empty, Price = p.Price ?? 0, ProductId = k })
                 }).FirstOrDefault()?.ToDto();
         }
+        private async Task OnGridActionComplete(ActionEventArgs<ProductPriceDto> args)
+        {
+            if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save) || args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
+            {
+                foreach (var p in ProductPrices!)
+                {
+                    Console.WriteLine(p);
+                }
+            }
 
-        private async Task SfGridActions(ActionEventArgs<ProductPriceDto> args)
+        }
+
+        private async Task OnGridActionBegin(ActionEventArgs<ProductPriceDto> args)
         {
             if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save))
             {
@@ -101,19 +114,24 @@ namespace BlazorStore.Components.Pages.Product
                     new SqliteParameter("Price", args.Data.Price),
                 ]);
 
-                if (sfGridRef is not null) await sfGridRef.Refresh();
-                // if (args.Action.Equals("Add", StringComparison.CurrentCultureIgnoreCase)){}
-                // else if (args.Action.Equals("Edit", StringComparison.CurrentCultureIgnoreCase)){}
+                ProductPrices = (await GetProductPrices(EntityId)).ToList();
+                if (args.Action.Equals("Edit") && sfGridRef is not null) await sfGridRef.Refresh();
+
             }
             else if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
             {
                 await _uow.ProductPrices.ExecuteSqlAsync(@"
-                    DELETE FROM  ProductPrices WHERE Id = @Id;"
+                    DELETE FROM ProductPrices WHERE Id = @Id;"
                 , [new SqliteParameter("Id", args.Data.Id)]);
-
-                if (sfGridRef is not null) await sfGridRef.Refresh();
             }
         }
 
+        private async Task<IEnumerable<ProductPriceDto>> GetProductPrices(int ProductId)
+        {
+            return (await _uow.ProductPrices.FromSqlAsync(@"
+                SELECT * FROM  ProductPrices WHERE ProductId = @ProductId;"
+            , [new SqliteParameter("ProductId", ProductId)]))
+            .Select(pp => pp.ToDto()) ?? [];
+        }
     }
 }

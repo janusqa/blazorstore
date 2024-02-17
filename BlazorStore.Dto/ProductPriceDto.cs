@@ -4,6 +4,7 @@ namespace BlazorStore.Dto
 {
     public record ProductPriceDto
     {
+        [Required]
         public int Id { get; set; }
         [Required]
         public int ProductId { get; set; }
