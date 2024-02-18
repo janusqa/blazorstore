@@ -14,6 +14,7 @@ namespace BlazorStore.Components.Pages.Product
         private ProductDto? ProductDto { get; set; }
         private List<ProductPriceDto>? ProductPrices { get; set; }
 
+        // syncfuscion
         private SfGrid<ProductPriceDto>? sfGridRef;
 
         private readonly IEnumerable<string> Sizes = [
@@ -24,7 +25,7 @@ namespace BlazorStore.Components.Pages.Product
         {
             if (EntityId > 0)
             {
-                var product = await Get(EntityId);
+                var product = await GetProduct(EntityId);
                 if (product is not null)
                 {
                     ProductDto ??= product;
@@ -33,7 +34,7 @@ namespace BlazorStore.Components.Pages.Product
             }
         }
 
-        private async Task<ProductDto?> Get(int entityId)
+        private async Task<ProductDto?> GetProduct(int entityId)
         {
             return (await _uow.Products.SqlQueryAsync<Models.Helper.ProductWithPrice>(@"
                 SELECT 
@@ -83,55 +84,64 @@ namespace BlazorStore.Components.Pages.Product
                     .Select(p => new Models.Domain.ProductPrice { Id = p.ProductPriceId ?? 0, Size = p.Size ?? string.Empty, Price = p.Price ?? 0, ProductId = k })
                 }).FirstOrDefault()?.ToDto();
         }
-        private async Task OnGridActionComplete(ActionEventArgs<ProductPriceDto> args)
+
+        private async Task<IEnumerable<ProductPriceDto>> GetAll(int ProductId)
+        {
+            return (await _uow.ProductPrices.FromSqlAsync(@"
+                SELECT * FROM  ProductPrices WHERE ProductId = @ProductId;"
+            , [new SqliteParameter("ProductId", ProductId)], tracked: false))
+            .Select(pp => pp.ToDto()) ?? [];
+        }
+
+        private async Task Upsert(ProductPriceDto productPrice)
+        {
+            await _uow.ProductPrices.ExecuteSqlAsync(@"
+                INSERT INTO ProductPrices 
+                (Id, ProductId, Size, Price)
+                VALUES (@Id, @ProductId, @Size, @Price)
+                ON CONFLICT(Id) DO UPDATE SET
+                    ProductId = EXCLUDED.ProductId,
+                    Size = EXCLUDED.Size,
+                    Price = EXCLUDED.Price;"
+            , [
+                new SqliteParameter("Id", productPrice.Id > 0 ? productPrice.Id : (object)DBNull.Value),
+                new SqliteParameter("ProductId", productPrice.ProductId > 0 ? productPrice.ProductId : EntityId),
+                new SqliteParameter("Size", productPrice.Size),
+                new SqliteParameter("Price", productPrice.Price),
+            ]);
+        }
+
+        private async Task Delete(ProductPriceDto productPrice)
+        {
+            await _uow.ProductPrices.ExecuteSqlAsync(@"
+                 DELETE FROM ProductPrices WHERE Id = @Id;"
+            , [new SqliteParameter("Id", productPrice.Id)]);
+        }
+
+
+        private async void OnGridActionComplete(ActionEventArgs<ProductPriceDto> args)
         {
             if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save) || args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
             {
+                ProductPrices = (await GetAll(EntityId)).ToList();
+
                 foreach (var p in ProductPrices!)
                 {
                     Console.WriteLine(p);
                 }
             }
-
         }
 
-        private async Task OnGridActionBegin(ActionEventArgs<ProductPriceDto> args)
+        private async void OnGridActionBegin(ActionEventArgs<ProductPriceDto> args)
         {
             if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save))
             {
-                await _uow.ProductPrices.ExecuteSqlAsync(@"
-                    INSERT INTO ProductPrices 
-                    (Id, ProductId, Size, Price)
-                    VALUES (@Id, @ProductId, @Size, @Price)
-                    ON CONFLICT(Id) DO UPDATE SET
-                        ProductId = EXCLUDED.ProductId,
-                        Size = EXCLUDED.Size,
-                        Price = EXCLUDED.Price;"
-                , [
-                    new SqliteParameter("Id", args.Data.Id > 0 ? args.Data.Id : (object)DBNull.Value),
-                    new SqliteParameter("ProductId", args.Data.ProductId > 0 ? args.Data.ProductId : EntityId),
-                    new SqliteParameter("Size", args.Data.Size),
-                    new SqliteParameter("Price", args.Data.Price),
-                ]);
-
-                ProductPrices = (await GetProductPrices(EntityId)).ToList();
-                if (args.Action.Equals("Edit") && sfGridRef is not null) await sfGridRef.Refresh();
-
+                await Upsert(args.Data);
             }
             else if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
             {
-                await _uow.ProductPrices.ExecuteSqlAsync(@"
-                    DELETE FROM ProductPrices WHERE Id = @Id;"
-                , [new SqliteParameter("Id", args.Data.Id)]);
+                await Delete(args.Data);
             }
-        }
-
-        private async Task<IEnumerable<ProductPriceDto>> GetProductPrices(int ProductId)
-        {
-            return (await _uow.ProductPrices.FromSqlAsync(@"
-                SELECT * FROM  ProductPrices WHERE ProductId = @ProductId;"
-            , [new SqliteParameter("ProductId", ProductId)]))
-            .Select(pp => pp.ToDto()) ?? [];
         }
     }
 }

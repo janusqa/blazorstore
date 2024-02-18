@@ -13,6 +13,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Radzen.Blazor" Version="4.24.7" />
     <PackageReference Include="Syncfusion.Blazor.Grid" Version="24.2.6" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="24.2.6" />
     <ProjectReference Include="..\BlazorStore.Client\BlazorStore.Client.csproj" />

@@ -6,6 +6,7 @@ using BlazorStore.DataAccess.UnitOfWork.IUnitOfWork;
 using BlazorStore.Service;
 using BlazorStore.Service.IService;
 using Microsoft.EntityFrameworkCore;
+using Radzen;
 using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,9 +25,10 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDBInitilizer, DBInitilizer>();
 builder.Services.AddScoped<IFileUpload, FileUpload>();
 
-// add sync fusion
+// add custom components [syncfusion, radzen]
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configuration.GetValue<string>("SyncFusion:ApiKey"));
 builder.Services.AddSyncfusionBlazor();
+builder.Services.AddRadzenComponents();
 
 var app = builder.Build();
 

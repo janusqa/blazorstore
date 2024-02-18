@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Configuration;
 using BlazorStore.DataAccess.Data;
 using BlazorStore.DataAccess.UnitOfWork.IUnitOfWork;
 

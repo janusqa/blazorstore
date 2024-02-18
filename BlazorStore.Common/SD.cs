@@ -16,5 +16,8 @@ namespace BlazorStore.Common
         public const int paginationSize = 20;
         public const int paginationDefaultPage = 0;
         public const int paginationDefaultSize = 10;
+
+        // Application
+        public const string appUrl = "https://localhost:7036";
     }
 }

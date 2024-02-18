@@ -18,18 +18,18 @@ namespace BlazorStore.DataAccess.Repository
             dbSet = _db.Set<T>();
         }
 
-        public async Task<T?> GetAsync(Expression<Func<T, bool>> predicate, bool tracked = true)
+        public async Task<T?> GetAsync(Expression<Func<T, bool>> predicate, bool tracked)
         {
             return tracked
                 ? await dbSet.Where(predicate).FirstOrDefaultAsync()
-                    : await dbSet.Where(predicate).AsNoTracking().FirstOrDefaultAsync();
+                : await dbSet.Where(predicate).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate)
         {
             return predicate is not null
                 ? await dbSet.Where(predicate).ToListAsync()
-                    : await dbSet.ToListAsync();
+                : await dbSet.ToListAsync();
         }
 
         public async Task AddAsync(T entity)
@@ -54,9 +54,11 @@ namespace BlazorStore.DataAccess.Repository
             await Task.CompletedTask;
         }
 
-        public async Task<IEnumerable<T>> FromSqlAsync(string sql, List<SqliteParameter> sqlParameters)
+        public async Task<IEnumerable<T>> FromSqlAsync(string sql, List<SqliteParameter> sqlParameters, bool tracked)
         {
-            return await dbSet.FromSqlRaw(sql, sqlParameters.ToArray()).ToListAsync();
+            return tracked
+                ? await dbSet.FromSqlRaw(sql, sqlParameters.ToArray()).ToListAsync()
+                : await dbSet.FromSqlRaw(sql, sqlParameters.ToArray()).AsNoTracking().ToListAsync();
         }
 
         public async Task ExecuteSqlAsync(string sql, List<SqliteParameter> sqlParameters)

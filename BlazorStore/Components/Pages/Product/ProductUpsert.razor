@@ -96,7 +96,7 @@
     <div class="col-md-2">
         @if (!string.IsNullOrWhiteSpace(ProductDto?.ImageUrl))
         {
-            <img src="@($"https://localhost:7036{ProductDto.ImageUrl}")" class="w-100" alt="@ProductDto?.Name" />
+            <img src="@($"{SD.appUrl}{ProductDto.ImageUrl}")" class="w-100" alt="@ProductDto?.Name" />
         }
     </div>
 </div>

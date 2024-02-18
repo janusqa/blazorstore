@@ -25,11 +25,11 @@
                 </div>
             </div>
             <div class="col-md-1">
-                <img src="@($"https://localhost:7036{ProductDto.ImageUrl}")" class="w-100" alt="@ProductDto.Name" />
+                <img src="@($"{SD.appUrl}{ProductDto.ImageUrl}")" class="w-100" alt="@ProductDto.Name" />
             </div>
         </div>
 
-        @if (ProductDto.ProductPrices is not null)
+        @if (ProductPrices is not null)
         {
             <SfGrid @ref="sfGridRef" DataSource="@ProductPrices" AllowPaging="true" AllowFiltering="true" AllowSorting="true"
                 Toolbar="@(new List<string>() { "Add", "Cancel", "Update" })">
@@ -37,11 +37,10 @@
                 <GridPageSettings PageSize="@SD.paginationDefaultSize" PageCount="5" PageSizes="true" />
                 <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" ShowDeleteConfirmDialog="true"
                     Mode="EditMode.Normal" />
-                <GridEvents OnActionBegin="async (args) => await OnGridActionBegin(args)"
-                    OnActionComplete="async (args) => await OnGridActionComplete(args)" TValue="ProductPriceDto" />
+                <GridEvents OnActionBegin="OnGridActionBegin" OnActionComplete="OnGridActionComplete"
+                    TValue="ProductPriceDto" />
                 <GridColumns>
-                    <GridColumn Field=@nameof(ProductPriceDto.Id) HeaderText="Id" IsPrimaryKey="true" IsIdentity="true"
-                        Visible="false" />
+                    <GridColumn Field=@nameof(ProductPriceDto.Id) HeaderText="Id" IsPrimaryKey="true" Visible="false" />
                     <GridColumn Field=@nameof(ProductPriceDto.ProductId) HeaderText="ProductId" Visible="false" />
                     <GridColumn Field=@nameof(ProductPriceDto.Size) HeaderText="Size">
                         <EditTemplate>
