@@ -7,7 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Asp.Versioning.Mvc" Version="8.0.0" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlazorStore.DataAccess\BlazorStore.DataAccess.csproj" />
+    <ProjectReference Include="..\BlazorStore.Dto\BlazorStore.Dto.csproj" />
+    <ProjectReference Include="..\BlazorStore.Models\BlazorStore.Models.csproj" />
   </ItemGroup>
 
 </Project>

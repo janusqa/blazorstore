@@ -34,7 +34,7 @@ namespace BlazorStore.Models.Extensions
                 ImageUrl = product.ImageUrl,
                 CategoryId = product.CategoryId,
                 CategoryDto = product.Category?.ToDto(),
-                ProductPrices = product.ProductPrices?.Select(pp => pp.ToDto())
+                ProductPrices = product.ProductPrices?.Select(pp => pp.ToDto()).ToList()
             };
         }
 

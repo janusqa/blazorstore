@@ -81,7 +81,7 @@ namespace BlazorStore.Components.Pages.Product
                     Category = new Models.Domain.Category { Id = g.First().CategoryId, Name = g.First().CategoryName },
                     ProductPrices = g
                     .Where(p => p.ProductPriceId is not null)
-                    .Select(p => new Models.Domain.ProductPrice { Id = p.ProductPriceId ?? 0, Size = p.Size ?? string.Empty, Price = p.Price ?? 0, ProductId = k })
+                    .Select(p => new Models.Domain.ProductPrice { Id = p.ProductPriceId ?? 0, Size = p.Size ?? string.Empty, Price = p.Price ?? 0, ProductId = k }).ToList()
                 }).FirstOrDefault()?.ToDto();
         }
 

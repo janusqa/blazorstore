@@ -21,6 +21,6 @@ namespace BlazorStore.Models.Domain
         [ForeignKey("CategoryId")]
         public Category? Category { get; set; }
         [NotMapped]
-        public IEnumerable<ProductPrice>? ProductPrices { get; set; }
+        public ICollection<ProductPrice>? ProductPrices { get; set; }
     }
 }
