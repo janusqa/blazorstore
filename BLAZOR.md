@@ -41,3 +41,14 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("YOUR LICENSE KEY
 builder.Services.AddSyncfusionBlazor();
 
 <SfRichTextEditor @bind-Value="ProductDto.Description"></SfRichTextEditor>
+
+Add API to Blazer Server Project
+---
+1. dotnet add BlazorStore package Asp.Versioning.Mvc
+2. dotnet add BlazorStore package Asp.Versioning.Mvc.ApiExplorer
+3. dotnet add BlazorStore package Swashbuckle.AspNetCore
+4. In programs.cs
+   1. Add "builder.Services.AddControllers();" to services section
+   2. Add "app.MapControllers();" to pipeline section
+   3. Add the swagger configureation into program cs. See program.cs
+   4. Add "SwaggerConfiguration.cs" to root of project

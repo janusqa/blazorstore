@@ -1,3 +1,5 @@
+using Asp.Versioning;
+using BlazorStore;
 using BlazorStore.Components;
 using BlazorStore.DataAccess.Data;
 using BlazorStore.DataAccess.DBInitilizer;
@@ -6,7 +8,9 @@ using BlazorStore.DataAccess.UnitOfWork.IUnitOfWork;
 using BlazorStore.Service;
 using BlazorStore.Service.IService;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Radzen;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -30,6 +36,24 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configura
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddRadzenComponents();
 
+// Swagger Config
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// enable API versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ReportApiVersions = true;
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+    options.AddApiVersionParametersWhenVersionNeutral = true;
+});
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerConfiguration>();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 //seed the db
@@ -39,6 +63,12 @@ await SeedDatabase();
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
+
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "BlazorStoreApi_v1");
+    });
 }
 else
 {
@@ -56,6 +86,8 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BlazorStore.Client._Imports).Assembly);
+
+app.MapControllers();
 
 app.Run();
 

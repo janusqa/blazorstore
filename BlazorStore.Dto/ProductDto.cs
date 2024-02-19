@@ -30,6 +30,6 @@ namespace BlazorStore.Dto
         public CategoryDto? CategoryDto { get; set; }
         public IFormFile? Image { get; set; }
         // public IFormFileCollection? Images { get; set; } // for multi file uploads
-        public IEnumerable<ProductPriceDto>? ProductPrices { get; set; }
+        public ICollection<ProductPriceDto>? ProductPrices { get; set; }
     };
 }
