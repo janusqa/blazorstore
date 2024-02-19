@@ -42,7 +42,8 @@ builder.Services.AddSyncfusionBlazor();
 
 <SfRichTextEditor @bind-Value="ProductDto.Description"></SfRichTextEditor>
 
-Add API to Blazer Server Project
+Add API to Blazer Server Project (needed if you have web assembly client)
+Note API can be in it's own project but unless there is a good reason, why not have it in the same Blazor server project to cut down on projects needed to be managed. Blazor server is well capable of hosting the API part also.
 ---
 1. dotnet add BlazorStore package Asp.Versioning.Mvc
 2. dotnet add BlazorStore package Asp.Versioning.Mvc.ApiExplorer
@@ -50,5 +51,5 @@ Add API to Blazer Server Project
 4. In programs.cs
    1. Add "builder.Services.AddControllers();" to services section
    2. Add "app.MapControllers();" to pipeline section
-   3. Add the swagger configureation into program cs. See program.cs
+   3. Add the swagger configuration into program cs. See program.cs
    4. Add "SwaggerConfiguration.cs" to root of project

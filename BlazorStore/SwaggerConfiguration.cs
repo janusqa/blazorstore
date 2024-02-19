@@ -52,7 +52,7 @@ namespace BlazorStore
                     Version = description.ApiVersion.ToString(),
                     Title = $"BlazorStore Api {description.ApiVersion}",
                     Description = "BlazorStore Management Api",
-                    TermsOfService = new Uri($"{SD.appUrl}/Home"),
+                    TermsOfService = new Uri(SD.appUrl),
                     Contact = new OpenApiContact
                     {
                         Name = "JanusQA",
