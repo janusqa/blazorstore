@@ -4,7 +4,7 @@
 
 @inject IUnitOfWork _uow
 @inject NavigationManager _nm
-@inject IFileUpload _fu
+@inject IFileService _fu
 @inject IJSRuntime _ijsr
 @inject IConfiguration Configuration
 
@@ -96,7 +96,7 @@
     <div class="col-md-2">
         @if (!string.IsNullOrWhiteSpace(ProductDto?.ImageUrl))
         {
-            <img src="@($"{SD.appUrl}{ProductDto.ImageUrl}")" class="w-100" alt="@ProductDto?.Name" />
+            <img src="@($"{SD.appBaseUrl}{ProductDto.ImageUrl}")" class="w-100" alt="@ProductDto?.Name" />
         }
     </div>
 </div>

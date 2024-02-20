@@ -52,16 +52,16 @@ namespace BlazorStore
                     Version = description.ApiVersion.ToString(),
                     Title = $"BlazorStore Api {description.ApiVersion}",
                     Description = "BlazorStore Management Api",
-                    TermsOfService = new Uri(SD.appUrl),
+                    TermsOfService = new Uri(SD.appBaseUrl),
                     Contact = new OpenApiContact
                     {
                         Name = "JanusQA",
-                        Url = new Uri(SD.appUrl),
+                        Url = new Uri(SD.appBaseUrl),
                     },
                     License = new OpenApiLicense
                     {
                         Name = "MIT License",
-                        Url = new Uri(SD.appUrl),
+                        Url = new Uri(SD.appBaseUrl),
                     }
                 });
             }

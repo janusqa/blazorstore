@@ -18,6 +18,23 @@ namespace BlazorStore.Common
         public const int paginationDefaultSize = 10;
 
         // Application
-        public const string appUrl = "https://localhost:7036";
+        public const string appBaseUrl = "https://localhost:7036";
+
+        // Api
+        public const string ApiVersion = "v1";
+        public const string ApiBaseUrl = "https://localhost:7036";
+        public enum ContentType { Json, MultiPartFormData }
+        public enum ApiMethod
+        {
+            GET,
+            POST,
+            PUT,
+            DELETE
+        }
+        public const string JwtAccessTokenCookie = "JWT_ACCESS_TOKEN";
+        public const int JwtAccessTokenExpiry = 1;
+        public const string JwtRrefreshTokenCookie = "JWT_REFRESH_TOKEN";
+        public const int JwtRefreshTokenExpiry = 5;
+        public const string ApiXsrfCookie = "XSRF-TOKEN";
     }
 }

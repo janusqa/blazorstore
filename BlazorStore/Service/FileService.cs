@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace BlazorStore.Service
 {
-    public class FileUpload : IFileUpload
+    public class FileService : IFileService
     {
         private readonly IWebHostEnvironment _whe;
 
-        public FileUpload(IWebHostEnvironment whe)
+        public FileService(IWebHostEnvironment whe)
         {
             _whe = whe;
         }
