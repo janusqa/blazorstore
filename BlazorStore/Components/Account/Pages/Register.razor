@@ -1,4 +1,4 @@
-﻿@page "/Account/Register"
+@page "/Account/Register"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
@@ -44,10 +44,10 @@
                 <label for="confirm-password">Confirm Password</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
-            <AuthorizeView Roles="@($"{SD.Role_Admin}")"  Context="registerRoleContext">
+            <AuthorizeView Roles="@($@"{SD.Role_Admin}")" Context="registerRoleContext">
                 <div class="form-floating mb-3">
                     <InputSelect @bind-Value="Input.Role" class="form-select">
-                        <option value="" disabled selected>-- Select Category --</option>
+                        <option value="" disabled selected>-- Select Role --</option>
                         @foreach (var role in RoleList)
                         {
                             <option value="@role">@role</option>
@@ -88,10 +88,10 @@
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
-        @* // *** BEGIN custom code to add custom fields to user db *@
-        @* // put custom user fields here *@
+        // *** BEGIN custom code to add custom fields to user db 
+        // put custom user fields here 
         user.UserSecret = BcryptUtils.CreateSalt();
-        @* // *** END custom code to add custom fields to user db *@
+        // *** END custom code to add custom fields to user db 
 
         var result = await UserManager.CreateAsync(user, Input.Password);
 
@@ -101,10 +101,10 @@
             return;
         }
 
-        @* // *** BEGIN CUSTOM CODE TO ASSIGN A USER TO A ROLE WHEN THEY REGISTER
+        // *** BEGIN CUSTOM CODE TO ASSIGN A USER TO A ROLE WHEN THEY REGISTER
         // *** FOR DEMO ONLY. USER CHOOSES ROLE WHEN REGISTERING. JUST FOR TESTING
         // *** IN PRODUCTING USER SHOULD BE GIVEN A DEFALUT ROLE AND THEN ADMIN SHOULD
-        // *** THEN FURTHER ASSIGN FINAL ROLE *@
+        // *** THEN FURTHER ASSIGN FINAL ROLE 
         if (Input.Role is not null && Input.Role != "")
         {
             await UserManager.AddToRoleAsync(user, Input.Role);
@@ -161,13 +161,12 @@
     }
 
     protected override void OnInitialized() {
-        @* // ** BEGIN CUSTOM CODE TO ADD ROLES WHEN VISITING THE REGISTER PAGE *@
-        if (RoleList is not null && RoleList.Count() == 0) {
-            foreach (var role in RoleManager.Roles) {
-                if (role is not null) RoleList.Append(role.Name);
-            }     
-        } 
-        @* // ** END CUSTOM CODE TO ADD ROLES WHEN VISITING THE REGISTER PAGE *@
+        // ** BEGIN CUSTOM CODE TO ADD ROLES WHEN VISITING THE REGISTER PAGE 
+        RoleList.Clear();
+        foreach (var role in RoleManager.Roles) {
+            if (role?.Name is not null) RoleList.Add(role.Name);
+        }     
+        // ** END CUSTOM CODE TO ADD ROLES WHEN VISITING THE REGISTER PAGE 
     }
 
     private sealed class InputModel
@@ -188,12 +187,12 @@
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = "";
 
-        @* // *** BEGIN CUSTOM FIELDS WE WANT TO ADD FOR A USER *@
+        // *** BEGIN CUSTOM FIELDS WE WANT TO ADD FOR A USER 
         public string Role { get; set; } = string.Empty;
-        @* // *** END CUSTOM FIELDS WE WANT TO ADD FOR A USER *@
+        // *** END CUSTOM FIELDS WE WANT TO ADD FOR A USER 
     }
 
-    @* // *** BEGIN CUSTOM FIELDS WE WANT TO ADD FOR A USER *@
-    private IEnumerable<string> RoleList { get; set; } = [];
-    @* // *** END CUSTOM FIELDS WE WANT TO ADD FOR A USER *@
+    // *** BEGIN CUSTOM FIELDS WE WANT TO ADD FOR A USER 
+    private List<string> RoleList { get; set; } = [];
+    // *** END CUSTOM FIELDS WE WANT TO ADD FOR A USER 
 }

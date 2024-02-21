@@ -32,9 +32,9 @@ namespace BlazorStore.Common
             DELETE
         }
         public const string JwtAccessTokenCookie = "JWT_ACCESS_TOKEN";
-        public const int JwtAccessTokenExpiry = 1;
+        public const int JwtAccessTokenExpiry = 1; //mins
         public const string JwtRrefreshTokenCookie = "JWT_REFRESH_TOKEN";
-        public const int JwtRefreshTokenExpiry = 5;
+        public const int JwtRefreshTokenExpiry = 5; // mins
         public const string ApiXsrfCookie = "XSRF-TOKEN";
 
         // Role Constants

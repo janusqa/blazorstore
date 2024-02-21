@@ -128,7 +128,27 @@ From a fresh project copy /Components/Account folder to  <[YOUR_PROJECT]>/Compon
     ```
 8. Add "@using Microsoft.AspNetCore.Components.Authorization"  to _imports.razor in webassembly and server project
 
-9. REMEBER TO UPDATE ANY NAME SPACES AS THEY ARE QUITE A FEW OF THEM!!!
+9. Files to adjust
+   1.  WebAssembly project : UserInfo.cs   
+       add Role "public required string Email { get; set; }"
+   2.  Main Project : PersistingRevalidatingAuthenticationStateProvider.cs
+       In "OnPersistingAsync" method add...
+       ```
+       var role = principal.FindFirst(options.ClaimsIdentity.RoleClaimType)?.Value;
+       .
+       .
+       .
+       Role = role ?? SD.Role_Customer,
+       ```
+   3.  WebAssembly project : PersistentAuthenticationStateProvider.cs
+       add
+       ```
+       new Claim(ClaimTypes.Role, userInfo.Role)
+       ```
+   4.  
+
+10. REMEBER TO UPDATE ANY NAME SPACES AS THEY ARE QUITE A FEW OF THEM!!!
+11.  Other files touched to adjust for jwt and roles were register.razor, login.razor, applicationuserrepository.cs, an api was created to retireve a refresh token.  Manage/Index must also be adjusted if you want to add custom user fields
 
 
 

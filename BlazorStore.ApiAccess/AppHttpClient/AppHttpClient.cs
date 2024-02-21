@@ -7,7 +7,7 @@ namespace BlazorStore.ApiAccess.AppHttpClient
     public class AppHttpClient : IAppHttpClient
     {
         // public IVillaService Villas { get; init; }
-        // public IAuthService ApplicationUsers { get; init; }
+        // public IApplicationUsersService ApplicationUsers { get; init; }
 
 
         public AppHttpClient(

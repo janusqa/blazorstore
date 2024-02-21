@@ -1,4 +1,4 @@
-﻿@page "/Account/Login"
+@page "/Account/Login"
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
@@ -106,7 +106,7 @@
             var tokenResult = await _uow.ApplicationUsers.LoginLite(Input.Email);
             if (tokenResult?.AccessToken is not null && tokenResult?.RefreshToken is not null && tokenResult?.XsrfToken is not null)
             {
-                var acccessTokenDto = tokenResult.ToAccessTokenDto();
+                var accessTokenDto = tokenResult.ToAccessTokenDto();
                 // refresh
                 HttpContext.Response.Cookies.Append(
                 SD.JwtRrefreshTokenCookie,

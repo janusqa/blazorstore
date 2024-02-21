@@ -11,9 +11,6 @@ using BlazorStore.Components.Account.Pages.Manage;
 using BlazorStore.Models.Domain;
 using BlazorStore.DataAccess.UnitOfWork;
 using BlazorStore.Common;
-using BlazorStore.Dto;
-using BlazorStore.Models.Extensions;
-
 
 namespace Microsoft.AspNetCore.Routing;
 

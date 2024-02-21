@@ -6,4 +6,7 @@ public class UserInfo
 {
     public required string UserId { get; set; }
     public required string Email { get; set; }
+    // *** Begin custom code
+    public required string Role { get; set; }
+    // *** End custom code
 }

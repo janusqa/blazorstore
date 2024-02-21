@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using BlazorStore.Client;
 using BlazorStore.Models.Domain;
+using BlazorStore.Common;
 
 namespace BlazorStore.Components.Account;
 
@@ -88,6 +89,9 @@ internal sealed class PersistingRevalidatingAuthenticationStateProvider : Revali
         {
             var userId = principal.FindFirst(options.ClaimsIdentity.UserIdClaimType)?.Value;
             var email = principal.FindFirst(options.ClaimsIdentity.EmailClaimType)?.Value;
+            // *** Begin custom code
+            var role = principal.FindFirst(options.ClaimsIdentity.RoleClaimType)?.Value;
+            // *** End custom code
 
             if (userId != null && email != null)
             {
@@ -95,6 +99,9 @@ internal sealed class PersistingRevalidatingAuthenticationStateProvider : Revali
                 {
                     UserId = userId,
                     Email = email,
+                    // *** Begin custom code
+                    Role = role ?? SD.Role_Customer,
+                    // *** End custom code
                 });
             }
         }
