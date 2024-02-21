@@ -1,7 +1,8 @@
 
 using BlazorStore.Common;
 using BlazorStore.DataAccess.Data;
-using BlazorStore.DataAccess.UnitOfWork.IUnitOfWork;
+using BlazorStore.DataAccess.UnitOfWork;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlazorStore.DataAccess.DBInitilizer
@@ -10,17 +11,17 @@ namespace BlazorStore.DataAccess.DBInitilizer
     {
         private readonly ApplicationDbContext _db;
         private readonly IUnitOfWork _uow;
-        // private readonly RoleManager<IdentityRole> _rm;
+        private readonly RoleManager<IdentityRole> _rm;
 
         public DBInitilizer(
             ApplicationDbContext db,
-            IUnitOfWork uow
-        // RoleManager<IdentityRole> rm
+            IUnitOfWork uow,
+            RoleManager<IdentityRole> rm
         )
         {
             _db = db;
             _uow = uow;
-            // _rm = rm;
+            _rm = rm;
         }
 
         public async Task Initilize()
@@ -66,25 +67,25 @@ namespace BlazorStore.DataAccess.DBInitilizer
 
             // 3. Create Roles if the do not already exist
             // ****
-            // var roles = new List<string> {
-            //     SD.Role_Customer,
-            //     SD.Role_Admin,
-            //     SD.Role_Employee,
-            // };
+            var roles = new List<string> {
+                SD.Role_Customer,
+                SD.Role_Admin,
+                SD.Role_Employee,
+            };
 
-            // var rolesToCreate = new List<string>();
-            // foreach (var role in roles)
-            // {
-            //     if (!await _rm.RoleExistsAsync(role))
-            //     {
-            //         rolesToCreate.Add(role);
-            //     }
-            // }
+            var rolesToCreate = new List<string>();
+            foreach (var role in roles)
+            {
+                if (!await _rm.RoleExistsAsync(role))
+                {
+                    rolesToCreate.Add(role);
+                }
+            }
 
-            // foreach (var task in rolesToCreate)
-            // {
-            //     await _rm.CreateAsync(new IdentityRole(task));
-            // }
+            foreach (var task in rolesToCreate)
+            {
+                await _rm.CreateAsync(new IdentityRole(task));
+            }
 
             return;
         }

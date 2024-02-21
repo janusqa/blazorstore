@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.Data.Sqlite;
 
-namespace BlazorStore.DataAccess.Repository.IRepository
+namespace BlazorStore.DataAccess.Repository
 {
     public interface IRepository<T> where T : class
     {

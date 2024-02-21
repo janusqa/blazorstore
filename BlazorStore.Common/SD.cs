@@ -36,5 +36,10 @@ namespace BlazorStore.Common
         public const string JwtRrefreshTokenCookie = "JWT_REFRESH_TOKEN";
         public const int JwtRefreshTokenExpiry = 5;
         public const string ApiXsrfCookie = "XSRF-TOKEN";
+
+        // Role Constants
+        public const string Role_Customer = "Customer";
+        public const string Role_Admin = "Admin";
+        public const string Role_Employee = "Employee";
     }
 }

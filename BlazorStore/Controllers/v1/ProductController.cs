@@ -1,5 +1,5 @@
 using Asp.Versioning;
-using BlazorStore.DataAccess.UnitOfWork.IUnitOfWork;
+using BlazorStore.DataAccess.UnitOfWork;
 using BlazorStore.Dto;
 using BlazorStore.Models.Domain;
 using BlazorStore.Models.Extensions;

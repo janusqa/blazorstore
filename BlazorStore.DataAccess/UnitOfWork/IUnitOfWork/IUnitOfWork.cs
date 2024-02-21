@@ -1,7 +1,7 @@
 using BlazorStore.DataAccess.Repository;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace BlazorStore.DataAccess.UnitOfWork.IUnitOfWork
+namespace BlazorStore.DataAccess.UnitOfWork
 {
     public interface IUnitOfWork : IDisposable
     {
@@ -9,6 +9,7 @@ namespace BlazorStore.DataAccess.UnitOfWork.IUnitOfWork
         IProductRepository Products { get; init; }
 
         IProductPriceRepository ProductPrices { get; init; }
+        IApplicationUserRepository ApplicationUsers { get; init; }
 
         Task<int> Complete();
 

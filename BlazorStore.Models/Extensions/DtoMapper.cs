@@ -48,5 +48,11 @@ namespace BlazorStore.Models.Extensions
                 Price = productPrice.Price
             };
         }
+        public static AccessTokenDto ToAccessTokenDto(this TokenDto tokenDto)
+        {
+            return new AccessTokenDto(
+                AccessToken: tokenDto.AccessToken
+            );
+        }
     }
 }

@@ -1,12 +1,16 @@
 using Asp.Versioning;
 using BlazorStore;
 using BlazorStore.Components;
+using BlazorStore.Components.Account;
 using BlazorStore.DataAccess.Data;
 using BlazorStore.DataAccess.DBInitilizer;
-using BlazorStore.DataAccess.Repository;
-using BlazorStore.DataAccess.UnitOfWork.IUnitOfWork;
+using BlazorStore.DataAccess.UnitOfWork;
+using BlazorStore.Models.Domain;
 using BlazorStore.Service;
 using BlazorStore.Service.IService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Radzen;
@@ -22,6 +26,40 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddControllers();
 
+// Blazor Auth
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<IdentityUserAccessor>();
+builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+// Add Autentication
+// add (jwt, could be other types of auth too) authentication
+builder.Services.AddScoped<ICustomJwtBearerHandler, CustomJwtBearerHandler>();
+// var JwtAccessSecret = builder.Configuration.GetValue<string>("ApiSettings:JwtAccessSecret") ?? "";
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddScheme<JwtBearerOptions, CustomJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.IncludeErrorDetails = true;
+});
+// builder.Services.AddAuthentication(options =>
+//     {
+//         options.DefaultScheme = IdentityConstants.ApplicationScheme;
+//         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+//     })
+//     .AddIdentityCookies();
+
+// Add Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
@@ -63,6 +101,7 @@ await SeedDatabase();
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
+    app.UseMigrationsEndPoint();
 
     app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -89,6 +128,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BlazorStore.Client._Imports).Assembly);
 
+app.MapAdditionalIdentityEndpoints();
 
 app.Run();
 

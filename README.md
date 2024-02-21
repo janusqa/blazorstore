@@ -225,7 +225,7 @@ var jwtSecret = config["ApiSettings:JwtAccessSecret"]
 IDENTITY ROLES
 Files: ApplicationUser.cs, ApplicationDbContext.cs, programs.cs, Register.cshtml.cs
 ---
-- in program.cs we updated the AddDefalutIdentity and changed it to AddIdentity
+- in program.cs we updated the AddDefaultIdentity and changed it to AddIdentity
 - in register.cshtml.cs we injected the RoleManager
 - In the utilities SD.cs we added some constants for use with roles
 - Back to register.cshtml.cs OnGetAsync to add some custom code there to add Admin role if it does not exists

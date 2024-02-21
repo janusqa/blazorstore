@@ -15,7 +15,7 @@ namespace BlazorStore.DataAccess.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
 
             modelBuilder.Entity("BlazorStore.Models.Domain.ApplicationUser", b =>
                 {
@@ -70,6 +70,9 @@ namespace BlazorStore.DataAccess.Migrations
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserSecret")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

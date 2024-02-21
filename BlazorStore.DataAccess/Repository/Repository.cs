@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using BlazorStore.DataAccess.Repository.IRepository;
+using BlazorStore.DataAccess.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
 using BlazorStore.DataAccess.Data;

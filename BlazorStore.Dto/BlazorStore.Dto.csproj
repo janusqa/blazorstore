@@ -14,4 +14,8 @@
     <ProjectReference Include="..\BlazorStore.Common\BlazorStore.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+
 </Project>

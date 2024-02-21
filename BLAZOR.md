@@ -53,3 +53,82 @@ Note API can be in it's own project but unless there is a good reason, why not h
    2. Add "app.MapControllers();" to pipeline section
    3. Add the swagger configuration into program cs. See program.cs
    4. Add "SwaggerConfiguration.cs" to root of project
+
+
+Adding Authentication AFTER starting a project
+===
+ON CLIENT
+---
+1.
+dotnet add <[YOUR_PROJECT]>.Client package Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+2.
+Copy the following files to <[YOUR_PROJECT]>.Client main folder
+   a. PersistentAuthenticationStateProvider.cs
+   b. RedirectToLogin.razor
+   c. UserInfo.cs
+
+3. 
+Add the following to program.cs above "await builder.Build().RunAsync()
+```
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddSingleton<AuthenticationStateProvider, PersistentAuthenticationStateProvider>();
+```
+
+ON SERVER
+---
+3.
+dotnet add <[YOUR_PROJECT]> package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+dotnet add <[YOUR_PROJECT]> package Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore
+
+4.
+update Routes.razor in server to 
+```
+<Router AppAssembly="typeof(Program).Assembly" AdditionalAssemblies="new[] { typeof(Client._Imports).Assembly }">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                <RedirectToLogin />
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>
+```
+
+5.
+From a fresh project copy /Components/Account folder to  <[YOUR_PROJECT]>/Components/Account folder
+
+6. Update program.cs
+   1. In services section add 
+	```
+	builder.Services.AddCascadingAuthenticationState();
+	builder.Services.AddScoped<IdentityUserAccessor>();
+	builder.Services.AddScoped<IdentityRedirectManager>();
+	builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
+	builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+	    .AddEntityFrameworkStores<ApplicationDbContext>()
+	    .AddSignInManager()
+	    .AddDefaultTokenProviders();
+	builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();	
+	```
+	2. In pipeline sections
+   	```
+	app.MapAdditionalIdentityEndpoints();
+	```
+7. Add AddAuthentication to services section (an example of cookie auth is used below but we actually use jwt, see programs.cs)
+   ```
+   builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+    })
+    .AddIdentityCookies();
+    ```
+8. Add "@using Microsoft.AspNetCore.Components.Authorization"  to _imports.razor in webassembly and server project
+
+9. REMEBER TO UPDATE ANY NAME SPACES AS THEY ARE QUITE A FEW OF THEM!!!
+
+
+
