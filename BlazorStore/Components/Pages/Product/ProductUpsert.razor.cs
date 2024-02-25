@@ -80,7 +80,7 @@ namespace BlazorStore.Components.Pages.Product
                     new SqliteParameter("ShopFavorites", ProductVm.ShopFavorites),
                     new SqliteParameter("CustomerFavorites", ProductVm.CustomerFavorites),
                     new SqliteParameter("Color", ProductVm.Color),
-                    new SqliteParameter("ImageUrl", (fileUploadResult.Error is not null ? existingImageUrl : fileUploadResult.ImageUrl) ?? string.Empty),
+                    new SqliteParameter("ImageUrl", (fileUploadResult.ImageUrl is null ? existingImageUrl : fileUploadResult.ImageUrl) ?? string.Empty),
                     new SqliteParameter("CategoryId", ProductVm.CategoryId),
                 ]);
 
