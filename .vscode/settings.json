@@ -1,8 +1,8 @@
 {
     "terminal.integrated.fontFamily": "'JetBrains Mono'",
     "terminal.integrated.gpuAcceleration": "off",
-    "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
-    "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution"
+    "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "openFiles",
+    "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "openFiles"
 
     // "dotnet.dotnetPath": "/usr/share/dotnet",
     // "dotnetAcquisitionExtension.existingDotnetPath": [

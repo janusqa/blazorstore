@@ -27,91 +27,103 @@ namespace BlazorStore.Service
             return false;
         }
 
-        public async Task<string> PostFile(IBrowserFile file, string? existingImageUrl = null)
+        public async Task<(string? ImageUrl, string? Error)> PostFile(IBrowserFile file, string? existingImageUrl = null)
         {
-            string ImageUrl;
-
-            if (file is not null)
+            string? ImageUrl = null;
+            try
             {
-                string wwwRootPath = _whe.WebRootPath;
-                string urlPath = @"images/product";
-                string fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.Name)}";
-                string fileDirectory = Path.Combine(wwwRootPath, urlPath);
-                string filePath = Path.Combine(fileDirectory, fileName);
-
-                if (!Directory.Exists(fileDirectory))
+                if (file is not null)
                 {
-                    Directory.CreateDirectory(fileDirectory);
+                    string wwwRootPath = _whe.WebRootPath;
+                    string urlPath = @"images/product";
+                    string fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.Name)}";
+                    string fileDirectory = Path.Combine(wwwRootPath, urlPath);
+                    string filePath = Path.Combine(fileDirectory, fileName);
+
+                    if (!Directory.Exists(fileDirectory))
+                    {
+                        Directory.CreateDirectory(fileDirectory);
+                    }
+
+                    // if a file was uploaded and there is an existing file
+                    // we need to repalce the existing file by first deleting 
+                    // it and then copying in the new file. Otherwise, just
+                    // copy in the new file
+                    DeleteFile(existingImageUrl);
+
+
+                    using (FileStream writer = new(filePath, FileMode.Create))
+                    {
+                        await file.OpenReadStream().CopyToAsync(writer);
+                    }
+
+                    ImageUrl = @$"/{urlPath}/{fileName}";
+                }
+                else
+                {
+                    // if no file is uploaded but a file is already in the database
+                    // keep that file, otherwise set ImageUrl to empty string.
+                    ImageUrl =
+                        existingImageUrl is null || existingImageUrl == ""
+                        ? ""
+                        : existingImageUrl;
                 }
 
-                // if a file was uploaded and there is an existing file
-                // we need to repalce the existing file by first deleting 
-                // it and then copying in the new file. Otherwise, just
-                // copy in the new file
-                DeleteFile(existingImageUrl);
-
-
-                using (FileStream writer = new(filePath, FileMode.Create))
-                {
-                    await file.OpenReadStream().CopyToAsync(writer);
-                }
-
-                ImageUrl = @$"/{urlPath}/{fileName}";
+                return (ImageUrl, null);
             }
-            else
+            catch (Exception ex)
             {
-                // if no file is uploaded but a file is already in the database
-                // keep that file, otherwise set ImageUrl to empty string.
-                ImageUrl =
-                    existingImageUrl is null || existingImageUrl == ""
-                    ? ""
-                    : existingImageUrl;
+                return (ImageUrl, ex.Message);
             }
-
-            return ImageUrl;
         }
 
-        public async Task<string> PostFileSSR(IFormFile file, string? existingImageUrl = null)
+        public async Task<(string? ImageUrl, string? Error)> PostFileSSR(IFormFile file, string? existingImageUrl = null)
         {
-            string ImageUrl;
+            string? ImageUrl = null;
 
-            if (file is not null)
+            try
             {
-                string wwwRootPath = _whe.WebRootPath;
-                string urlPath = @"images/product";
-                string fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-                string fileDirectory = Path.Combine(wwwRootPath, urlPath);
-                string filePath = Path.Combine(fileDirectory, fileName);
-
-                if (!Directory.Exists(fileDirectory))
+                if (file is not null)
                 {
-                    Directory.CreateDirectory(fileDirectory);
+                    string wwwRootPath = _whe.WebRootPath;
+                    string urlPath = @"images/product";
+                    string fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                    string fileDirectory = Path.Combine(wwwRootPath, urlPath);
+                    string filePath = Path.Combine(fileDirectory, fileName);
+
+                    if (!Directory.Exists(fileDirectory))
+                    {
+                        Directory.CreateDirectory(fileDirectory);
+                    }
+
+                    // if a file was uploaded and there is an existing file
+                    // we need to repalce the existing file by first deleting 
+                    // it and then copying in the new file. Otherwise, just
+                    // copy in the new file
+                    DeleteFile(existingImageUrl);
+
+                    using (FileStream writer = new(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(writer);
+                    }
+
+                    ImageUrl = @$"/{urlPath}/{fileName}";
                 }
-
-                // if a file was uploaded and there is an existing file
-                // we need to repalce the existing file by first deleting 
-                // it and then copying in the new file. Otherwise, just
-                // copy in the new file
-                DeleteFile(existingImageUrl);
-
-                using (FileStream writer = new(filePath, FileMode.Create))
+                else
                 {
-                    await file.CopyToAsync(writer);
+                    // if no file is uploaded but a file is already in the database
+                    // keep that file, otherwise set ImageUrl to empty string.
+                    ImageUrl =
+                        existingImageUrl is null || existingImageUrl == ""
+                        ? ""
+                        : existingImageUrl;
                 }
-
-                ImageUrl = @$"/{urlPath}/{fileName}";
+                return (ImageUrl, null);
             }
-            else
+            catch (Exception ex)
             {
-                // if no file is uploaded but a file is already in the database
-                // keep that file, otherwise set ImageUrl to empty string.
-                ImageUrl =
-                    existingImageUrl is null || existingImageUrl == ""
-                    ? ""
-                    : existingImageUrl;
+                return (ImageUrl, ex.Message);
             }
-
-            return ImageUrl;
         }
     }
 }

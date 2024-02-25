@@ -12,7 +12,7 @@
 <div class="row my-2">
     <h3 class="card-title text-primary mb-3 ml-3">@Title Product</h3>
     <div class="col-md-10">
-        @if (ProductDto is null)
+        @if (ProductVm is null)
         {
             <div class="text-center">
                 <img src="/images/loading.gif">
@@ -20,39 +20,39 @@
         }
         else
         {
-            <EditForm Model="ProductDto" OnValidSubmit="Upsert" FormName="product-upsert" method="POST"
+            <EditForm Model="ProductVm" OnValidSubmit="Upsert" FormName="product-upsert" method="POST"
                 enctype="multipart/form-data">
                 <DataAnnotationsValidator />
                 @* <ValidationSummary /> *@
                 <div class="form-group">
                     <label>Name:</label>
-                    <InputText @bind-Value="ProductDto.Name" class="form-control" />
-                    <ValidationMessage For="()=>ProductDto.Name"></ValidationMessage>
+                    <InputText @bind-Value="ProductVm.Name" class="form-control" />
+                    <ValidationMessage For="()=>ProductVm.Name"></ValidationMessage>
                 </div>
 
                 <div class="form-group">
                     <label>Description:</label>
-                    <InputTextArea @bind-Value="ProductDto.Description" id="ProductDto_Description" class="form-control">
+                    <InputTextArea @bind-Value="ProductVm.Description" id="ProductVm_Description" class="form-control">
                     </InputTextArea>
                 </div>
 
                 <div class="form-group">
                     <label>Color:</label>
-                    <InputText @bind-Value="ProductDto.Color" class="form-control" />
-                    <ValidationMessage For="()=>ProductDto.Color"></ValidationMessage>
+                    <InputText @bind-Value="ProductVm.Color" class="form-control" />
+                    <ValidationMessage For="()=>ProductVm.Color"></ValidationMessage>
                 </div>
 
                 <div class="row pt-3">
                     <div class="form-group col-6">
                         <div class="form-check">
-                            <InputCheckbox @bind-Value="ProductDto.ShopFavorites" class="form-check-input" />
+                            <InputCheckbox @bind-Value="ProductVm.ShopFavorites" class="form-check-input" />
                             <label class="form-check-label">Is Shop Favorite:</label>
                         </div>
                     </div>
 
                     <div class="form-group col-6">
                         <div class="form-check">
-                            <InputCheckbox @bind-Value="ProductDto.CustomerFavorites" class="form-check-input" />
+                            <InputCheckbox @bind-Value="ProductVm.CustomerFavorites" class="form-check-input" />
                             <label class="form-check-label">Is Customer Favorite:</label>
                         </div>
                     </div>
@@ -61,7 +61,7 @@
                 <div class="row pt-3">
                     <div class="form-group col-6">
                         <label>Category:</label>
-                        <InputSelect @bind-Value="ProductDto.CategoryId" class="form-select">
+                        <InputSelect @bind-Value="ProductVm.CategoryId" class="form-select">
                             <option value="0" disabled selected>-- Select Category --</option>
                             @foreach (var category in Categories)
                             {
@@ -69,14 +69,13 @@
                                 </option>
                             }
                         </InputSelect>
-                        <ValidationMessage For="()=>ProductDto.CategoryId"></ValidationMessage>
+                        <ValidationMessage For="()=>ProductVm.CategoryId"></ValidationMessage>
                     </div>
 
                     <div class="form-group col-6">
                         <label style="display:block;">Image upload:</label>
-                        @* <InputFile name="ProductDto.Image" @bind-Value="ProductDto.Image" /> *@
-                        <InputFile @bind-Value="ProductDto.Image" />
-                        <input type="hidden" name="ProductDto.ImageUrl" @bind="ProductDto.ImageUrl" />
+                        <InputFile name="ProductVm.Image" @bind-Value="ProductVm.Image" />
+                        <input type="hidden" name="ProductVm.ImageUrl" @bind="ProductVm.ImageUrl" />
                         <!-- This below should work but there is a bug so need to use "name" insstead of "bind-Value" -->
                         @* <InputFile @bind-Value="ProductDto.Image" /> *@
                         <!-- This below is for multiple file uploads -->
@@ -91,13 +90,21 @@
                     <NavLink href="/product" class="btn btn-secondary">Cancel</NavLink>
                 </div>
             </EditForm>
-            <div>@message</div>
+            @if (submissionError)
+            {
+                <div class="bg-danger">@message</div>
+            }
+            else
+            {
+                <div class="bg-success">@message</div>
+            }
+
         }
     </div>
     <div class="col-md-2">
-        @if (!string.IsNullOrWhiteSpace(ProductDto?.ImageUrl))
+        @if (!string.IsNullOrWhiteSpace(ProductVm?.ImageUrl))
         {
-            <img src="@($"{SD.appBaseUrl}{ProductDto.ImageUrl}")" class="w-100" alt="@ProductDto?.Name" />
+            <img src="@($"{SD.appBaseUrl}{ProductVm.ImageUrl}")" class="w-100" alt="@ProductVm?.Name" />
         }
     </div>
 </div>

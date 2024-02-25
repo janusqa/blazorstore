@@ -1,10 +1,10 @@
 export function onLoad() {
-    TinyMceInit('ProductDto_Description');
+    TinyMceInit('ProductVm_Description');
     // console.log('Loaded');
 }
 
 export function onUpdate() {
-    TinyMceInit('ProductDto_Description');
+    TinyMceInit('ProductVm_Description');
     // console.log('Updated');
 }
 
