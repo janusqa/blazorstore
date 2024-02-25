@@ -6,10 +6,12 @@ using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using BlazorStore.Common;
 using BlazorStore.DataAccess.UnitOfWork;
+using BlazorStore.Models.Domain;
 using BlazorStore.Service.IService;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
@@ -117,7 +119,7 @@ namespace BlazorStore.Service
                 try
                 {
                     userSecret = (await _uow.ApplicationUsers.SqlQueryAsync<string>($@"
-                        SELECT UserSecret FROM dbo.AspNetUsers WHERE UserName = @UserName
+                        SELECT UserSecret FROM AspNetUsers WHERE UserName = @UserName
                     ", [new SqliteParameter("UserName", userNameClaim)])).FirstOrDefault();
                 }
                 catch (Exception ex)
@@ -231,9 +233,9 @@ namespace BlazorStore.Service
         //     return dateTime;
         // }
 
-        [GeneratedRegex(@"/users/refresh$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+        [GeneratedRegex(@"/auth/refresh$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
         private static partial Regex RefTokenReqRegex();
-        [GeneratedRegex(@"/users/login$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+        [GeneratedRegex(@"/auth/login$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
         private static partial Regex AccTokenReqRegex();
         [GeneratedRegex(@"^Bearer ", RegexOptions.Compiled, "en-US")]
         private static partial Regex AuthHeaderRegex();

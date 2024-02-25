@@ -27,7 +27,7 @@ namespace BlazorStore.Service
             return false;
         }
 
-        public async Task<string> PostFile(IBrowserFile file, string? existingImageUrl)
+        public async Task<string> PostFile(IBrowserFile file, string? existingImageUrl = null)
         {
             string ImageUrl;
 
@@ -71,15 +71,15 @@ namespace BlazorStore.Service
             return ImageUrl;
         }
 
-        public async Task<string> PostFileSSR(IFormFile Image, string? existingImageUrl = null)
+        public async Task<string> PostFileSSR(IFormFile file, string? existingImageUrl = null)
         {
             string ImageUrl;
 
-            if (Image is not null)
+            if (file is not null)
             {
                 string wwwRootPath = _whe.WebRootPath;
                 string urlPath = @"images/product";
-                string fileName = $"{Guid.NewGuid()}{Path.GetExtension(Image.FileName)}";
+                string fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
                 string fileDirectory = Path.Combine(wwwRootPath, urlPath);
                 string filePath = Path.Combine(fileDirectory, fileName);
 
@@ -96,7 +96,7 @@ namespace BlazorStore.Service
 
                 using (FileStream writer = new(filePath, FileMode.Create))
                 {
-                    await Image.CopyToAsync(writer);
+                    await file.CopyToAsync(writer);
                 }
 
                 ImageUrl = @$"/{urlPath}/{fileName}";

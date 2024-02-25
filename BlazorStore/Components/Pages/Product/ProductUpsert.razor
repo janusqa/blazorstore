@@ -74,7 +74,8 @@
 
                     <div class="form-group col-6">
                         <label style="display:block;">Image upload:</label>
-                        <InputFile name="ProductDto.Image" @bind-Value="ProductDto.Image" />
+                        @* <InputFile name="ProductDto.Image" @bind-Value="ProductDto.Image" /> *@
+                        <InputFile @bind-Value="ProductDto.Image" />
                         <input type="hidden" name="ProductDto.ImageUrl" @bind="ProductDto.ImageUrl" />
                         <!-- This below should work but there is a bug so need to use "name" insstead of "bind-Value" -->
                         @* <InputFile @bind-Value="ProductDto.Image" /> *@

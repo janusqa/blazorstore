@@ -8,11 +8,13 @@ using BlazorStore.DataAccess.UnitOfWork;
 using BlazorStore.Models.Domain;
 using BlazorStore.Service;
 using BlazorStore.Service.IService;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Radzen;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Syncfusion.Blazor;
@@ -31,6 +33,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
+// This implements AddIdentityCookies by default
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
@@ -43,15 +46,44 @@ builder.Services.AddScoped<ICustomJwtBearerHandler, CustomJwtBearerHandler>();
 // var JwtAccessSecret = builder.Configuration.GetValue<string>("ApiSettings:JwtAccessSecret") ?? "";
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = "BlazorStore";
+    options.DefaultChallengeScheme = "BlazorStore";
 })
 .AddScheme<JwtBearerOptions, CustomJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
     options.IncludeErrorDetails = true;
+}).AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration.GetValue<string>("Google:AppId") ?? "";
+    options.ClientSecret = builder.Configuration.GetValue<string>("Google:AppSecret") ?? "";
+})
+.AddPolicyScheme("BlazorStore", "BlazorStore", options =>
+{
+    // runs on each request
+    options.ForwardDefaultSelector = context =>
+    {
+        // filter by auth type
+        string? authorization = context.Request.Headers[HeaderNames.Authorization];
+        if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
+            return JwtBearerDefaults.AuthenticationScheme; ;
+
+        // otherwise always check for cookie auth
+        return IdentityConstants.ApplicationScheme;
+    };
 });
+// builder.Services.AddAuthentication(options =>
+// {
+//     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+// })
+// .AddScheme<JwtBearerOptions, CustomJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options =>
+// {
+//     options.RequireHttpsMetadata = false;
+//     options.SaveToken = true;
+//     options.IncludeErrorDetails = true;
+// });
 // builder.Services.AddAuthentication(options =>
 //     {
 //         options.DefaultScheme = IdentityConstants.ApplicationScheme;

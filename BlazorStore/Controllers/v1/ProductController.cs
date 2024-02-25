@@ -95,7 +95,7 @@ namespace BlazorStore.Controllers
         public async Task<ActionResult<ApiResponse>> Get(int entityId)
         {
             // lets do some simple validation
-            if (entityId == 0) return BadRequest(new ApiResponse { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest });
+            if (entityId < 1) return BadRequest(new ApiResponse { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest });
 
             try
             {

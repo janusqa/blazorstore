@@ -13,8 +13,4 @@ namespace BlazorStore.Dto
         string? XsrfToken = null,
         string? RefreshToken = null
     );
-
-    public record AccessTokenDto(
-        string? AccessToken = null
-    );
 }

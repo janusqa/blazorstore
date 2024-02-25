@@ -10,8 +10,9 @@
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.0.0" />
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="8.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="8.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
@@ -23,7 +24,7 @@
     <PackageReference Include="Syncfusion.Blazor.Grid" Version="24.2.6" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="24.2.6" />
     <ProjectReference Include="..\BlazorStore.Client\BlazorStore.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +32,11 @@
     <ProjectReference Include="..\BlazorStore.DataAccess\BlazorStore.DataAccess.csproj" />
     <ProjectReference Include="..\BlazorStore.Dto\BlazorStore.Dto.csproj" />
     <ProjectReference Include="..\BlazorStore.PageScript\BlazorStore.PageScript.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- extends watching group to include *.js files -->
+    <Watch Include="wwwroot\images\*" Exclude="true" />
   </ItemGroup>
 
 </Project>

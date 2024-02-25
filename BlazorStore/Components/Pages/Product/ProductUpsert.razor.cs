@@ -54,9 +54,13 @@ namespace BlazorStore.Components.Pages.Product
             {
                 message = "Saving...";
 
+                Console.WriteLine("***");
+                Console.WriteLine(ProductDto.Image);
+                Console.WriteLine("***");
+
                 if (ProductDto.Image is not null)
                 {
-                    ProductDto.ImageUrl = await PostImageSSR(ProductDto.Image, ProductDto.ImageUrl);
+                    ProductDto.ImageUrl = await PostImageSSRBrowserFile(ProductDto.Image, ProductDto.ImageUrl);
                 }
 
                 await _uow.Products.ExecuteSqlAsync(@"
@@ -148,6 +152,42 @@ namespace BlazorStore.Components.Pages.Product
             catch (Exception ex)
             {
                 await _ijsr.InvokeVoidAsync("ShowToastr", "error", ex.Message);
+            }
+
+            return null;
+        }
+
+        private async Task<string?> PostImageSSRBrowserFile(IBrowserFile Image, string? existingImageUrl)
+        {
+            Console.WriteLine("***");
+            Console.WriteLine(Image.Name);
+            Console.WriteLine("***");
+            try
+            {
+                if (Image is not null)
+                {
+                    if (
+                        Path.GetExtension(Image.Name) == ".jpg" ||
+                        Path.GetExtension(Image.Name) == ".png" ||
+                        Path.GetExtension(Image.Name) == ".jpeg"
+                    )
+                    {
+                        return await _fu.PostFile(Image, existingImageUrl);
+                    }
+                    else
+                    {
+                        await _ijsr.InvokeVoidAsync("ShowToastr", "error", "Please select .jpg, .jpeg or .png file only");
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                // await _ijsr.InvokeVoidAsync("ShowToastr", "error", ex.Message);
+                Console.WriteLine("***");
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("***");
+
             }
 
             return null;

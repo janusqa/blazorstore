@@ -12,7 +12,7 @@ namespace BlazorStore.DataAccess.Repository
         Task<TokenDto?> Login(ApplicationUserLoginRequestDto loginRequestDto);
         Task<TokenDto?> LoginLite(string userName);
         Task<TokenDto?> Register(CreateApplicationUserDto userDto);
-        Task<TokenDto?> Refresh(ClaimsPrincipal user);
-        Task Logout(ClaimsPrincipal user);
+        Task<TokenDto?> RefreshToken(ApplicationUser user);
+        Task RevokeToken(ApplicationUser user);
     }
 }

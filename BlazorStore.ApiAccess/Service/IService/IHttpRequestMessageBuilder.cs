@@ -1,8 +1,8 @@
 using BlazorStore.Dto;
 
-namespace BlazorStore.ApiAccess.Service.IService
+namespace BlazorStore.ApiAccess.Service
 {
-    public interface IMessageRequestBuilder
+    public interface IHttpRequestMessageBuilder
     {
         HttpRequestMessage Build(ApiRequest apiRequest);
     }

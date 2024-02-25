@@ -311,7 +311,7 @@ builder.Services.AddAuthentication().AddFacebook(option =>
 );
 ```
 Add Facebook AppId and AppSecret to secrets
-eg. dotnet user-secrets --project[<PROJECT>] set "[<KEY>] [<VALUE>]
+eg. dotnet user-secrets --project[<PROJECT>] set "[<KEY>]" "[<VALUE>]"
 
 Remember to update the ExternalLogin.cshtml.cs and ExternalLogin.cshtml to handle custom fields files in /Area/Identity/Account (NOT THE ONES IN MANAGE THOUGH!!!)
 

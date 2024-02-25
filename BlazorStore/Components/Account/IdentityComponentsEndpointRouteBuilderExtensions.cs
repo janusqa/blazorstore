@@ -43,17 +43,23 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         });
 
         accountGroup.MapPost("/Logout", async (
-            ClaimsPrincipal user,
+            ClaimsPrincipal principal,
             SignInManager<ApplicationUser> signInManager,
             HttpContext context,
             IUnitOfWork _uow,
+            UserManager<ApplicationUser> _um,
             [FromForm] string returnUrl) =>
         {
             // *** Begin custom code
-            await _uow.ApplicationUsers.Logout(user);
+            if (principal.Identity?.Name is not null)
+            {
+                var user = await _um.FindByNameAsync(principal.Identity.Name);
+                if (user is not null) await _uow.ApplicationUsers.RevokeToken(user);
+            }
             context.Response.Cookies.Delete(SD.JwtRrefreshTokenCookie);
             context.Response.Cookies.Delete(SD.ApiXsrfCookie);
             // *** End custom code
+
             await signInManager.SignOutAsync();
             return TypedResults.LocalRedirect($"~/{returnUrl}");
         });
@@ -61,10 +67,23 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         var manageGroup = accountGroup.MapGroup("/Manage").RequireAuthorization();
 
         manageGroup.MapPost("/LinkExternalLogin", async (
+            ClaimsPrincipal principal,
             HttpContext context,
+            IUnitOfWork _uow,
+            UserManager<ApplicationUser> _um,
             [FromServices] SignInManager<ApplicationUser> signInManager,
             [FromForm] string provider) =>
         {
+            // *** Begin custom code
+            // if (principal.Identity?.Name is not null)
+            // {
+            //     var user = await _um.FindByNameAsync(principal.Identity.Name);
+            //     if (user is not null) await _uow.ApplicationUsers.RevokeToken(user);
+            // }
+            // context.Response.Cookies.Delete(SD.JwtRrefreshTokenCookie);
+            // context.Response.Cookies.Delete(SD.ApiXsrfCookie);
+            // *** End custom code
+
             // Clear the existing external cookie to ensure a clean login process
             await context.SignOutAsync(IdentityConstants.ExternalScheme);
 

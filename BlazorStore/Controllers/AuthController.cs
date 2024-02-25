@@ -5,6 +5,8 @@ using BlazorStore.Common;
 using BlazorStore.DataAccess.UnitOfWork;
 using BlazorStore.Dto;
 using BlazorStore.Models.Extensions;
+using Microsoft.AspNetCore.Identity;
+using BlazorStore.Models.Domain;
 
 
 namespace RealEstate.Controllers
@@ -15,10 +17,12 @@ namespace RealEstate.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
+        private readonly UserManager<ApplicationUser> _um;
 
-        public AuthController(IUnitOfWork uow)
+        public AuthController(IUnitOfWork uow, UserManager<ApplicationUser> um)
         {
             _uow = uow;
+            _um = um;
         }
 
         [Authorize]
@@ -31,13 +35,15 @@ namespace RealEstate.Controllers
         {
             try
             {
+                if (User.Identity?.Name is null)
+                    return new ObjectResult(new ApiResponse { IsSuccess = false, ErrorMessages = ["Invalid credentials"], StatusCode = System.Net.HttpStatusCode.Unauthorized }) { StatusCode = StatusCodes.Status401Unauthorized };
 
-                var result = await _uow.ApplicationUsers.Refresh(User);
+                var user = await _um.FindByNameAsync(User.Identity.Name);
+                var result = user is not null ? await _uow.ApplicationUsers.RefreshToken(user) : null;
                 if (result?.AccessToken is not null && result?.XsrfToken is not null)
                 {
-                    var accessTokenDto = result.ToAccessTokenDto();
-
                     // xsrf
+                    Response.Cookies.Delete(SD.ApiXsrfCookie);
                     Response.Cookies.Append(
                         SD.ApiXsrfCookie,
                         result.XsrfToken,
@@ -50,12 +56,7 @@ namespace RealEstate.Controllers
                             MaxAge = DateTime.UtcNow.AddMinutes(SD.JwtAccessTokenExpiry) - DateTime.UtcNow
                         });
 
-                    // usually we should just return access token in json, refresh token in a httpOnly cookie and xsrf in a regular cookie
-                    // return Ok(new ApiResponse { IsSuccess = true, Result = accessTokenDto, StatusCode = System.Net.HttpStatusCode.OK });
-
-                    // BUT our front-end is an .net core mvc app so we need to do things differently.  We must
-                    // return access, refresh and xsrf all in the json and let the mvc app set and clear cookies for browser
-                    return Ok(new ApiResponse { IsSuccess = true, Result = accessTokenDto, StatusCode = System.Net.HttpStatusCode.OK });
+                    return Ok(new ApiResponse { IsSuccess = true, Result = result, StatusCode = System.Net.HttpStatusCode.OK });
                 }
                 return new ObjectResult(new ApiResponse { IsSuccess = false, ErrorMessages = ["Invalid credentials"], StatusCode = System.Net.HttpStatusCode.Unauthorized }) { StatusCode = StatusCodes.Status401Unauthorized };
             }

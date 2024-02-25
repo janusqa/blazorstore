@@ -1,42 +1,37 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Security.Authentication;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using BlazorStore.Dto;
-using BlazorStore.ApiAccess.Service.IService;
-using BlazorStore.Common;
+using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
+using BlazorStore.ApiAccess.Exceptions;
+using BlazorStore.Common;
+using BlazorStore.Dto;
 using Microsoft.IdentityModel.JsonWebTokens;
-
 
 namespace BlazorStore.ApiAccess.Service
 {
-    public class BaseService<T> : IBaseHttpService<T> where T : class
+    public class Repository<T> : IRepository<T> where T : class
     {
         private readonly IHttpClientFactory _httpClient;
-        private readonly IHttpContextAccessor _httpAccessor;
-        private readonly ITokenProvider _tokenProvider;
-        private readonly IMessageRequestBuilder _messageBuilder;
+        private readonly ICookieService _cookieService;
+        private readonly IHttpRequestMessageBuilder _messageBuilder;
         private readonly string _url;
 
-        public BaseService(
+        public Repository(
             IHttpClientFactory httpClient,
-            IHttpContextAccessor httpAccessor,
-            ITokenProvider tokenProvider,
-            IMessageRequestBuilder messageBuilder,
+            ICookieService cookieService,
+            IHttpRequestMessageBuilder messageBuilder,
             string url
         )
         {
             _httpClient = httpClient;
-            _httpAccessor = httpAccessor;
-            _tokenProvider = tokenProvider;
+            _cookieService = cookieService;
             _messageBuilder = messageBuilder;
             _url = url;
         }
 
-        public async Task<T?> PostAsync<U>(U dto, bool withBearer, SD.ContentType contentType)
+        public async Task<T?> AddAsync<U>(U dto, bool withBearer, SD.ContentType contentType)
         {
             return await RequestAsync(
                 new ApiRequest
@@ -44,13 +39,12 @@ namespace BlazorStore.ApiAccess.Service
                     ApiMethod = SD.ApiMethod.POST,
                     Data = dto,
                     Url = _url,
-                    ContentType = contentType,
-                },
-                withBearer
+                    ContentType = contentType
+                }
             );
         }
 
-        public async Task<T?> PutAsync<U>(int entityId, U dto, bool withBearer, SD.ContentType contentType)
+        public async Task<T?> UpdateAsync<U>(int entityId, U dto, bool withBearer, SD.ContentType contentType)
         {
             return await RequestAsync(
                 new ApiRequest
@@ -59,20 +53,18 @@ namespace BlazorStore.ApiAccess.Service
                     Data = dto,
                     Url = $"{_url}/{entityId}",
                     ContentType = contentType
-                },
-                withBearer
+                }
             );
         }
 
-        public async Task<T?> DeleteAsync(int entityId, bool withBearer)
+        public async Task<T?> RemoveAsync(int entityId, bool withBearer)
         {
             return await RequestAsync(
                 new ApiRequest
                 {
                     ApiMethod = SD.ApiMethod.DELETE,
                     Url = $"{_url}/{entityId}"
-                },
-                withBearer
+                }
             );
         }
 
@@ -83,8 +75,7 @@ namespace BlazorStore.ApiAccess.Service
                 {
                     ApiMethod = SD.ApiMethod.GET,
                     Url = _url
-                },
-                withBearer
+                }
             );
         }
 
@@ -95,8 +86,7 @@ namespace BlazorStore.ApiAccess.Service
                 {
                     ApiMethod = SD.ApiMethod.GET,
                     Url = $"{_url}/{entityId}"
-                },
-                withBearer
+                }
             );
         }
 
@@ -110,11 +100,12 @@ namespace BlazorStore.ApiAccess.Service
 
                 if (withBearer)
                 {
-                    var token = _tokenProvider.GetToken();
-                    if (token?.AccessToken is not null && token.XsrfToken is not null)
+                    var accessToken = "GetAccessToken()";
+                    var xsrfToken = await _cookieService.GetCookie(SD.ApiXsrfCookie);
+                    if (accessToken is not null && xsrfToken is not null)
                     {
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
-                        client.DefaultRequestHeaders.Add("X-XSRF-TOKEN", token.XsrfToken);
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                        client.DefaultRequestHeaders.Add("X-XSRF-TOKEN", xsrfToken);
                     }
                 }
 
@@ -124,63 +115,28 @@ namespace BlazorStore.ApiAccess.Service
 
                 if (httpResponseMessage.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    var token = _tokenProvider.GetToken();
-
-                    if (token?.RefreshToken is null)
-                    {
-                        var errorsDefault = "You are not authorized to perform this action. Please login.";
-                        var jsonErrors = await httpResponseMessage.Content.ReadAsStringAsync();
-                        if (jsonErrors is not null && !string.IsNullOrEmpty(jsonErrors))
-                        {
-
-                            var response = JsonSerializer.Deserialize<ApiResponse>(jsonErrors);
-                            jsonErrors = JsonSerializer.Serialize(response?.ErrorMessages);
-                            if (response is not null && !string.IsNullOrEmpty(jsonErrors))
-                            {
-                                var errorMessages = JsonSerializer.Deserialize<List<string>>(jsonErrors);
-                                if (errorMessages is not null && errorMessages.Count != 0)
-                                {
-                                    errorsDefault = string.Join(" | ", errorMessages);
-                                }
-                            }
-                        }
-
-                        throw new AuthenticationFailureException(errorsDefault);
-                    }
-
-                    var jwtTokenHandler = new JsonWebTokenHandler();
-                    var refreshToken = jwtTokenHandler.ReadJsonWebToken(token.RefreshToken);
-                    var expRefreshtoken = long.Parse(refreshToken.Claims.First(c => c.Type == "exp").Value);
-                    var expRefreshTokenDate = DateTimeOffset.FromUnixTimeSeconds(expRefreshtoken).UtcDateTime;
+                    var accessToken = "GetAccessToken()";
 
                     var jwtAuthStatus = httpResponseMessage.Headers.WwwAuthenticate.ToString();
 
-                    if (
-                        !string.IsNullOrEmpty(token.RefreshToken) &&
-                        expRefreshTokenDate >= DateTime.Now.ToUniversalTime() &&
-                        (
-                            jwtAuthStatus.Contains("token expired") ||
-                            jwtAuthStatus.Trim().Equals("bearer", StringComparison.CurrentCultureIgnoreCase)
-                        )
-                    )
+                    if (!string.IsNullOrEmpty(accessToken) && jwtAuthStatus.Contains("token expired"))
                     {
-                        var refreshTokenDto = await RefreshTokenAsync(client, token.RefreshToken);
-                        if (refreshTokenDto?.AccessToken is not null && refreshTokenDto.XsrfToken is not null)
+                        /*
+                            FLUXOR
+                           ******** TODO: SET ACCESSTOKEN TO NULL HERE ********
+                        */
+                        var newAccessToken = await RefreshTokenAsync(client);
+                        var newXsrfToken = await _cookieService.GetCookie(SD.ApiXsrfCookie);
+                        if (newAccessToken is not null)
                         {
-                            var jwt = jwtTokenHandler.ReadJsonWebToken(refreshTokenDto.AccessToken);
-                            var claims = new List<Claim> {
-                                new Claim(ClaimTypes.Name, jwt.Claims.First(c => c.Type == "unique_name").Value),
-                                new Claim(ClaimTypes.Role, jwt.Claims.First(c => c.Type == "role").Value),
-                                new Claim("xsrf", jwt.Claims.First(c => c.Type == "xsrf").Value)
-                            };
-                            var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
-                            if (_httpAccessor.HttpContext is not null)
-                                await _httpAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-                            _tokenProvider.SetToken(refreshTokenDto);
+                            /*
+                                FLUXOR
+                                ******** TODO: SET ACCESSTOKEN HERE ********
+                            */
 
-                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", refreshTokenDto.AccessToken);
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", newAccessToken);
                             client.DefaultRequestHeaders.Remove("X-XSRF-TOKEN");
-                            client.DefaultRequestHeaders.Add("X-XSRF-TOKEN", refreshTokenDto.XsrfToken);
+                            client.DefaultRequestHeaders.Add("X-XSRF-TOKEN", newXsrfToken);
 
                             httpResponseMessage = await client.SendAsync(messageFactory());
                         }
@@ -203,7 +159,6 @@ namespace BlazorStore.ApiAccess.Service
                     // Note we conrcretely deserialize to an ApIResponse. Seems to negate
                     // the benefits of having this class as a generic but se le vie.
                     var apiResponse = JsonSerializer.Deserialize<ApiResponse>(jsonData);
-
 
                     if (!httpResponseMessage.IsSuccessStatusCode && apiResponse is not null)
                     {
@@ -234,10 +189,15 @@ namespace BlazorStore.ApiAccess.Service
                     throw new Exception("Oops, something went wrong. Please try again later");
                 }
             }
-            catch (AuthenticationFailureException)
+            catch (AuthenticationException)
             {
-                if (_httpAccessor.HttpContext is not null) await _httpAccessor.HttpContext.SignOutAsync();
-                _tokenProvider.ClearToken();
+                var client = _httpClient.CreateClient("BlazorStoreApi");
+
+                await SignOutAsync(client);
+                /*
+                    FLUXOUR
+                    ******** TODO: SET ACCESSTOKEN NULL HERE ********
+                */
                 throw;
             }
             catch (Exception ex)
@@ -254,15 +214,12 @@ namespace BlazorStore.ApiAccess.Service
             }
         }
 
-        private async Task<TokenDto?> RefreshTokenAsync(HttpClient client, string refreshToken)
+        private async Task<string?> RefreshTokenAsync(HttpClient client)
         {
-            Uri url = new Uri(_url);
-            string baseUrl = $"{url.Scheme}://{url.Host}:{url.Port}";
             HttpRequestMessage message = new HttpRequestMessage();
             message.Headers.Add("Accept", "application/json");
-            message.RequestUri = new Uri($"{baseUrl}/api/{SD.ApiVersion}/users/refresh");
+            message.RequestUri = new Uri($"/api/{SD.ApiVersion}/auth/refresh");
             message.Method = HttpMethod.Get;
-            message.Headers.Add("Cookie", $"{SD.JwtRrefreshTokenCookie}={refreshToken}");
 
             HttpResponseMessage httpResponseMessage = await client.SendAsync(message);
             var jsonData = await httpResponseMessage.Content.ReadAsStringAsync();
@@ -275,16 +232,24 @@ namespace BlazorStore.ApiAccess.Service
                     var tokenDto = JsonSerializer.Deserialize<TokenDto>(jsonData);
                     if (tokenDto?.AccessToken is not null && tokenDto.XsrfToken is not null)
                     {
-                        return new TokenDto(
-                            AccessToken: tokenDto.AccessToken,
-                            XsrfToken: tokenDto.XsrfToken,
-                            RefreshToken: refreshToken
-                        );
+                        return tokenDto.AccessToken;
                     }
                 }
             }
 
             return null;
+        }
+
+        private async Task SignOutAsync(HttpClient client)
+        {
+            HttpRequestMessage message = new HttpRequestMessage();
+            message.Headers.Add("Accept", "*/*");
+            message.Method = HttpMethod.Post;
+            message.RequestUri = new Uri($"/Account/Logout");
+            var content = new MultipartFormDataContent { { new StringContent("/"), "returnUrl" } };
+            message.Content = content;
+
+            await client.SendAsync(message);
         }
     }
 }

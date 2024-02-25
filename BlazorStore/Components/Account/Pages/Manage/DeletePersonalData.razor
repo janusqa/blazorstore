@@ -9,6 +9,7 @@
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<DeletePersonalData> Logger
+@inject IUnitOfWork _uow
 
 <PageTitle>Delete Personal Data</PageTitle>
 
@@ -70,6 +71,12 @@
         {
             throw new InvalidOperationException("Unexpected error occurred deleting user.");
         }
+
+        // *** Begin custom code
+        // await _uow.ApplicationUsers.RevokeToken(user);
+        HttpContext.Response.Cookies.Delete(SD.JwtRrefreshTokenCookie);
+        HttpContext.Response.Cookies.Delete(SD.ApiXsrfCookie);
+        // *** End custom code
 
         await SignInManager.SignOutAsync();
 

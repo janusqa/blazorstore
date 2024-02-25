@@ -150,5 +150,23 @@ From a fresh project copy /Components/Account folder to  <[YOUR_PROJECT]>/Compon
 10. REMEBER TO UPDATE ANY NAME SPACES AS THEY ARE QUITE A FEW OF THEM!!!
 11.  Other files touched to adjust for jwt and roles were register.razor, login.razor, applicationuserrepository.cs, an api was created to retireve a refresh token.  Manage/Index must also be adjusted if you want to add custom user fields
 
+Fluxor
+---
+1.
+Install the following to webassembly client project
+    1. dotnet add BlazorStore.Client package Fluxor
+    2. dotnet add BlazorStore.Client package Fluxor.Blazor.Web
+    3. dotnet add BlazorStore.Client package Fluxor.Blazor.Web.ReduxDevTools
 
+2.
+Update Program.cs of webassembly client project by adding to services section the below snippet
+```
+// Fluxor
+builder.Services.AddFluxor(options =>
+{
+    options.ScanAssemblies(typeof(Program).Assembly);
+    options.UseReduxDevTools(rdt => { rdt.Name = "BlazorStore"; });
+});
+```
 
+3.

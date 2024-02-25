@@ -7,7 +7,8 @@
 // Via a DTO.
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Components.Forms;
+// using Microsoft.AspNetCore.Http;
 
 namespace BlazorStore.Dto
 {
@@ -28,7 +29,8 @@ namespace BlazorStore.Dto
         [Range(1, int.MaxValue, ErrorMessage = "Please select a category")]
         public int CategoryId { get; set; }
         public CategoryDto? CategoryDto { get; set; }
-        public IFormFile? Image { get; set; }
+        public IBrowserFile? Image { get; set; }
+        // public IFormFile? Image { get; set; }
         // public IFormFileCollection? Images { get; set; } // for multi file uploads
         public ICollection<ProductPriceDto>? ProductPrices { get; set; }
     };

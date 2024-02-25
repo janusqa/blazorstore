@@ -21,7 +21,7 @@ else
     <div>
         <AntiforgeryToken />
         <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
-        <p>
+        <p class="d-flex gap-1">
             @foreach (var provider in externalLogins)
                 {
                     <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name"

@@ -32,8 +32,8 @@ namespace BlazorStore.DataAccess.Repository
             _um = um;
             _us = us;
             _es = GetEmailStore();
-            _jwtAccessSecret = config.GetValue<string>("ApiSettings:JwtAccessSecret") ?? "";
-            _jwtRefreshSecret = config.GetValue<string>("ApiSettings:JwtRefreshSecret") ?? "";
+            _jwtAccessSecret = config.GetSection("ApiSettings:JwtAccessSecret").Value ?? "";
+            _jwtRefreshSecret = config.GetSection("ApiSettings:JwtRefreshSecret").Value ?? "";
         }
 
         public async Task<bool> IsUinqueUser(string UserName)
@@ -126,36 +126,31 @@ namespace BlazorStore.DataAccess.Repository
             return null;
         }
 
-        public async Task<TokenDto?> Refresh(ClaimsPrincipal user)
+        public async Task<TokenDto?> RefreshToken(ApplicationUser user)
         {
-            if (user.Identity?.Name is null) return null;
-
-            var appUser = await _um.FindByNameAsync(user.Identity.Name);
-
-            if (appUser is null) return null;
+            if (user is null) return null;
 
             var xsrf = Guid.NewGuid().ToString();
-            var jwtAccessToken = await CreateJwtToken(appUser, xsrf: xsrf);
+            var jwtAccessToken = await CreateJwtToken(user, xsrf: xsrf);
 
             return jwtAccessToken is not null
                 ? new TokenDto(AccessToken: jwtAccessToken, XsrfToken: xsrf)
                 : null;
         }
 
-        public async Task Logout(ClaimsPrincipal user)
+        public async Task RevokeToken(ApplicationUser user)
         {
-            if (user.Identity?.Name is not null)
-            {
-                await ExecuteSqlAsync($@"
-                    UPDATE dbo.AspNetUsers SET UserSecret = @UserSecret WHERE (UserName = @UserName)
-                ", [
-                        new SqliteParameter("UserName", user.Identity.Name),
-                        new SqliteParameter("UserSecret", BcryptUtils.CreateSalt())
-                ]);
+            if (user is null) return;
 
-                // Response.Cookies.Delete(SD.JwtRrefreshTokenCookie);
-                // Response.Cookies.Delete(SD.ApiXsrfCookie);
-            }
+            await ExecuteSqlAsync($@"
+                    UPDATE AspNetUsers SET UserSecret = @UserSecret WHERE (UserName = @UserName)
+                ", [
+                    new SqliteParameter("UserName", user.UserName),
+                        new SqliteParameter("UserSecret", BcryptUtils.CreateSalt())
+            ]);
+
+            // Response.Cookies.Delete(SD.JwtRrefreshTokenCookie);
+            // Response.Cookies.Delete(SD.ApiXsrfCookie);
         }
 
         private async Task<string?> CreateJwtToken(ApplicationUser user, string? xsrf = null, bool isRefresh = false)

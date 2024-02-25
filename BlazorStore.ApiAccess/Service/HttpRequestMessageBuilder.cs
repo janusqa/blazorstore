@@ -1,15 +1,14 @@
 
-using Microsoft.AspNetCore.Http;
 using System.Text;
 using System.Text.Json;
-using BlazorStore.ApiAccess.Service.IService;
 using BlazorStore.Common;
 using BlazorStore.Dto;
+using Microsoft.AspNetCore.Components.Forms;
 
 
 namespace BlazorStore.ApiAccess.Service
 {
-    public class MessageRequestBuilder : IMessageRequestBuilder
+    public class HttpRequestMessageBuilder : IHttpRequestMessageBuilder
     {
         public HttpRequestMessage Build(ApiRequest apiRequest)
         {
@@ -32,7 +31,7 @@ namespace BlazorStore.ApiAccess.Service
 
             message.RequestUri = new Uri(apiRequest.Url);
 
-            if (apiRequest.Data != null)
+            if (apiRequest.Data is not null)
             {
                 if (apiRequest.ContentType == SD.ContentType.MultiPartFormData)
                 {
@@ -41,12 +40,12 @@ namespace BlazorStore.ApiAccess.Service
                     foreach (var item in apiRequest.Data.GetType().GetProperties())
                     {
                         var value = item.GetValue(apiRequest.Data);
-                        if (value is IFormFile)
+                        if (value is IBrowserFile)
                         {
-                            var file = (IFormFile)value;
+                            var file = (IBrowserFile)value;
                             if (file is not null)
                             {
-                                content.Add(new StreamContent(file.OpenReadStream()), item.Name, file.FileName);
+                                content.Add(new StreamContent(file.OpenReadStream()), item.Name, file.Name);
                             }
                         }
                         else
