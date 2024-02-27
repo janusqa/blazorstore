@@ -1,4 +1,5 @@
 using BlazorStore.ApiAccess.Service;
+using BlazorStore.Client.Store.FluxorMiddleware;
 using Fluxor;
 
 namespace BlazorStore.Client
@@ -13,8 +14,9 @@ namespace BlazorStore.Client
             // Fluxor
             services.AddFluxor(options =>
             {
-                options.ScanAssemblies(typeof(Program).Assembly);
-                options.UseReduxDevTools(rdt => { rdt.Name = "BlazorStore"; });
+                options.ScanAssemblies(typeof(Program).Assembly)
+                    .AddMiddleware<LoggingMiddleware>()
+                    .UseReduxDevTools(rdt => { rdt.Name = "BlazorStore"; });
             });
         }
     }

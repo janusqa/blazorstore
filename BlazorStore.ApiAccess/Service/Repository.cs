@@ -10,14 +10,14 @@ namespace BlazorStore.ApiAccess.Service
     public class Repository<T> : IRepository<T> where T : class
     {
         private readonly IHttpClientFactory _httpClient;
-        private readonly ICookieService _cookieService;
         private readonly IHttpRequestMessageBuilder _messageBuilder;
+        private readonly ICookieService _cookieService;
         private readonly string _url;
 
         public Repository(
             IHttpClientFactory httpClient,
-            ICookieService cookieService,
             IHttpRequestMessageBuilder messageBuilder,
+            ICookieService cookieService,
             string url
         )
         {
@@ -27,66 +27,32 @@ namespace BlazorStore.ApiAccess.Service
             _url = url;
         }
 
-        public async Task<T?> AddAsync<U>(U dto, bool withBearer, SD.ContentType contentType)
+        public async Task<T?> AddAsync(ApiRequest request)
         {
-            return await RequestAsync(
-                new ApiRequest
-                {
-                    ApiMethod = SD.ApiMethod.POST,
-                    Data = dto,
-                    Url = _url,
-                    ContentType = contentType
-                }
-            );
+            return await RequestAsync(request with { ApiMethod = SD.ApiMethod.POST });
         }
 
-        public async Task<T?> UpdateAsync<U>(int entityId, U dto, bool withBearer, SD.ContentType contentType)
+        public async Task<T?> UpdateAsync(int entityId, ApiRequest request)
         {
-            return await RequestAsync(
-                new ApiRequest
-                {
-                    ApiMethod = SD.ApiMethod.PUT,
-                    Data = dto,
-                    Url = $"{_url}/{entityId}",
-                    ContentType = contentType
-                }
-            );
+            return await RequestAsync(request with { ApiMethod = SD.ApiMethod.PUT, Url = $"{_url}/{entityId}" });
         }
 
-        public async Task<T?> RemoveAsync(int entityId, bool withBearer)
+        public async Task<T?> RemoveAsync(int entityId, ApiRequest request)
         {
-            return await RequestAsync(
-                new ApiRequest
-                {
-                    ApiMethod = SD.ApiMethod.DELETE,
-                    Url = $"{_url}/{entityId}"
-                }
-            );
+            return await RequestAsync(request with { ApiMethod = SD.ApiMethod.DELETE, Url = $"{_url}/{entityId}" });
         }
 
-        public async Task<T?> GetAllAsync(bool withBearer)
+        public async Task<T?> GetAllAsync(ApiRequest request)
         {
-            return await RequestAsync(
-                new ApiRequest
-                {
-                    ApiMethod = SD.ApiMethod.GET,
-                    Url = _url
-                }
-            );
+            return await RequestAsync(request with { ApiMethod = SD.ApiMethod.GET });
         }
 
-        public async Task<T?> GetAsync(int entityId, bool withBearer)
+        public async Task<T?> GetAsync(int entityId, ApiRequest request)
         {
-            return await RequestAsync(
-                new ApiRequest
-                {
-                    ApiMethod = SD.ApiMethod.GET,
-                    Url = $"{_url}/{entityId}"
-                }
-            );
+            return await RequestAsync(request with { ApiMethod = SD.ApiMethod.GET, Url = $"{_url}/{entityId}" });
         }
 
-        protected async Task<T?> RequestAsync(ApiRequest apiRequest, bool withBearer = true)
+        protected async Task<T?> RequestAsync(ApiRequest apiRequest)
         {
             try
             {
@@ -94,13 +60,9 @@ namespace BlazorStore.ApiAccess.Service
 
                 var messageFactory = () => _messageBuilder.Build(apiRequest);
 
-                if (withBearer)
+                if (apiRequest.WithCredentials)
                 {
-                    /*
-                        FLUXOR
-                        ******** TODO: GET ACCESSTOKEN  ********
-                    */
-                    var accessToken = "GetAccessToken() ?? await RefreshTokenAsync(client)";
+                    var accessToken = apiRequest.AccessToken;
                     var xsrfToken = await _cookieService.GetCookie(SD.ApiXsrfCookie);
                     if (accessToken is not null && string.IsNullOrEmpty(xsrfToken))
                     {
@@ -119,19 +81,10 @@ namespace BlazorStore.ApiAccess.Service
 
                     if (jwtAuthStatus.Contains("token expired"))
                     {
-                        /*
-                            FLUXOR
-                           ******** TODO: SET ACCESSTOKEN TO NULL HERE ********
-                        */
                         var newAccessToken = await RefreshTokenAsync(client);
                         var newXsrfToken = await _cookieService.GetCookie(SD.ApiXsrfCookie);
                         if (newAccessToken is not null && string.IsNullOrEmpty(newXsrfToken))
                         {
-                            /*
-                                FLUXOR
-                                ******** TODO: SET ACCESSTOKEN HERE ********
-                            */
-
                             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", newAccessToken);
                             client.DefaultRequestHeaders.Remove("X-XSRF-TOKEN");
                             client.DefaultRequestHeaders.Add("X-XSRF-TOKEN", newXsrfToken);
@@ -190,13 +143,7 @@ namespace BlazorStore.ApiAccess.Service
             catch (AuthenticationFailureException)
             {
                 var client = _httpClient.CreateClient("BlazorStoreApi");
-
-                /*
-                    FLUXOUR
-                    ******** TODO: SET ACCESSTOKEN NULL HERE ********
-                */
                 await SignOutAsync(client);
-
                 throw;
             }
             catch (Exception ex)

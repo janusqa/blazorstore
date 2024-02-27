@@ -23,7 +23,11 @@ namespace BlazorStore.Common
         // Api
         public const string ApiVersion = "v1";
         public const string ApiBaseUrl = "https://localhost:7036";
-        public enum ContentType { Json, MultiPartFormData }
+        public enum ContentType
+        {
+            Json,
+            MultiPartFormData
+        }
         public enum ApiMethod
         {
             GET,

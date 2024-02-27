@@ -1,13 +1,14 @@
 using BlazorStore.Common;
-using static BlazorStore.Common.SD;
 
 namespace BlazorStore.Dto
 {
-    public class ApiRequest
+    public record ApiRequest
     {
-        public ApiMethod ApiMethod { get; set; } = SD.ApiMethod.GET;
-        public required string Url { get; set; }
-        public object? Data { get; set; }
-        public ContentType ContentType { get; set; } = SD.ContentType.Json;
+        public SD.ApiMethod ApiMethod { get; init; } = SD.ApiMethod.GET;
+        public required string Url { get; init; }
+        public object? Data { get; init; }
+        public SD.ContentType ContentType { get; init; } = SD.ContentType.Json;
+        public virtual bool WithCredentials { get; init; } = false;
+        public string? AccessToken { get; init; } = null;
     }
 }

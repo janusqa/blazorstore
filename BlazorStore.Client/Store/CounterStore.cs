@@ -1,6 +1,5 @@
 using Fluxor;
 
-
 namespace BlazorStore.Client.Store.Counter
 {
     // ********************
@@ -22,6 +21,13 @@ namespace BlazorStore.Client.Store.Counter
         {
             return state with { CurrentCount = state.CurrentCount + action.Step };
         }
+    }
+
+    // ********************
+    // Effects
+    // ********************
+    public class Effects
+    {
 
     }
 
