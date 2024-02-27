@@ -43,6 +43,30 @@ namespace BlazorStore.DataAccess.Repository
             return user is null;
         }
 
+        public async Task<TokenDto?> LoginLite(string userName)
+        {
+            // Note this is for demo only so no password hassing applied
+            // in realworld scenario, please use somthing like bcrypt
+            // to seed and hash the password. NEVER store plaintext
+            // passwords in the database. Later we will use .net Identity
+            // to take care of all the heavy lifting here.
+
+            var user = await _um.FindByNameAsync(userName);
+
+            if (user is null) return null;
+
+            var xsrf = Guid.NewGuid().ToString();
+            var jwtAccessToken = await CreateJwtToken(user, xsrf: xsrf);
+            var jwtRefreshToken = await CreateJwtToken(user, isRefresh: true);
+
+            return jwtAccessToken is not null && jwtRefreshToken is not null
+                ? new TokenDto(
+                    AccessToken: jwtAccessToken,
+                    XsrfToken: xsrf,
+                    RefreshToken: jwtRefreshToken)
+                : null;
+        }
+
         public async Task<TokenDto?> Login(ApplicationUserLoginRequestDto loginRequestDto)
         {
             // Note this is for demo only so no password hassing applied
@@ -58,30 +82,6 @@ namespace BlazorStore.DataAccess.Repository
             bool isValidCredentials = await _um.CheckPasswordAsync(user, loginRequestDto.Password);
 
             if (!isValidCredentials) return null;
-
-            var xsrf = Guid.NewGuid().ToString();
-            var jwtAccessToken = await CreateJwtToken(user, xsrf: xsrf);
-            var jwtRefreshToken = await CreateJwtToken(user, isRefresh: true);
-
-            return jwtAccessToken is not null && jwtRefreshToken is not null
-                ? new TokenDto(
-                    AccessToken: jwtAccessToken,
-                    XsrfToken: xsrf,
-                    RefreshToken: jwtRefreshToken)
-                : null;
-        }
-
-        public async Task<TokenDto?> LoginLite(string userName)
-        {
-            // Note this is for demo only so no password hassing applied
-            // in realworld scenario, please use somthing like bcrypt
-            // to seed and hash the password. NEVER store plaintext
-            // passwords in the database. Later we will use .net Identity
-            // to take care of all the heavy lifting here.
-
-            var user = await _um.FindByNameAsync(userName);
-
-            if (user is null) return null;
 
             var xsrf = Guid.NewGuid().ToString();
             var jwtAccessToken = await CreateJwtToken(user, xsrf: xsrf);

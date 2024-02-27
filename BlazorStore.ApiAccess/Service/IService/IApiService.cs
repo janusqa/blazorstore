@@ -1,7 +1,7 @@
 
 namespace BlazorStore.ApiAccess.Service
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IApiService : IDisposable
     {
 
     }

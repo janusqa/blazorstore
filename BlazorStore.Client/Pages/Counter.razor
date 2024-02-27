@@ -1,19 +1,20 @@
 @page "/counter"
 @rendermode InteractiveAuto
 
+@inject IState<CounterState> counterState
+@inject IDispatcher dispatcher
+
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
 
-<p role="status">Current count: @currentCount</p>
+<p role="status">Current count: @counterState.Value.CurrentCount</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
 @code {
-    private int currentCount = 0;
-
     private void IncrementCount()
     {
-        currentCount++;
+        dispatcher.Dispatch(new CounterIncremented());
     }
 }

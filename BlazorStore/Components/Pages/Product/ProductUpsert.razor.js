@@ -9,5 +9,6 @@ export function onUpdate() {
 }
 
 export function onDispose() {
+    TinyMceDestroy('ProductVm_Description');
     // console.log('Disposed');
 }

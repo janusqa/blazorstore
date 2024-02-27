@@ -1,13 +1,9 @@
 using System.Net;
 using System.Net.Http.Headers;
-using System.Security.Authentication;
-using System.Security.Claims;
-using System.Text;
 using System.Text.Json;
 using BlazorStore.ApiAccess.Exceptions;
 using BlazorStore.Common;
 using BlazorStore.Dto;
-using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace BlazorStore.ApiAccess.Service
 {
@@ -94,15 +90,19 @@ namespace BlazorStore.ApiAccess.Service
         {
             try
             {
-                var client = _httpClient.CreateClient("BlazorStoreApi");
+                var client = _httpClient.CreateClient("BlazorStore");
 
                 var messageFactory = () => _messageBuilder.Build(apiRequest);
 
                 if (withBearer)
                 {
-                    var accessToken = "GetAccessToken()";
+                    /*
+                        FLUXOR
+                        ******** TODO: GET ACCESSTOKEN  ********
+                    */
+                    var accessToken = "GetAccessToken() ?? await RefreshTokenAsync(client)";
                     var xsrfToken = await _cookieService.GetCookie(SD.ApiXsrfCookie);
-                    if (accessToken is not null && xsrfToken is not null)
+                    if (accessToken is not null && string.IsNullOrEmpty(xsrfToken))
                     {
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                         client.DefaultRequestHeaders.Add("X-XSRF-TOKEN", xsrfToken);
@@ -115,11 +115,9 @@ namespace BlazorStore.ApiAccess.Service
 
                 if (httpResponseMessage.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    var accessToken = "GetAccessToken()";
-
                     var jwtAuthStatus = httpResponseMessage.Headers.WwwAuthenticate.ToString();
 
-                    if (!string.IsNullOrEmpty(accessToken) && jwtAuthStatus.Contains("token expired"))
+                    if (jwtAuthStatus.Contains("token expired"))
                     {
                         /*
                             FLUXOR
@@ -127,7 +125,7 @@ namespace BlazorStore.ApiAccess.Service
                         */
                         var newAccessToken = await RefreshTokenAsync(client);
                         var newXsrfToken = await _cookieService.GetCookie(SD.ApiXsrfCookie);
-                        if (newAccessToken is not null)
+                        if (newAccessToken is not null && string.IsNullOrEmpty(newXsrfToken))
                         {
                             /*
                                 FLUXOR
@@ -189,15 +187,16 @@ namespace BlazorStore.ApiAccess.Service
                     throw new Exception("Oops, something went wrong. Please try again later");
                 }
             }
-            catch (AuthenticationException)
+            catch (AuthenticationFailureException)
             {
                 var client = _httpClient.CreateClient("BlazorStoreApi");
 
-                await SignOutAsync(client);
                 /*
                     FLUXOUR
                     ******** TODO: SET ACCESSTOKEN NULL HERE ********
                 */
+                await SignOutAsync(client);
+
                 throw;
             }
             catch (Exception ex)

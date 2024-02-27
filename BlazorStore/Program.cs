@@ -28,22 +28,21 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddControllers();
 
-// Blazor Auth
+// Blazor Authentitication with roles
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
-// This implements AddIdentityCookies by default
+// builder.Services.AddIdentity implements AddIdentityCookies by default
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-// Add Autentication
+// Add Custmom Autentication
 // add (jwt, could be other types of auth too) authentication
 builder.Services.AddScoped<ICustomJwtBearerHandler, CustomJwtBearerHandler>();
-// var JwtAccessSecret = builder.Configuration.GetValue<string>("ApiSettings:JwtAccessSecret") ?? "";
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "BlazorStore";
@@ -100,6 +99,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDBInitilizer, DBInitilizer>();
 builder.Services.AddScoped<IFileService, FileService>();
+
+// Configure DPI for client services that will be neccessary on the server if pre-rendering is enabled 
+BlazorStore.Client.CommonServices.ConfigureCommonServices(builder.Services);
 
 // add custom components [syncfusion, radzen]
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configuration.GetValue<string>("SyncFusion:ApiKey"));

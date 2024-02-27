@@ -1,11 +1,15 @@
 @page "/auth"
 @rendermode InteractiveAuto
 
+@inherits Fluxor.Blazor.Web.Components.FluxorComponent
+@inject IState<CounterState> counterState
+
 @attribute [Authorize]
 
 <PageTitle>Auth</PageTitle>
 
 <h1>You are authenticated</h1>
+<p>Counter: @counterState.Value.CurrentCount</p>
 
 <AuthorizeView>
     Hello @context.User.Identity?.Name!

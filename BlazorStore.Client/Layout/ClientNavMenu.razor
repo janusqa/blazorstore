@@ -1,6 +1,6 @@
 @implements IDisposable
-
 @inject NavigationManager NavigationManager
+@inject IState<CounterState> counterState
 
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
@@ -15,7 +15,7 @@
                     <a class="nav-link active" aria-current="page" href="#">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
+                    <a class="nav-link" href="/auth">Link</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -33,6 +33,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" aria-disabled="true">Counter: @counterState.Value.CurrentCount</a>
                 </li>
             </ul>
             <form class="d-flex" role="search">
@@ -52,14 +55,28 @@
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            counterState.StateChanged += FluxorStateHasChanged;
+        }
+    }
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
     }
 
+    private void FluxorStateHasChanged(object? sender, EventArgs args)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+        counterState.StateChanged -= FluxorStateHasChanged;
     }
 }

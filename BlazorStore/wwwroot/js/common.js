@@ -58,3 +58,7 @@ TinyMceInit = function (selector) {
             'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | align lineheight | numlist bullist indent outdent',
     });
 };
+
+TinyMceDestroy = function (selector) {
+    tinymce.remove(`textarea#${selector}`);
+};

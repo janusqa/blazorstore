@@ -1,32 +1,33 @@
 using Fluxor;
 
-// State
-namespace BlazorStore.Client.Store
+
+namespace BlazorStore.Client.Store.Counter
 {
+    // ********************
+    // State
+    // ********************
     [FeatureState]
-    public record CounterState(
-        int ClickCount
-    );
+    public record CounterState
+    {
+        public int CurrentCount { get; init; }
+    }
 
-
+    // ********************
     // Reducers
+    // ********************
     public static class Reducers
     {
         [ReducerMethod]
-        public static CounterState ReduceIncrementCounterAction(CounterState state, IncrementCounterAction action)
+        public static CounterState CounterIncrementedReducer(CounterState state, CounterIncremented action)
         {
-            return action switch
-            {
-                IncrementCounterAction => new(ClickCount: state.ClickCount + 1),
-            };
-
+            return state with { CurrentCount = state.CurrentCount + action.Step };
         }
+
     }
 
-
+    // ********************
     // Actions
-    public class IncrementCounterAction
-    {
-    }
+    // ********************
+    public record CounterIncremented(int Step = 1);
 
 }

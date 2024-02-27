@@ -1,10 +1,10 @@
 
 namespace BlazorStore.ApiAccess.Service
 {
-    public class UnitOfWork : IUnitOfWork
+    public class ApiService : IApiService
     {
 
-        public UnitOfWork(IHttpClientFactory httpClient)
+        public ApiService(IHttpClientFactory httpClient)
         {
 
         }
