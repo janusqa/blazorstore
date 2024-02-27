@@ -47,6 +47,10 @@ namespace BlazorStore.Client.Store.Auth
                 var tokenDto = JsonSerializer.Deserialize<TokenDto>(JsonSerializer.Serialize(response));
                 dispatcher.Dispatch(new AccessTokenRetrieved(tokenDto?.AccessToken));
             }
+            else
+            {
+                dispatcher.Dispatch(new AccessTokenRetrieved(null));
+            }
         }
     }
 

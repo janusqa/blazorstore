@@ -21,12 +21,8 @@ namespace BlazorStore.ApiAccess.Service
         public async Task<ApiResponse?> RefreshAsync()
         {
             return await RequestAsync(
-                new ApiRequest
-                {
-                    ApiMethod = SD.ApiMethod.GET,
-                    Url = $"{_url}/refresh"
-                }, withBearer: false);
+                new ApiRequest { ApiMethod = SD.ApiMethod.GET, Url = $"{_url}/refresh" }
+            );
         }
-
     }
 }
