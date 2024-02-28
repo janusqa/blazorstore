@@ -124,11 +124,6 @@ namespace BlazorStore.Components.Pages.Product
             if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save) || args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
             {
                 ProductPrices = (await GetAll(EntityId)).ToList();
-
-                foreach (var p in ProductPrices!)
-                {
-                    Console.WriteLine(p);
-                }
             }
         }
 

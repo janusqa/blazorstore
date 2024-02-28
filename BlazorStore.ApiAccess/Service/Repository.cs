@@ -29,7 +29,7 @@ namespace BlazorStore.ApiAccess.Service
 
         public async Task<T?> AddAsync(ApiRequest request)
         {
-            return await RequestAsync(request with { ApiMethod = SD.ApiMethod.POST });
+            return await RequestAsync(request with { ApiMethod = SD.ApiMethod.POST, Url = _url });
         }
 
         public async Task<T?> UpdateAsync(int entityId, ApiRequest request)
@@ -44,7 +44,7 @@ namespace BlazorStore.ApiAccess.Service
 
         public async Task<T?> GetAllAsync(ApiRequest request)
         {
-            return await RequestAsync(request with { ApiMethod = SD.ApiMethod.GET });
+            return await RequestAsync(request with { ApiMethod = SD.ApiMethod.GET, Url = _url });
         }
 
         public async Task<T?> GetAsync(int entityId, ApiRequest request)
@@ -54,11 +54,11 @@ namespace BlazorStore.ApiAccess.Service
 
         protected async Task<T?> RequestAsync(ApiRequest apiRequest)
         {
+            var client = _httpClient.CreateClient("BlazorStore");
+
             try
             {
-                var client = _httpClient.CreateClient("BlazorStore");
-
-                var messageFactory = () => _messageBuilder.Build(apiRequest);
+                var messageFactory = () => _messageBuilder.Build(apiRequest, client.BaseAddress!.ToString());
 
                 if (apiRequest.WithCredentials)
                 {
@@ -102,14 +102,14 @@ namespace BlazorStore.ApiAccess.Service
                     }
                 }
 
-                var jsonData = await httpResponseMessage.Content.ReadAsStringAsync();
-                if (jsonData is not null && !string.IsNullOrEmpty(jsonData))
+                var json = await httpResponseMessage.Content.ReadAsStringAsync();
+                if (json is not null && !string.IsNullOrEmpty(json))
                 {
                     // Success (response could still be a bad request etc. though)
                     // this just indicates a valid response that is not a 401 Unauthorized
                     // Note we conrcretely deserialize to an ApIResponse. Seems to negate
                     // the benefits of having this class as a generic but se le vie.
-                    var apiResponse = JsonSerializer.Deserialize<ApiResponse>(jsonData);
+                    var apiResponse = JsonSerializer.Deserialize<ApiResponse>(json);
 
                     if (!httpResponseMessage.IsSuccessStatusCode && apiResponse is not null)
                     {
@@ -119,15 +119,14 @@ namespace BlazorStore.ApiAccess.Service
                             HttpStatusCode.Forbidden => [.. (apiResponse.ErrorMessages ?? []), "Access Denied"],
                             HttpStatusCode.Unauthorized => [.. (apiResponse.ErrorMessages ?? []), "Unauthorized"],
                             HttpStatusCode.InternalServerError => [.. (apiResponse.ErrorMessages ?? []), "Internal Server Error"],
-                            _ => ["Oops, something went wrong. Please try again later"]
+                            _ => [.. (apiResponse.ErrorMessages ?? []), "Oops, something went wrong. Please try again later"]
                         };
                     }
 
                     if (apiResponse is not null)
                     {
                         apiResponse.StatusCode = httpResponseMessage.StatusCode;
-                        jsonData = JsonSerializer.Serialize(apiResponse);
-                        var response = JsonSerializer.Deserialize<T>(jsonData);
+                        var response = JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(apiResponse));
                         return response;
                     }
                     else
@@ -142,7 +141,6 @@ namespace BlazorStore.ApiAccess.Service
             }
             catch (AuthenticationFailureException)
             {
-                var client = _httpClient.CreateClient("BlazorStoreApi");
                 await SignOutAsync(client);
                 throw;
             }
@@ -150,12 +148,11 @@ namespace BlazorStore.ApiAccess.Service
             {
                 var errorResponse = new ApiResponse
                 {
-                    ErrorMessages = [ex.Message],
+                    ErrorMessages = ex.InnerException?.Message is not null ? [ex.Message, ex.InnerException.Message] : [ex.Message],
                     IsSuccess = false,
                     StatusCode = HttpStatusCode.InternalServerError
                 };
-                var jsonError = JsonSerializer.Serialize(errorResponse);
-                var apiResponse = JsonSerializer.Deserialize<T>(jsonError);
+                var apiResponse = JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(errorResponse));
                 return apiResponse;
             }
         }
@@ -168,18 +165,14 @@ namespace BlazorStore.ApiAccess.Service
             message.Method = HttpMethod.Get;
 
             HttpResponseMessage httpResponseMessage = await client.SendAsync(message);
-            var jsonData = await httpResponseMessage.Content.ReadAsStringAsync();
-            if (jsonData is not null && !string.IsNullOrEmpty(jsonData))
+            var json = await httpResponseMessage.Content.ReadAsStringAsync();
+            if (json is not null && !string.IsNullOrEmpty(json))
             {
-                var response = JsonSerializer.Deserialize<ApiResponse>(jsonData);
-                jsonData = JsonSerializer.Serialize(response?.Result);
-                if (response is not null && response.IsSuccess && !string.IsNullOrEmpty(jsonData))
+                var apiResponse = JsonSerializer.Deserialize<ApiResponse>(json);
+                var tokenDto = JsonSerializer.Deserialize<TokenDto>(JsonSerializer.Serialize(apiResponse?.Result));
+                if (tokenDto?.AccessToken is not null && tokenDto.XsrfToken is not null)
                 {
-                    var tokenDto = JsonSerializer.Deserialize<TokenDto>(jsonData);
-                    if (tokenDto?.AccessToken is not null && tokenDto.XsrfToken is not null)
-                    {
-                        return tokenDto.AccessToken;
-                    }
+                    return tokenDto.AccessToken;
                 }
             }
 

@@ -4,6 +4,6 @@ namespace BlazorStore.ApiAccess.Service
 {
     public interface IHttpRequestMessageBuilder
     {
-        HttpRequestMessage Build(ApiRequest apiRequest);
+        HttpRequestMessage Build(ApiRequest apiRequest, string baseAddress);
     }
 }

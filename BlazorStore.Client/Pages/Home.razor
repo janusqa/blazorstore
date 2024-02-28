@@ -1,8 +1,73 @@
 @page "/"
-@rendermode InteractiveAuto
+@attribute [StreamRendering]
+@rendermode @(new InteractiveAutoRenderMode(prerender: false))
 
-<PageTitle>Home</PageTitle>
+@inject IApiService _api
+@inject IConfiguration _config
 
-<h1>Hello, world!</h1>
+@if (products is null)
+{
+    <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
+    <img src="images/ajax-loader.gif" />
+</div>
+}
+else
+{
+    @foreach (var product in products)
+    {
+        if (product is not null)
+        {
+            <div class="container">
+    <div class="row  pb-3 pt-3 backgroundWhite">
+        <h2 class="text-success pl-1"><b>@(product.CategoryDto?.Name.ToUpper())</b></h2>
+        <div class="col-lg-4 col-md-6 pb-4 filter">
+            <div class="card bg-white rounded shadow-sm" style="border:1px solid #222">
+                <div class="card-body pb-1 row">
+                    <div class="col-8 h5">@product.Name</div>
+                    <div class="col-4 text-end"><span class="text-info h4">ProductPrice</span></div>
+                </div>
 
-Welcome to your new app.
+                <img class="card-img-top img-fluid d-block mx-auto mb-3" src="@($"{baseImageUrl}{@product.ImageUrl}")"
+                    alt="@product.Name">
+                <div class="card-body p-1 px-3 row">
+                    <div class="col-6">
+                        <span class="badge p-2 border w-100 text-dark bg-warning ">@product.CategoryDto?.Name</span>
+                    </div>
+                    <div class="col-6 border-0">
+                        <span class="badge p-2 border w-100 bg-info ">@product.Color</span>
+                    </div>
+                    <div class="col-12 pt-2" style="font-size:13px; text-align:justify">
+                        <p>@((MarkupString)product.Description)</p>
+                    </div>
+                    <div class="col-12 p-1">
+                        <a href="" class="btn btn-dark form-control btn-sm p-2" style="height:40px">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        }
+    }
+}
+
+@code {
+
+    private List<ProductDto>? products { get; set; }
+    private string? baseImageUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        baseImageUrl = _config.GetSection("AppUrls:BaseApiUrl").Value!;
+
+        var response = await _api.Products.GetAllAsync(new ApiRequest());
+        if (response is not null && response.IsSuccess)
+        {
+            products = JsonSerializer.Deserialize<List<ProductDto>>(JsonSerializer.Serialize(response.Result)) ?? [];
+        }
+        else
+        {
+            products = [];
+        }
+    }
+}

@@ -44,7 +44,7 @@ namespace BlazorStore.Client.Store.Auth
             var response = await _api.Auth.RefreshAsync();
             if (response is not null && response.IsSuccess)
             {
-                var tokenDto = JsonSerializer.Deserialize<TokenDto>(JsonSerializer.Serialize(response));
+                var tokenDto = JsonSerializer.Deserialize<TokenDto>(JsonSerializer.Serialize(response.Result));
                 dispatcher.Dispatch(new AccessTokenRetrieved(tokenDto?.AccessToken));
             }
             else

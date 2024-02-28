@@ -11,7 +11,7 @@ namespace BlazorStore.Client
             // HttpClient
             services.AddHttpClient(
                 "BlazorStore",
-                http => http.BaseAddress = new Uri(configuration.GetSection("AppUrls:BaseApiUrl").Value ?? "")
+                http => http.BaseAddress = new Uri(configuration.GetSection("AppUrls:BaseApiUrl").Value!)
             );
             services.AddScoped<IApiService, ApiService>();
             services.AddScoped<ICookieService, CookieService>();
@@ -21,7 +21,7 @@ namespace BlazorStore.Client
             services.AddFluxor(options =>
             {
                 options.ScanAssemblies(typeof(Program).Assembly)
-                    .AddMiddleware<LoggingMiddleware>()
+                    // .AddMiddleware<LoggingMiddleware>()
                     .UseReduxDevTools(rdt => { rdt.Name = "BlazorStore"; });
             });
         }

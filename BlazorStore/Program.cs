@@ -27,7 +27,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null); ;
 
 // Blazor Authentitication with roles
 builder.Services.AddCascadingAuthenticationState();
@@ -104,6 +104,22 @@ builder.Services.AddScoped<IFileService, FileService>();
 // Configure DPI for client services that will be neccessary on the server if pre-rendering is enabled 
 BlazorStore.Client.CommonServices.ConfigureCommonServices(builder.Services, builder.Configuration);
 
+builder.Services.AddCors(options =>
+{
+    // We can have multiple policies one per expected client. 
+    // In pipeline activate like
+    //  app.UseCors("BlazorWasmClient");
+    //  app.UseCors("BlazorWasmClient_2"); // if you have a second client policy.
+    // This is the policy for the Blazor WASM Client
+    options.AddPolicy("BlazorWasmClient", builder =>
+        builder
+        .WithOrigins("https://localhost:7036", "http://localhost:5199")
+        .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS")
+        .WithHeaders("Origin", "X-Requested-With", "Content-Type", "Authorization", "X-Xsrf-Token", "X-Forwarded-For", "X-Real-IP")
+        .AllowCredentials()
+    );
+});
+
 // // HttpClient
 // builder.Services.AddHttpClient<IApiService, ApiService>(
 //     "BlazorStore",
@@ -158,6 +174,8 @@ else
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("BlazorWasmClient");
 
 app.UseStaticFiles();
 app.UseAntiforgery();

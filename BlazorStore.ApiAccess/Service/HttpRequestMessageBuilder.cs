@@ -10,7 +10,7 @@ namespace BlazorStore.ApiAccess.Service
 {
     public class HttpRequestMessageBuilder : IHttpRequestMessageBuilder
     {
-        public HttpRequestMessage Build(ApiRequest apiRequest)
+        public HttpRequestMessage Build(ApiRequest apiRequest, string baseAddress)
         {
             HttpRequestMessage message = new HttpRequestMessage();
 
@@ -29,7 +29,7 @@ namespace BlazorStore.ApiAccess.Service
                 _ => HttpMethod.Get,
             };
 
-            message.RequestUri = new Uri(apiRequest.Url);
+            message.RequestUri = new Uri($"{baseAddress}{apiRequest.Url}");
 
             if (apiRequest.Data is not null)
             {

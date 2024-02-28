@@ -5,7 +5,7 @@ namespace BlazorStore.Dto
     public record ApiRequest
     {
         public SD.ApiMethod ApiMethod { get; init; } = SD.ApiMethod.GET;
-        public required string Url { get; init; }
+        public string Url { get; init; } = string.Empty;
         public object? Data { get; init; }
         public SD.ContentType ContentType { get; init; } = SD.ContentType.Json;
         public virtual bool WithCredentials { get; init; } = false;
