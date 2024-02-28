@@ -2,52 +2,51 @@
 @attribute [StreamRendering]
 @rendermode @(new InteractiveAutoRenderMode(prerender: false))
 
-@inject IApiService _api
-@inject IConfiguration _config
+@inject IApiService Api
+@inject IConfiguration Config
 
-@if (products is null)
+@if (Products is null)
 {
     <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
-    <img src="images/ajax-loader.gif" />
+    <img src="images/ajax-loader.gif" alt="Loading..."/>
 </div>
 }
 else
 {
     <div class="container">
     <div class="row  pb-3 pt-3 backgroundWhite">
-        @foreach (var categoryName in products.Select(p => p.CategoryDto.Name).Distinct())
+        @foreach (var categoryName in Products.Select(p => p.CategoryDto?.Name).Distinct())
             {
-                <h2 class="text-success pl-1"><b>@categoryName.ToUpper()</b></h2>
-
-                @foreach (var product in products.Where(p => p.CategoryDto.Name == categoryName))
+                <h2 class="text-success pl-1"><b>@categoryName?.ToUpper()</b></h2>
+                @foreach (var product in Products.Where(p => p.CategoryDto?.Name == categoryName))
                 {
-                    if (product is not null)
-                    {
-                        <div class="col-lg-4 col-md-6 pb-4 filter">
-                            <div class="card bg-white rounded shadow-sm" style="border:1px solid #222">
-                                <div class="card-body pb-1 row">
-                                    <div class="col-8 h5">@product.Name</div>
-                                    <div class="col-4 text-end"><span class="text-info h4">ProductPrice</span></div>
+                    <div class="col-lg-4 col-md-6 pb-4 filter">
+                        <div class="card bg-white rounded shadow-sm" style="border:1px solid #222">
+                            <div class="card-body pb-1 row">
+                                <div class="col-8 h5">@product.Name</div>
+                                <div class="col-4 text-end"><span class="text-info h4">
+                                        @product.ProductPrices?.MinBy(pp => pp.Price)?.Price.ToString("c")
+                                    </span></div>
+                            </div>
+                            <img class="card-img-top img-fluid d-block mx-auto mb-3" src="@($"{baseImageUrl}{@product.ImageUrl}")"
+                                alt="@product.Name">
+                            <div class="card-body p-1 px-3 row">
+                                <div class="col-6">
+                                    <span class="badge p-2 border w-100 text-dark bg-warning ">@categoryName</span>
                                 </div>
-                                <img class="card-img-top img-fluid d-block mx-auto mb-3" src="@($"{baseImageUrl}{@product.ImageUrl}")"
-                                    alt="@product.Name">
-                                <div class="card-body p-1 px-3 row">
-                                    <div class="col-6">
-                                        <span class="badge p-2 border w-100 text-dark bg-warning ">@categoryName</span>
-                                    </div>
-                                    <div class="col-6 border-0">
-                                        <span class="badge p-2 border w-100 bg-info ">@product.Color</span>
-                                    </div>
-                                    <div class="col-12 pt-2" style="font-size:13px; text-align:justify">
-                                        <p>@((MarkupString)product.Description)</p>
-                                    </div>
-                                    <div class="col-12 p-1">
-                                        <a href="" class="btn btn-dark form-control btn-sm p-2" style="height:40px">View Details</a>
-                                    </div>
+                                <div class="col-6 border-0">
+                                    <span class="badge p-2 border w-100 bg-info ">@product.Color</span>
+                                </div>
+                                <div class="col-12 pt-2" style="font-size:13px; text-align:justify">
+                                    <p>@((MarkupString)product.Description)</p>
+                                </div>
+                                <div class="col-12 p-1">
+                                    <a href="/details/@product.Id" class="btn btn-dark form-control btn-sm p-2"
+                                        style="height:40px">View Details</a>
                                 </div>
                             </div>
                         </div>
-                    }
+                    </div>
                 }
             }
         </div>
@@ -55,21 +54,21 @@ else
 }
 
 @code {
-    private List<ProductDto>? products { get; set; }
+    private List<ProductDto>? Products { get; set; }
     private string? baseImageUrl;
 
     protected override async Task OnInitializedAsync()
     {
-        baseImageUrl = _config.GetSection("AppUrls:BaseApiUrl").Value!;
+        baseImageUrl = Config.GetSection("AppUrls:BaseApiUrl").Value!;
 
-        var response = await _api.Products.GetAllAsync(new ApiRequest());
+        var response = await Api.Products.GetAllAsync(new ApiRequest());
         if (response is not null && response.IsSuccess)
         {
-            products = JsonSerializer.Deserialize<List<ProductDto>>(JsonSerializer.Serialize(response.Result)) ?? [];
+            Products = JsonSerializer.Deserialize<List<ProductDto>>(JsonSerializer.Serialize(response.Result)) ?? [];
         }
         else
         {
-            products = [];
+            Products = [];
         }
     }
 }
