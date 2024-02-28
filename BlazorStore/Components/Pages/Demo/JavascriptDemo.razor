@@ -55,11 +55,11 @@
     private async Task SweetSuccess()
     {
         // returns a bool since this is a confirmation box, its eiter confirm (true) otherwise false
-        await _ijsr.InvokeVoidAsync("ShowSweetAlert", "success", "It's a success");
+        await _ijsr.InvokeVoidAsync("blazorInterop.ShowSweetAlert", "success", "It's a success");
     }
     private async Task SweetFailure()
     {
         // returns a bool since this is a confirmation box, its eiter confirm (true) otherwise false
-        await _ijsr.InvokeVoidAsync("ShowSweetAlert", "error", "It's a failure");
+        await _ijsr.InvokeVoidAsync("blazorInterop.ShowSweetAlert", "error", "It's a failure");
     }
 }

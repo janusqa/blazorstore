@@ -59,14 +59,14 @@ namespace BlazorStore.Components.Pages.Product
         private async Task Delete(int entityId)
         {
             var confirmed = await _ijsr.InvokeAsync<bool>(
-                "ConfirmationModal",
+                "blazorInterop.ConfirmationModal",
                 "Confirm Delete",
                 "Are you sure you want to delete",
                 "Delete"
             );
             if (confirmed)
             {
-                await _ijsr.InvokeVoidAsync("Spinner", true);
+                await _ijsr.InvokeVoidAsync("blazorInterop.Spinner", true);
                 try
                 {
                     var existingImageUrl = (await _uow.Products.SqlQueryAsync<string>($@"DELETE FROM Products WHERE Id = @Id RETURNING ImageUrl;",
@@ -78,13 +78,13 @@ namespace BlazorStore.Components.Pages.Product
                     }
 
                     if (quickGridRef is not null) await quickGridRef.RefreshDataAsync();
-                    await _ijsr.InvokeVoidAsync("Spinner", false);
-                    await _ijsr.InvokeVoidAsync("ShowToastr", "success", "Deleted successfully");
+                    await _ijsr.InvokeVoidAsync("blazorInterop.Spinner", false);
+                    await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "success", "Deleted successfully");
                 }
                 catch (Exception ex)
                 {
-                    await _ijsr.InvokeVoidAsync("Spinner", false);
-                    await _ijsr.InvokeVoidAsync("ShowToastr", "error", ex.Message);
+                    await _ijsr.InvokeVoidAsync("blazorInterop.Spinner", false);
+                    await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "error", ex.Message);
                 }
             }
         }

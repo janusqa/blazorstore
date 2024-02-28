@@ -42,23 +42,23 @@ namespace BlazorStore.Components.Pages.Category
 
         private async Task Delete(int entityId)
         {
-            var confirmed = await _ijsr.InvokeAsync<bool>("ConfirmationModal", "Confirm Delete", "Are you sure you want to delete",
+            var confirmed = await _ijsr.InvokeAsync<bool>("blazorInterop.ConfirmationModal", "Confirm Delete", "Are you sure you want to delete",
             "Delete");
             if (confirmed)
             {
                 try
                 {
-                    await _ijsr.InvokeVoidAsync("Spinner", true);
+                    await _ijsr.InvokeVoidAsync("blazorInterop.Spinner", true);
                     await _uow.Categories.ExecuteSqlAsync($@"DELETE FROM Categories WHERE Id = @Id;",
                     [new SqliteParameter("Id", entityId)]);
                     if (quickGridRef is not null) await quickGridRef.RefreshDataAsync();
-                    await _ijsr.InvokeVoidAsync("Spinner", false);
-                    await _ijsr.InvokeVoidAsync("ShowToastr", "success", "Deleted successfully");
+                    await _ijsr.InvokeVoidAsync("blazorInterop.Spinner", false);
+                    await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "success", "Deleted successfully");
                 }
                 catch (Exception ex)
                 {
-                    await _ijsr.InvokeVoidAsync("Spinner", false);
-                    await _ijsr.InvokeVoidAsync("ShowToastr", "error", ex.Message);
+                    await _ijsr.InvokeVoidAsync("blazorInterop.Spinner", false);
+                    await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "error", ex.Message);
                 }
             }
         }

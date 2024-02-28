@@ -181,14 +181,14 @@ namespace BlazorStore.Components.Pages.Product
         //                     }
         //                     else
         //                     {
-        //                         // await _ijsr.InvokeVoidAsync("ShowToastr", "error", "Please select .jpg, .jpeg or .png file only");
+        //                         // await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "error", "Please select .jpg, .jpeg or .png file only");
         //                     }
         //                 }
         //             }
         //         }
         //         catch (Exception ex)
         //         {
-        //             // await _ijsr.InvokeVoidAsync("ShowToastr", "error", ex.Message);
+        //             // await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "error", ex.Message);
         //         }
         //     }
         // }

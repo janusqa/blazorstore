@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using BlazorStore;
+using BlazorStore.ApiAccess.Service;
 using BlazorStore.Components;
 using BlazorStore.Components.Account;
 using BlazorStore.DataAccess.Data;
@@ -101,7 +102,13 @@ builder.Services.AddScoped<IDBInitilizer, DBInitilizer>();
 builder.Services.AddScoped<IFileService, FileService>();
 
 // Configure DPI for client services that will be neccessary on the server if pre-rendering is enabled 
-BlazorStore.Client.CommonServices.ConfigureCommonServices(builder.Services);
+BlazorStore.Client.CommonServices.ConfigureCommonServices(builder.Services, builder.Configuration);
+
+// // HttpClient
+// builder.Services.AddHttpClient<IApiService, ApiService>(
+//     "BlazorStore",
+//     http => http.BaseAddress = new Uri(builder.Configuration.GetSection("AppUrls:BaseApiUrl").Value ?? "")
+// );
 
 // add custom components [syncfusion, radzen]
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configuration.GetValue<string>("SyncFusion:ApiKey"));

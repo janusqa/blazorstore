@@ -6,12 +6,12 @@ namespace BlazorStore.Extensions
     {
         public static async ValueTask ToastrSuccess(this IJSRuntime ijsr, string message)
         {
-            await ijsr.InvokeVoidAsync("ShowToastr", "success", message);
+            await ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "success", message);
         }
 
         public static async ValueTask ToastrFailure(this IJSRuntime ijsr, string message)
         {
-            await ijsr.InvokeVoidAsync("ShowToastr", "error", message);
+            await ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "error", message);
         }
     }
 }

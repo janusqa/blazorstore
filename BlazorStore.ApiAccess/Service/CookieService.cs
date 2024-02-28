@@ -13,7 +13,7 @@ namespace BlazorStore.ApiAccess.Service
 
         public async Task<string> GetCookie(string name)
         {
-            return await _jsRuntime.InvokeAsync<string>("getCookie", name);
+            return await _jsRuntime.InvokeAsync<string>("blazorInterop.GetCookie", name);
         }
     }
 }
