@@ -3,7 +3,7 @@ using BlazorStore.ApiAccess.Service;
 using BlazorStore.Dto;
 using Fluxor;
 
-namespace BlazorStore.Client.Store.Auth
+namespace BlazorStore.Client.AppState.Auth
 {
     // ********************
     // State

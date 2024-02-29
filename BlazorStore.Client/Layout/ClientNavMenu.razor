@@ -1,6 +1,6 @@
 @implements IDisposable
 @inject NavigationManager NavigationManager
-@inject IState<CounterState> counterState
+@inject IState<AppState.Counter.CounterState> counterState
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
@@ -65,7 +65,7 @@
     {
         if (firstRender)
         {
-            counterState.StateChanged += FluxorStateHasChanged;
+            counterState.StateChanged += AppStateHasChanged;
         }
     }
 
@@ -75,7 +75,7 @@
         StateHasChanged();
     }
 
-    private void FluxorStateHasChanged(object? sender, EventArgs args)
+    private void AppStateHasChanged(object? sender, EventArgs args)
     {
         InvokeAsync(StateHasChanged);
     }
@@ -83,6 +83,6 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
-        counterState.StateChanged -= FluxorStateHasChanged;
+        counterState.StateChanged -= AppStateHasChanged;
     }
 }

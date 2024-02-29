@@ -2,63 +2,85 @@
 @rendermode InteractiveAuto
 @attribute [StreamRendering]
 
+@* Fluxor Plumbing *@
+@implements IDisposable
+@inject IState<AppState.ProductSelected.ProductSelectedState> ProductSelectedState
+@inject IDispatcher dispatcher
+
 @inject IApiService Api
 @inject IConfiguration Config
+
 
 <h2>Details</h2>
 
 @if (Product is null)
 {
     <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
-        <img src="images/ajax-loader.gif" alt="Loading..."/>
-    </div>
+    <img src="images/ajax-loader.gif" alt="Loading..." />
+</div>
 }
 else
 {
-    <form method="post">
-        <div class="card container mt-4">
-            <div class="card-header ml-0  row">
-                <div class="col-12 col-md-6">
-                    <h1 class="text-primary">@Product.Name</h1>
-                </div>
-
-                <div class="col-12 col-md-6 text-end pt-4">
-                    <span class="badge bg-info pt-2" style="height:30px;">@Product.CategoryDto?.Name</span>
-                    <span class="badge bg-warning pt-2" style="height:30px;">@Product.Color</span>
-                </div>
+    <EditForm OnValidSubmit="AddToCart" FormName="add-to-cart" method="post">
+    <div class="card container mt-4">
+        <div class="card-header ml-0  row">
+            <div class="col-12 col-md-6">
+                <h1 class="text-primary">@Product.Name</h1>
             </div>
-            <div class="card-body">
-                <div class="container rounded p-2">
-                    <div class="row">
-                        <div class="col-10">
-                            <p>@((MarkupString)Product.Description)</p>
-                            <div class="row">
-                                @if (Product.ProductPrices is not null)
+
+            <div class="col-12 col-md-6 text-end pt-4">
+                <span class="badge bg-info pt-2" style="height:30px;">@Product.CategoryDto?.Name</span>
+                <span class="badge bg-warning pt-2" style="height:30px;">@Product.Color</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container rounded p-2">
+                <div class="row">
+                    <div class="col-10">
+                        <p>@((MarkupString)Product.Description)</p>
+                        <div class="row">
+                            @if (Product.ProductPrices is not null && Product.ProductPrices.Count > 0)
                                 {
                                     @foreach (var productPrice in Product.ProductPrices)
                                     {
-                                        <div class="col-2 bg-light text-center pt-2 m-2"
-                                             style="border:3px solid #28A745; border-radius:10px;box-shadow:5px">
-                                            <p>@productPrice.Size</p>
-                                            <p>@productPrice.Price.ToString("c")</p>
-                                        </div>
+                                        @if (productPrice.Id == ProductSelectedState.Value.ProductPriceId)
+                                        {
+                                            <div class="col-2 bg-light text-center pt-2 m-2"
+                                                style="cursor: pointer; border:3px solid #28A745; border-radius:10px;box-shadow:5px">
+                                                <p>@productPrice.Size</p>
+                                                <p>@productPrice.Price.ToString("c")</p>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="col-2 bg-light text-center pt-2 m-2"
+                                                style="cursor: pointer;border:1px solid; border-radius:10px;box-shadow:5px"
+                                                @onclick="(args) => SelectedProductPrice(args, productPrice.Id)">
+                                                <p>@productPrice.Size</p>
+                                                <p>@productPrice.Price.ToString("c")</p>
+                                            </div>
+                                        }
                                     }
+                                }
+                                else
+                                {
+                                    <p class="text-warning">No sizes available yet...</p>
                                 }
                                 <div class="row pl-2">
                                     <div class="col-2 text-primary">
                                         <h4>Count</h4>
                                     </div>
                                     <div class="col-10">
-                                        <input type="text" class="form-control"/>
+                                        <InputNumber TValue="int" value="@ProductSelectedState.Value.Count"
+                                            class="form-control" />
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-2">
-                                <img src="@($"{baseImageUrl}{Product.ImageUrl}")" width="100%" class="rounded" alt="@Product.Name"/>
-                            </div>
-
                         </div>
-
+                        <div class="col-2">
+                            <img src="@($"{baseImageUrl}{Product.ImageUrl}")" width="100%" class="rounded"
+                                alt="@Product.Name" />
+                        </div>
                     </div>
                 </div>
                 <div class="card-footer">
@@ -76,13 +98,14 @@ else
                 </div>
             </div>
         </div>
-    </form>
+    </EditForm>
 }
 
 @code {
     [Parameter] public int EntityId { get; set; }
-    private ProductDto? Product { get; set; }
     private string? baseImageUrl;
+    private ProductDto? Product { get; set; }
+    private ViewModels.ProductDetailVm? ProductDetailVm { get; set; }
 
     protected override void OnInitialized()
     {
@@ -98,5 +121,34 @@ else
         }
     }
 
-}
+    private void SelectedProductPrice(MouseEventArgs e, int productPriceId)
+    {
+        var productPrice = Product?.ProductPrices?.FirstOrDefault(pp => pp.Id == productPriceId);
+        if (productPrice is not null) dispatcher.Dispatch(new AppState.ProductSelected.ProductSelected(productPrice));
+    }
 
+    private void AddToCart()
+    {
+
+    }
+
+    // Fluxor Plumbing
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ProductSelectedState.StateChanged += AppStateHasChanged;
+        }
+    }
+
+    private void AppStateHasChanged(object? sender, EventArgs args)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        ProductSelectedState.StateChanged -= AppStateHasChanged;
+    }
+
+}

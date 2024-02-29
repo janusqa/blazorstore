@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Fluxor;
-namespace BlazorStore.Client.Store.FluxorMiddleware
+namespace BlazorStore.Client.AppState.FluxorMiddleware
 {
     public class LoggingMiddleware : Middleware
     {

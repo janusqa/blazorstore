@@ -1,5 +1,5 @@
 using BlazorStore.ApiAccess.Service;
-using BlazorStore.Client.Store.FluxorMiddleware;
+using BlazorStore.Client.AppState.FluxorMiddleware;
 using Fluxor;
 
 namespace BlazorStore.Client

@@ -1,6 +1,6 @@
 using Fluxor;
 
-namespace BlazorStore.Client.Store.Counter
+namespace BlazorStore.Client.AppState.Counter
 {
     // ********************
     // State
