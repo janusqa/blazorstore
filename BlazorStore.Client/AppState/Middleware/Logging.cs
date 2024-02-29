@@ -2,7 +2,7 @@ using System.Text.Json;
 using Fluxor;
 namespace BlazorStore.Client.AppState.FluxorMiddleware
 {
-    public class LoggingMiddleware : Middleware
+    public class Logging : Middleware
     {
         private IStore? Store;
 

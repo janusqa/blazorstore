@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using BlazorStore.ApiAccess.Service;
 using BlazorStore.Client.AppState.FluxorMiddleware;
 using Fluxor;
@@ -21,9 +22,12 @@ namespace BlazorStore.Client
             services.AddFluxor(options =>
             {
                 options.ScanAssemblies(typeof(Program).Assembly)
-                    // .AddMiddleware<LoggingMiddleware>()
+                    .AddMiddleware<LocalStorage>()
                     .UseReduxDevTools(rdt => { rdt.Name = "BlazorStore"; });
             });
+
+            // LocalStorage
+            services.AddBlazoredLocalStorage();
         }
     }
 }

@@ -19,6 +19,7 @@ namespace BlazorStore.Common
 
         // Application
         public const string appBaseUrl = "https://localhost:7036";
+        public const string cartKey = "BlazorCartLocalStorage";
 
         // Api
         public const string ApiVersion = "v1";

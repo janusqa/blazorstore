@@ -4,7 +4,7 @@
 
 @* Fluxor Plumbing *@
 @implements IDisposable
-@inject IState<AppState.CartItem.CartItemState> CartItemState
+@inject IState<AppState.Cart.CartState> CartState
 @inject IDispatcher dispatcher
 
 @inject IApiService Api
@@ -21,7 +21,9 @@
 }
 else
 {
-    <EditForm Model="CartItem" OnValidSubmit="AddToCart" FormName="add-to-cart" method="post">
+    <EditForm Model="CartItem" OnValidSubmit="AddToCart" FormName="add-to-cart" method="POST">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-danger" role="alert" />
     <div class="card container mt-4">
         <div class="card-header ml-0  row">
             <div class="col-12 col-md-6">
@@ -72,6 +74,7 @@ else
                                     </div>
                                     <div class="col-10">
                                         <InputNumber @bind-Value="CartItem.Count" class="form-control" />
+                                        <ValidationMessage For="() => CartItem.Count" />
                                     </div>
                                 </div>
                             </div>
@@ -88,10 +91,12 @@ else
                             <a class="btn btn-success form-control " href="/">Back to Home</a>
                         </div>
                         <div class="col-12 col-md-6 pb-1">
-                            <button type="submit" value="Add to Cart" class="btn btn-primary form-control">
-                                Add to
-                                Cart
-                            </button>
+                            @if (CartItem.ProductPriceId > 0)
+                            {
+                                <button type="submit" value="Add to Cart" class="btn btn-primary form-control">
+                                    Add to Cart
+                                </button>
+                            }
                         </div>
                     </div>
                 </div>
@@ -104,6 +109,7 @@ else
     [Parameter] public int EntityId { get; set; }
     private string? baseImageUrl;
     private ProductDto? Product { get; set; }
+    [SupplyParameterFromForm(FormName = "add-to-cart")]
     private CartItemDto CartItem { get; set; } = new CartItemDto { };
 
     protected override void OnInitialized()
@@ -118,33 +124,31 @@ else
         {
             Product = JsonSerializer.Deserialize<ProductDto>(JsonSerializer.Serialize(response.Result));
         }
-
-        CartItem = CartItemState.Value.CartItem;
-        Console.WriteLine("param changed");
     }
 
     private void SelectedProductPrice(MouseEventArgs e, int productPriceId)
     {
         var productPrice = Product?.ProductPrices?.FirstOrDefault(pp => pp.Id == productPriceId);
-        if (productPrice is not null)
+        if (productPrice is not null && Product is not null)
         {
             CartItem.ProductPrice = productPrice;
             CartItem.ProductPriceId = productPriceId;
-            dispatcher.Dispatch(new AppState.CartItem.CartItemSelected(CartItem));
+            CartItem.Product = Product;
+            CartItem.ProductId = Product.Id;
         }
     }
 
     private void AddToCart()
     {
-
+        dispatcher.Dispatch(new AppState.Cart.AddedToCart(CartItem));
     }
 
-    // Fluxor Plumbing
+    // Fluxor Plumbing - Testing global state but its not really used on this page as not needed
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
-            CartItemState.StateChanged += AppStateHasChanged;
+            CartState.StateChanged += AppStateHasChanged;
         }
     }
 
@@ -155,7 +159,7 @@ else
 
     public void Dispose()
     {
-        CartItemState.StateChanged -= AppStateHasChanged;
+        CartState.StateChanged -= AppStateHasChanged;
     }
 
 }
