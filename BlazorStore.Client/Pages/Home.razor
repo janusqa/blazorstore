@@ -1,6 +1,5 @@
 @page "/"
-@attribute [StreamRendering]
-@rendermode @(new InteractiveAutoRenderMode(prerender: false))
+@rendermode @(new InteractiveAutoRenderMode(prerender:false))
 
 @inject IApiService _api
 @inject IConfiguration _config
@@ -62,9 +61,9 @@ else
         baseImageUrl = _config.GetSection("AppUrls:BaseApiUrl").Value!;
 
         var response = await _api.Products.GetAllAsync(new ApiRequest());
-        if (response is not null && response.IsSuccess)
+        if (response is not null && response.IsSuccess && response.Result is not null)
         {
-            Products = JsonSerializer.Deserialize<List<ProductDto>>(JsonSerializer.Serialize(response.Result)) ?? [];
+            Products = JsonSerializer.Deserialize<List<ProductDto>>(JsonSerializer.Serialize(response.Result));
         }
         else
         {

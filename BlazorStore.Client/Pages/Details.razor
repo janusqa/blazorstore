@@ -1,6 +1,5 @@
 @page "/details/{entityId:int}"
-@rendermode InteractiveAuto
-@attribute [StreamRendering]
+@rendermode @(new InteractiveAutoRenderMode(prerender:false))
 
 @* Fluxor Plumbing *@
 @implements IDisposable

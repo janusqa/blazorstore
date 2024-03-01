@@ -1,0 +1,124 @@
+@page "/cart"
+@rendermode @(new InteractiveAutoRenderMode(prerender:false))
+
+@* Fluxor Plumbing *@
+@implements IDisposable
+@inject IState<AppState.Cart.CartState> CartState
+
+@if (CartState.Value.Updating)
+{
+    <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
+    <img src="images/ajax-loader.gif" alt="Loading..." />
+</div>
+}
+else
+{
+    @if (CartState.Value.Cart.Count < 1)
+    {
+        <div>You have @CartState.Value.Cart.Count items in your cart</div>
+    }
+    else
+    {
+        <div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-dark text-light ml-0 ">
+            <div class="row">
+                <div class="col-6  pt-2">
+                    Shopping Cart
+                </div>
+                <div class="col-6 col-md-3 offset-md-3 text-end">
+                    <a href="/" class="btn btn-outline-info form-control">Continue Shopping</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @foreach (var item in CartState.Value.Cart)
+                    {
+                        <div class="row">
+                            <div class="col-3 col-md-1 text-center py-2">
+                                <img src="@item.Value.Product.ImageUrl" class="rounded" width="100%" />
+                            </div>
+                            <div class="col-9 text-sm-center text-md-start col-md-4 pt-lg-1 ">
+                                <h4><strong>@item.Value.Product.Name</strong></h4>
+
+                                <div class="badge bg-primary text-center" style="font-size:12px;">
+                                    @item.Value.Product.CategoryDto?.Name
+                                </div>
+                                <div class="badge bg-info text-center" style="font-size:12px;">
+                                    @item.Value.Product.Color
+                                </div>
+                                <div>
+                                    <p>Size : @item.Value.ProductPrice.Size</p>
+                                </div>
+                            </div>
+                            <div class="col-12 text-sm-center col-md-7 text-md-start row  pt-lg-3 mt-3">
+                                <div class="col-4 pt-1 ">
+
+                                    <h6><strong>@item.Value.ProductPrice.Price.ToString("c") <span class="text-muted">x</span>
+                                            @item.Value.Count </strong></h6>
+                                </div>
+                                <div class="col-6 col-sm-4 col-lg-6">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-plus-square"></i>
+                                    </button>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="bi bi-dash-square"></i>
+                                    </button>
+                                </div>
+                                <div class="col-2 col-sm-4 col-lg-2 text-right">
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <hr />
+
+                    <div class="row">
+                        <div class="col-12 col-md-5">
+                        </div>
+                        <div class="col-12 col-md-6 offset-md-1 col-lg-4 offset-lg-3 pr-4">
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between bg-light">
+                                    <span class="text-info"> Total (USD)</span>
+                                    <strong class="text-info">@(CartState.Value.Cart.Select(c => c.Value.Count *
+                                c.Value.ProductPrice.Price).Sum().ToString("c"))</strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="card-footer">
+                    <div class="col-12  col-md-3 offset-md-9">
+                        <a href="" class="btn btn-secondary form-control">Summary</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+
+    // Fluxor Plumbing
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            CartState.StateChanged += AppStateHasChanged;
+        }
+    }
+
+    private void AppStateHasChanged(object? sender, EventArgs args)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        CartState.StateChanged -= AppStateHasChanged;
+    }
+}
