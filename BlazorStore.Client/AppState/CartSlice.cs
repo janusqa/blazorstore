@@ -11,7 +11,7 @@ namespace BlazorStore.Client.AppState.Cart
     [FeatureState]
     public record CartState
     {
-        public Dictionary<string, CartItemDto> Cart { get; init; } = [];
+        public Dictionary<int, CartItemDto> Cart { get; init; } = [];
         public bool Updating { get; init; } = false;
         public bool Updated { get; init; } = false;
     }
@@ -29,7 +29,7 @@ namespace BlazorStore.Client.AppState.Cart
 
             if (tempCart is not null && cartItem is not null)
             {
-                var key = $"{action.CartItem.ProductId}{action.CartItem.ProductPriceId}";
+                var key = action.CartItem.ProductPriceId;
 
                 if (tempCart.ContainsKey(key))
                 {
@@ -96,7 +96,7 @@ namespace BlazorStore.Client.AppState.Cart
             {
                 dispatcher.Dispatch(new CartUpdating(true));
                 dispatcher.Dispatch(new CartUpdated(false));
-                await _localStorage.SetItemAsync<Dictionary<string, CartItemDto>>(SD.cartKey, _state.Value.Cart);
+                await _localStorage.SetItemAsync(SD.cartKey, _state.Value.Cart);
                 dispatcher.Dispatch(new CartUpdated(true));
             }
             catch
@@ -136,7 +136,7 @@ namespace BlazorStore.Client.AppState.Cart
             {
                 dispatcher.Dispatch(new CartUpdating(true));
                 dispatcher.Dispatch(new CartUpdated(false));
-                var cart = await _localStorage.GetItemAsync<Dictionary<string, CartItemDto>>(SD.cartKey);
+                var cart = await _localStorage.GetItemAsync<Dictionary<int, CartItemDto>>(SD.cartKey);
                 if (cart is not null)
                 {
                     dispatcher.Dispatch(new CartFetched(cart));
@@ -159,11 +159,11 @@ namespace BlazorStore.Client.AppState.Cart
     // Actions
     // ********************
     public record AddedToCart(CartItemDto CartItem);
-    public record RemovedFromCart(string CartItemKey);
+    public record RemovedFromCart(int CartItemKey);
     public record CartPersisted();
     public record CartRemoved();
     public record CartInitilized();
-    public record CartFetched(Dictionary<string, CartItemDto> Cart);
+    public record CartFetched(Dictionary<int, CartItemDto> Cart);
     public record CartUpdating(bool IsUpdating);
     public record CartUpdated(bool IsUpdated);
 
