@@ -21,7 +21,7 @@ namespace BlazorStore.Client.AppState.FluxorMiddleware
         public override void AfterDispatch(object action)
         {
             var actionName = action.GetType().Name;
-            if (actionName == "AddedToCart" || actionName == "RemovedFromCart")
+            if (actionName == "UpsertedItemInCart" || actionName == "RemovedItemFromCart")
             {
                 _dispatcher.Dispatch(new CartPersisted());
             }

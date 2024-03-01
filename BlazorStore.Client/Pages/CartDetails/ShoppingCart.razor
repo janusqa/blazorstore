@@ -4,6 +4,7 @@
 @* Fluxor Plumbing *@
 @implements IDisposable
 @inject IState<AppState.Cart.CartState> CartState
+@inject IDispatcher _dispatcher
 
 @if (CartState.Value.Updating)
 {
@@ -58,15 +59,18 @@ else
                                             @item.Value.Count </strong></h6>
                                 </div>
                                 <div class="col-6 col-sm-4 col-lg-6">
-                                    <button type="submit" class="btn btn-primary">
+                                    <button @onclick="() => UpdateCart(CartOperation.INCREMENT, item.Value)" type="submit"
+                                        class="btn btn-primary">
                                         <i class="bi bi-plus-square"></i>
                                     </button>
-                                    <button type="submit" class="btn btn-warning">
+                                    <button @onclick="() => UpdateCart(CartOperation.DECREMENT, item.Value)" type="submit"
+                                        class="btn btn-warning">
                                         <i class="bi bi-dash-square"></i>
                                     </button>
                                 </div>
                                 <div class="col-2 col-sm-4 col-lg-2 text-right">
-                                    <button type="submit" class="btn btn-outline-danger">
+                                    <button @onclick="() => UpdateCart(CartOperation.DELETE, item.Value)" type="submit"
+                                        class="btn btn-outline-danger">
                                         <i class="bi bi-trash-fill"></i>
                                     </button>
                                 </div>
@@ -102,6 +106,38 @@ else
 }
 
 @code {
+
+    private enum CartOperation
+    {
+        INCREMENT,
+        DECREMENT,
+        DELETE
+    }
+
+    private void UpdateCart(CartOperation operation, CartItemDto item)
+    {
+        if (operation == CartOperation.INCREMENT)
+        {
+            item.Count++;
+            _dispatcher.Dispatch(new AppState.Cart.UpsertedItemInCart(item));
+        }
+        else if (operation == CartOperation.DECREMENT)
+        {
+            item.Count--;
+            if (item.Count > 0)
+            {
+                _dispatcher.Dispatch(new AppState.Cart.UpsertedItemInCart(item));
+            }
+            else
+            {
+                _dispatcher.Dispatch(new AppState.Cart.RemovedItemFromCart(item.ProductPriceId));
+            }
+        }
+        else if (operation == CartOperation.DELETE)
+        {
+            _dispatcher.Dispatch(new AppState.Cart.RemovedItemFromCart(item.ProductPriceId));
+        }
+    }
 
     // Fluxor Plumbing
     protected override void OnAfterRender(bool firstRender)

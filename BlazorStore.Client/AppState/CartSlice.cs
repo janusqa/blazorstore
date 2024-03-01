@@ -22,7 +22,7 @@ namespace BlazorStore.Client.AppState.Cart
     public static class Reducers
     {
         [ReducerMethod]
-        public static CartState AddToCartReducer(CartState state, AddedToCart action)
+        public static CartState UpsertItemInCartReducer(CartState state, UpsertedItemInCart action)
         {
             var tempCart = FastDeepCloner.DeepCloner.Clone(state.Cart);
             var cartItem = FastDeepCloner.DeepCloner.Clone(action.CartItem);
@@ -49,7 +49,7 @@ namespace BlazorStore.Client.AppState.Cart
         }
 
         [ReducerMethod]
-        public static CartState RemoveFromCartReducer(CartState state, RemovedFromCart action)
+        public static CartState RemoveItemInCartReducer(CartState state, RemovedItemFromCart action)
         {
             var tempCart = state.Cart.ToDictionary(c => c.Key, c => c.Value);
             tempCart.Remove(action.CartItemKey);
@@ -158,8 +158,8 @@ namespace BlazorStore.Client.AppState.Cart
     // ********************
     // Actions
     // ********************
-    public record AddedToCart(CartItemDto CartItem);
-    public record RemovedFromCart(int CartItemKey);
+    public record UpsertedItemInCart(CartItemDto CartItem);
+    public record RemovedItemFromCart(int CartItemKey);
     public record CartPersisted();
     public record CartRemoved();
     public record CartInitilized();

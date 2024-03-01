@@ -141,7 +141,7 @@ else
 
     private void AddToCart()
     {
-        dispatcher.Dispatch(new AppState.Cart.AddedToCart(CartItem));
+        dispatcher.Dispatch(new AppState.Cart.UpsertedItemInCart(CartItem));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
