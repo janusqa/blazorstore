@@ -1,7 +1,7 @@
 @inherits LayoutComponentBase
 
-<Fluxor.Blazor.Web.StoreInitializer @rendermode="(new InteractiveAutoRenderMode(prerender: true))" />
-<ClientNavMenu @rendermode="InteractiveAuto" />
+<Fluxor.Blazor.Web.StoreInitializer @rendermode="(new InteractiveWebAssemblyRenderMode(prerender: false))" />
+<ClientNavMenu @rendermode="(new InteractiveWebAssemblyRenderMode(prerender: true))" />
 <div class="content px-4">
     @Body
 </div>
