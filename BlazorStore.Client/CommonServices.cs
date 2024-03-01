@@ -22,7 +22,7 @@ namespace BlazorStore.Client
             services.AddFluxor(options =>
             {
                 options.ScanAssemblies(typeof(Program).Assembly)
-                    .AddMiddleware<LocalStorage>()
+                    .AddMiddleware<Cart>()
                     .UseReduxDevTools(rdt => { rdt.Name = "BlazorStore"; });
             });
 
