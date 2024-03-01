@@ -7,9 +7,9 @@
 @inject IState<AppState.Cart.CartState> CartState
 @inject IDispatcher dispatcher
 
-@inject IApiService Api
-@inject IConfiguration Config
-
+@inject IApiService _api
+@inject IConfiguration _config
+@inject IJSRuntime _jsruntime
 
 <h2>Details</h2>
 
@@ -105,6 +105,8 @@ else
     </EditForm>
 }
 
+@* <BlazorStore.Client.Components.ToastrNotification ToastType="success" ToastMessage="Hello"/> *@
+
 @code {
     [Parameter] public int EntityId { get; set; }
     private string? baseImageUrl;
@@ -114,12 +116,12 @@ else
 
     protected override void OnInitialized()
     {
-        baseImageUrl = Config.GetSection("AppUrls:BaseApiUrl").Value!;
+        baseImageUrl = _config.GetSection("AppUrls:BaseApiUrl").Value!;
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        var response = await Api.Products.GetAsync(EntityId, new ApiRequest());
+        var response = await _api.Products.GetAsync(EntityId, new ApiRequest());
         if (response is not null && response.IsSuccess)
         {
             Product = JsonSerializer.Deserialize<ProductDto>(JsonSerializer.Serialize(response.Result));
@@ -143,7 +145,15 @@ else
         dispatcher.Dispatch(new AppState.Cart.AddedToCart(CartItem));
     }
 
-    // Fluxor Plumbing - Testing global state but its not really used on this page as not needed
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!CartState.Value.Updating && CartState.Value.Updated)
+        {
+            await _jsruntime.InvokeVoidAsync("blazorInterop.ShowToastr", "success", "Cart updated");
+        }
+    }
+
+    // Fluxor Plumbing
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
@@ -161,5 +171,4 @@ else
     {
         CartState.StateChanged -= AppStateHasChanged;
     }
-
 }

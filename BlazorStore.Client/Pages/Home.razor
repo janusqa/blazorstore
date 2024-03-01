@@ -2,13 +2,13 @@
 @attribute [StreamRendering]
 @rendermode @(new InteractiveAutoRenderMode(prerender: false))
 
-@inject IApiService Api
-@inject IConfiguration Config
+@inject IApiService _api
+@inject IConfiguration _config
 
 @if (Products is null)
 {
     <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
-    <img src="images/ajax-loader.gif" alt="Loading..."/>
+    <img src="images/ajax-loader.gif" alt="Loading..." />
 </div>
 }
 else
@@ -59,9 +59,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        baseImageUrl = Config.GetSection("AppUrls:BaseApiUrl").Value!;
+        baseImageUrl = _config.GetSection("AppUrls:BaseApiUrl").Value!;
 
-        var response = await Api.Products.GetAllAsync(new ApiRequest());
+        var response = await _api.Products.GetAllAsync(new ApiRequest());
         if (response is not null && response.IsSuccess)
         {
             Products = JsonSerializer.Deserialize<List<ProductDto>>(JsonSerializer.Serialize(response.Result)) ?? [];

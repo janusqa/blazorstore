@@ -1,6 +1,5 @@
 window.blazorInterop = {
     ShowToastr: function (type, message) {
-        console.log('file error');
         if (type === 'success') {
             toastr.success(message, 'Operation Successful', { timeOut: 5000 });
         } else if (type === 'error') {
