@@ -8,7 +8,7 @@ namespace BlazorStore.Dto
         public string Url { get; init; } = string.Empty;
         public object? Data { get; init; }
         public SD.ContentType ContentType { get; init; } = SD.ContentType.Json;
-        public virtual bool WithCredentials { get; init; } = false;
+        public bool WithCredentials { get; init; } = false;
         public string? AccessToken { get; init; } = null;
     }
 }
