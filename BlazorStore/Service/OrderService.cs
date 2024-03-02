@@ -2,6 +2,7 @@ using System.Text;
 using BlazorStore.DataAccess.UnitOfWork;
 using BlazorStore.Dto;
 using BlazorStore.Models.Domain;
+using BlazorStore.Models.Extensions;
 using BlazorStore.Service.IService;
 using Microsoft.Data.Sqlite;
 
@@ -16,9 +17,28 @@ namespace BlazorStore.Service
             _uow = uow;
         }
 
-        public Task<int> Cancel(int entityId)
+        public async Task<bool> Cancel(int entityId)
         {
-            throw new NotImplementedException();
+            using var transaction = _uow.Transaction();
+            try
+            {
+                await _uow.OrderDetails.ExecuteSqlAsync($@"
+                    DELETE FROM OrderDetails WHERE OrderHeaderId = @Id;
+                ", [new SqliteParameter("Id", entityId)]);
+
+                await _uow.OrderHeaders.ExecuteSqlAsync($@"
+                    DELETE FROM OrderHeaders WHERE Id = @Id;
+                ", [new SqliteParameter("Id", entityId)]);
+
+                transaction.Commit();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                return false;
+            }
         }
 
         public async Task<OrderDto?> Create(OrderDto orderDto)
@@ -53,7 +73,7 @@ namespace BlazorStore.Service
                         @State,
                         @City ,
                         @PostalCode
-                    ) RETURNING Id
+                    ) RETURNING Id;
                 ", [
                         new SqliteParameter("UserId", orderDto.OrderHeader.UserId),
                         new SqliteParameter("OrderTotal",  orderDto.OrderHeader.OrderTotal),
@@ -94,7 +114,7 @@ namespace BlazorStore.Service
                     await _uow.OrderDetails.ExecuteSqlAsync($@"
                         INSERT INTO OrderDetails
                         (OrderHeaderId, ProductId, Price, Size, Count, ProductName)
-                        VALUES {inParams.ToString()[..^1]}
+                        VALUES {inParams.ToString()[..^1]};
                     ", sqlParams);
 
                     transaction.Commit();
@@ -115,9 +135,33 @@ namespace BlazorStore.Service
             }
         }
 
-        public Task<OrderDto> Get(int entityId)
+        public async Task<OrderDto?> Get(int entityId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var orderHeader = (await _uow.OrderHeaders.FromSqlAsync($@"
+                    SELECT * FROM OrderHeaders WHERE Id = @Id;
+                ", [new SqliteParameter("Id", entityId)])).FirstOrDefault();
+
+                if (orderHeader is not null)
+                {
+                    var orderDetails = await _uow.OrderDetails.FromSqlAsync($@"
+                        SELECT * FROM OrderDetails WHERE Id = @Id;
+                    ", [new SqliteParameter("Id", entityId)]);
+
+                    return new OrderDto
+                    {
+                        OrderHeader = orderHeader.ToDto(),
+                        OderDetails = orderDetails.Select(od => od.ToDto()).ToList()
+                    };
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            };
         }
 
         public Task<IEnumerable<OrderDto>> GetAll(string? userId = null, string? status = null)
