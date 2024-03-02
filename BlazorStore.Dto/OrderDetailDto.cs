@@ -11,11 +11,11 @@ namespace BlazorStore.Dto
         public int ProductId { get; set; }
         public ProductDto? Product { get; set; }
         [Required]
-        public int Count { get; set; }
-        [Required]
         public double Price { get; set; }
         [Required]
         public required string Size { get; set; }
+        [Required]
+        public int Count { get; set; }
         [Required]
         public required string ProductName { get; set; }
     }

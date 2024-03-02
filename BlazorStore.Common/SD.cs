@@ -9,7 +9,9 @@ namespace BlazorStore.Common
         public static readonly (string Model, string Table)[] dbEntity = [
             ("Category","Categories"),
             ("Product","Products"),
-            ("ProductPrice", "ProductPrices")
+            ("ProductPrice", "ProductPrices"),
+            ("OrderHeader", "OrderHeaders"),
+            ("OrderDetail", "OrderDetails"),
         ];
 
         // Pagination
@@ -46,5 +48,20 @@ namespace BlazorStore.Common
         public const string Role_Customer = "Customer";
         public const string Role_Admin = "Admin";
         public const string Role_Employee = "Employee";
+
+        // Order Status Constants
+        public const string OrderStatusPending = "Pending";
+        public const string OrderStatusApproved = "Approved";
+        public const string OrderStatusInProcess = "Processing";
+        public const string OrderStatusShipped = "Shipped";
+        public const string OrderStatusCancelled = "Cancelled";
+
+        // Order Payment Status Constants
+        public const string PaymentStatusPending = "Pending";
+        public const string PaymentStatusApproved = "Approved";
+        public const string PaymentStatusApprovedDelayedPayment = "ApprovedForDelayedPayment";
+        public const string PaymentStatusRejected = "Rejected";
+        public const string PaymentStatusRefunded = "Refunded";
+        public const string PaymentStatusCancelled = "Cancelled";
     }
 }

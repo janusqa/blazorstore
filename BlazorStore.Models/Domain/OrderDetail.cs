@@ -15,11 +15,11 @@ namespace BlazorStore.Models.Domain
         [NotMapped]
         public Product? Product { get; set; }
         [Required]
-        public int Count { get; set; }
-        [Required]
         public double Price { get; set; }
         [Required]
         public required string Size { get; set; }
+        [Required]
+        public int Count { get; set; }
         [Required]
         public required string ProductName { get; set; }
     }
