@@ -7,9 +7,10 @@ namespace BlazorStore.DataAccess.UnitOfWork
     {
         ICategoryRepository Categories { get; init; }
         IProductRepository Products { get; init; }
-
         IProductPriceRepository ProductPrices { get; init; }
         IApplicationUserRepository ApplicationUsers { get; init; }
+        IOrderHeaderRepository OrderHeaders { get; init; }
+        IOrderDetailRepository OrderDetails { get; init; }
 
         Task<int> Complete();
 

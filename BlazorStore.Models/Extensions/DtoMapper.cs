@@ -48,5 +48,41 @@ namespace BlazorStore.Models.Extensions
                 Price = productPrice.Price
             };
         }
+
+        public static OrderHeaderDto ToDto(this OrderHeader OrderHeader)
+        {
+            return new OrderHeaderDto
+            {
+                Id = OrderHeader.Id,
+                UserId = OrderHeader.UserId,
+                OrderTotal = OrderHeader.OrderTotal,
+                OrderDate = OrderHeader.OrderDate,
+                ShippingDate = OrderHeader.ShippingDate,
+                Status = OrderHeader.Status,
+                SessionId = OrderHeader.SessionId,
+                PaymentIntentId = OrderHeader.PaymentIntentId,
+                Name = OrderHeader.Name,
+                PhoneNumber = OrderHeader.PhoneNumber,
+                StreetAddress = OrderHeader.StreetAddress,
+                State = OrderHeader.State,
+                City = OrderHeader.City,
+                PostalCode = OrderHeader.PostalCode
+            };
+        }
+
+        public static OrderDetailDto ToDto(this OrderDetail OrderDetail)
+        {
+            return new OrderDetailDto
+            {
+                Id = OrderDetail.Id,
+                OrderHeaderId = OrderDetail.OrderHeaderId,
+                ProductId = OrderDetail.ProductId,
+                Product = OrderDetail.Product?.ToDto(),
+                Count = OrderDetail.Count,
+                Price = OrderDetail.Price,
+                Size = OrderDetail.Size,
+                ProductName = OrderDetail.ProductName
+            };
+        }
     }
 }

@@ -14,6 +14,8 @@ namespace BlazorStore.DataAccess.UnitOfWork
         public IProductRepository Products { get; init; }
         public IProductPriceRepository ProductPrices { get; init; }
         public IApplicationUserRepository ApplicationUsers { get; init; }
+        public IOrderHeaderRepository OrderHeaders { get; init; }
+        public IOrderDetailRepository OrderDetails { get; init; }
 
         public UnitOfWork(
             ApplicationDbContext db,
@@ -27,6 +29,8 @@ namespace BlazorStore.DataAccess.UnitOfWork
             Categories = new CategoryRepository(_db);
             Products = new ProductRepository(_db);
             ProductPrices = new ProductPriceRepository(_db);
+            OrderHeaders = new OrderHeaderRepository(_db);
+            OrderDetails = new OrderDetailRepository(_db);
             ApplicationUsers = new ApplicationUserRepository(_db, config, um, us);
         }
 
