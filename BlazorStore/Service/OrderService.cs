@@ -1,4 +1,5 @@
 using System.Text;
+using BlazorStore.Common;
 using BlazorStore.DataAccess.UnitOfWork;
 using BlazorStore.Dto;
 using BlazorStore.Models.Domain;
@@ -196,10 +197,23 @@ namespace BlazorStore.Service
                     sqlParams.Add(new SqliteParameter($"oh{idx}", ohId));
                 }
 
-                var orderDetials = await _uow.OrderDetails.FromSqlAsync($@"
+                var orderDetails = await _uow.OrderDetails.FromSqlAsync($@"
                     SELECT * FROM OrderDetails WHERE OrderHeaderId IN ({string.Join(", ", inParams)});
                 ", sqlParams);
 
+                List<OrderDto> orderDtos = [];
+                foreach (var orderHeader in orderHeaders)
+                {
+                    orderDtos.Add(
+                        new OrderDto
+                        {
+                            OrderHeader = orderHeader.ToDto(),
+                            OderDetails = orderDetails.Where(od => od.OrderHeaderId == orderHeader.Id).Select(od => od.ToDto()).ToList()
+                        }
+                    );
+                }
+
+                return orderDtos;
             }
             catch (Exception)
             {
@@ -207,19 +221,74 @@ namespace BlazorStore.Service
             }
         }
 
-        public Task<OrderHeaderDto> PaymentConfirmation(int entityId)
+        public async Task<OrderHeaderDto?> PaymentConfirmation(int entityId)
         {
-            throw new NotImplementedException();
+            var orderHeaderDto = (await _uow.OrderHeaders.SqlQueryAsync<OrderHeader>($@"
+                UPDATE OrderHeaders 
+                SET 
+                    Status = @NewStatus 
+                WHERE Id = @Id AND Status = @OldStatus
+                RETURNING *;
+            ", [
+                new SqliteParameter("Id", entityId),
+                new SqliteParameter("OldStatus", SD.OrderStatusPending),
+                new SqliteParameter("NewStatus", SD.OrderStatusApproved)
+            ])).FirstOrDefault()?.ToDto();
+
+            return orderHeaderDto;
         }
 
-        public Task<OrderHeaderDto> UpdateOrderDetails(OrderHeaderDto orderHeader)
+        public async Task<OrderHeaderDto?> UpdateOrderDetails(OrderHeaderDto orderHeader)
         {
-            throw new NotImplementedException();
+            var orderHeaderDto = (await _uow.OrderHeaders.SqlQueryAsync<OrderHeader>($@"
+                UPDATE OrderHeaders 
+                SET 
+                    OrderTotal = @OrderTotal,
+                    OrderDate = @OrderDate,
+                    ShippingDate = @ShippingDate, 
+                    Status = @Status,
+                    SessionId = @SessionId, 
+                    PaymentIntentId = @PaymentIntentId,
+                    Name = @Name, 
+                    PhoneNumber = @PhoneNumber, 
+                    StreetAddress = @StreetAddress, 
+                    State = @State, 
+                    City = @City, 
+                    PostalCode = @PostalCode 
+                WHERE Id = @Id
+                RETURNING *;
+            ", [
+                new SqliteParameter("OrderTotal", orderHeader.OrderTotal),
+                new SqliteParameter("OrderDate", orderHeader.OrderDate),
+                new SqliteParameter("ShippingDate", orderHeader.ShippingDate),
+                new SqliteParameter("Status", orderHeader.Status),
+                new SqliteParameter("SessionId", orderHeader.SessionId ?? (object)DBNull.Value),
+                new SqliteParameter("PaymentIntentId", orderHeader.PaymentIntentId ?? (object)DBNull.Value),
+                new SqliteParameter("Name", orderHeader.Name),
+                new SqliteParameter("PhoneNumber", orderHeader.PhoneNumber),
+                new SqliteParameter("StreetAddress", orderHeader.StreetAddress),
+                new SqliteParameter("State", orderHeader.State),
+                new SqliteParameter("City", orderHeader.City),
+                new SqliteParameter("PostalCode", orderHeader.PostalCode)
+            ])).FirstOrDefault()?.ToDto();
+
+            return orderHeaderDto;
         }
 
-        public Task<bool> UpdateOrderStatus(int orderId, string status)
+        public async Task<bool> UpdateOrderStatus(int entityId, string status)
         {
-            throw new NotImplementedException();
+            var orderHeaderId = (await _uow.OrderHeaders.SqlQueryAsync<int>($@"
+                UPDATE OrderHeaders 
+                SET 
+                    Status = @NewStatus 
+                WHERE Id = @Id
+                RETURNING Id;
+            ", [
+                new SqliteParameter("Id", entityId),
+                new SqliteParameter("NewStatus", SD.OrderStatusApproved)
+            ])).FirstOrDefault();
+
+            return orderHeaderId != 0;
         }
     }
 }

@@ -8,9 +8,9 @@ namespace BlazorStore.Service.IService
         public Task<IEnumerable<OrderDto>?> GetAll(string? userId = null, string? status = null);
         public Task<OrderDto?> Create(OrderDto orderDto);
         public Task<bool> Cancel(int entityId);
-        public Task<OrderHeaderDto> UpdateOrderDetails(OrderHeaderDto orderHeader);
-        public Task<OrderHeaderDto> PaymentConfirmation(int entityId);
-        public Task<bool> UpdateOrderStatus(int orderId, string status);
+        public Task<OrderHeaderDto?> UpdateOrderDetails(OrderHeaderDto orderHeader);
+        public Task<OrderHeaderDto?> PaymentConfirmation(int entityId);
+        public Task<bool> UpdateOrderStatus(int entityId, string status);
     }
 
 }
