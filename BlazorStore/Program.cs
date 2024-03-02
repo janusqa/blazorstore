@@ -100,6 +100,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDBInitilizer, DBInitilizer>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 // Configure DPI for client services that will be neccessary on the server if pre-rendering is enabled 
 BlazorStore.Client.CommonServices.ConfigureCommonServices(builder.Services, builder.Configuration);

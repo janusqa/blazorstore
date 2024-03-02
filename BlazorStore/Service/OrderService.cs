@@ -277,16 +277,24 @@ namespace BlazorStore.Service
 
         public async Task<bool> UpdateOrderStatus(int entityId, string status)
         {
+            var sqlParams = new List<SqliteParameter> {
+                new SqliteParameter("Id", entityId),
+                new SqliteParameter("NewStatus", status)
+            };
+            var inParams = new List<string> { "Status = @NewStatus" };
+            if (status == SD.OrderStatusShipped)
+            {
+                sqlParams.Add(new SqliteParameter("ShippingDate", DateTime.Now));
+                inParams.Add("ShippingDate = @ShippingDate");
+            }
+
             var orderHeaderId = (await _uow.OrderHeaders.SqlQueryAsync<int>($@"
                 UPDATE OrderHeaders 
                 SET 
-                    Status = @NewStatus 
+                    {string.Join(", ", inParams)} 
                 WHERE Id = @Id
                 RETURNING Id;
-            ", [
-                new SqliteParameter("Id", entityId),
-                new SqliteParameter("NewStatus", SD.OrderStatusApproved)
-            ])).FirstOrDefault();
+            ", sqlParams)).FirstOrDefault();
 
             return orderHeaderId != 0;
         }
