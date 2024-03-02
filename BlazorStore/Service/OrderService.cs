@@ -3,6 +3,7 @@ using BlazorStore.DataAccess.UnitOfWork;
 using BlazorStore.Dto;
 using BlazorStore.Models.Domain;
 using BlazorStore.Models.Extensions;
+using BlazorStore.Models.Helper;
 using BlazorStore.Service.IService;
 using Microsoft.Data.Sqlite;
 
@@ -164,9 +165,46 @@ namespace BlazorStore.Service
             };
         }
 
-        public Task<IEnumerable<OrderDto>> GetAll(string? userId = null, string? status = null)
+        public async Task<IEnumerable<OrderDto>?> GetAll(string? userId = null, string? status = null)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var sqlParams = new List<SqliteParameter>();
+                var inParams = new List<string>();
+                if (userId is not null)
+                {
+                    sqlParams.Add(new SqliteParameter($"UserId", userId));
+                    inParams.Add("oh.UserId = @UserId");
+                }
+                if (userId is not null)
+                {
+                    sqlParams.Add(new SqliteParameter($"Status", status));
+                    inParams.Add("oh.Status = @Status");
+                }
+
+                var orderHeaders = await _uow.OrderHeaders.FromSqlAsync($@"
+                    SELECT * FROM OrderHeaders WHERE {string.Join(" AND ", inParams)};
+                ", sqlParams);
+
+                var orderHeaderIds = orderHeaders.Select(oh => oh.Id).ToList();
+
+                inParams.Clear();
+                sqlParams.Clear();
+                foreach (var (ohId, idx) in orderHeaderIds.Select((ohId, idx) => (ohId, idx)))
+                {
+                    inParams.Add($"@oh{idx}");
+                    sqlParams.Add(new SqliteParameter($"oh{idx}", ohId));
+                }
+
+                var orderDetials = await _uow.OrderDetails.FromSqlAsync($@"
+                    SELECT * FROM OrderDetails WHERE OrderHeaderId IN ({string.Join(", ", inParams)});
+                ", sqlParams);
+
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public Task<OrderHeaderDto> PaymentConfirmation(int entityId)
