@@ -7,6 +7,7 @@ namespace BlazorStore.ApiAccess.Service
     {
         public IAuthService Auth { get; init; }
         public IProductService Products { get; init; }
+        public IOrderService Orders { get; init; }
 
         public ApiService(
             IHttpClientFactory httpClient,
@@ -26,6 +27,13 @@ namespace BlazorStore.ApiAccess.Service
                 messageBuilder,
                 cookieService,
                 $@"api/{SD.ApiVersion}/products"
+            );
+
+            Orders = new OrderService(
+                httpClient,
+                messageBuilder,
+                cookieService,
+                $@"api/{SD.ApiVersion}/orders"
             );
         }
 
