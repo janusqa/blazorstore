@@ -1,6 +1,21 @@
 @page "/summary"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
 
-<div class="mt-4 mx-4 px-md-5 mx-md-5 p-1">
+@* Fluxor Plumbing *@
+@implements IDisposable
+@inject IState<AppState.Cart.CartState> CartState
+
+@inject IJSRuntime _jsruntime
+
+@if (Order is null)
+{
+    <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
+    <img src="images/ajax-loader.gif" alt="Loading..." />
+</div>
+}
+else
+{
+    <div class="mt-4 mx-4 px-md-5 mx-md-5 p-1">
 
     <div class="row p-2 my-3">
         <div class="col-12 col-lg-7 p-4">
@@ -12,80 +27,144 @@
                     <a href="/cart" class="btn btn-secondary btn-block">Back to cart</a>
                 </div>
             </div>
+            @foreach (var item in Order.OrderDetails)
+                {
+                    <div class="row border p-1 m-1">
 
-            <div class="row border p-1 m-1">
+                        <div class="col-3 col-md-2 ">
+                            <img src="" width="100%">
+                        </div>
+                        <div class="col-5 col-md-5 ">
+                            <span class="">Product : @item.ProductName </span><br />
+                            <span class="pt-1">Size : @item.Size</span><br />
+                            <span class="pt-1">Count : @item.Count</span><br />
 
-                <div class="col-3 col-md-2 ">
-                    <img src="" width="100%">
-                </div>
-                <div class="col-5 col-md-5 ">
-                    <span class="">Product : ProductName </span><br />
-                    <span class="pt-1">Size : Size</span><br />
-                    <span class="pt-1">Count : Count</span><br />
-
-                </div>
-                <div class="col-4 col-md-5 " style="text-align:right;">
-                    <h4 class="text-warning font-weight-bold pt-2">
-                        USD
-                        <span style="border-bottom:1px solid #ff6a00">
-                            Count * Price
-                        </span>
-                    </h4>
-                </div>
-            </div>
-            <div class="row" style="text-align:right">
-                <div class="col-12 px-3">
-                    <h3> Order Total : <span class="text-secondary">OrderTotal</span> </h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-lg-5 p-4 ml-4 ml-md-0 mt-4 mt-md-0 border">
-            <form method="post">
-                <div class="row px-2 text-success border-bottom">
-                    <div class="col-7 py-1">
-                        <p style="font-size:x-large;margin:0px;">Enter Details</p>
+                        </div>
+                        <div class="col-4 col-md-5 " style="text-align:right;">
+                            <h4 class="text-warning font-weight-bold pt-2">
+                                USD
+                                <span style="border-bottom:1px solid #ff6a00">
+                                    @((item.Count * item.Price).ToString("c"))
+                                </span>
+                            </h4>
+                        </div>
+                    </div>
+                }
+                <div class="row" style="text-align:right">
+                    <div class="col-12 px-3">
+                        <h3> Order Total : <span class="text-secondary">@(Order.OrderDetails.Sum(od => od.Count *
+                            od.Price).ToString("c"))</span> </h3>
                     </div>
                 </div>
+            </div>
 
-                <div class="form-group pt-2">
-                    <label class="text-warning">Name</label>
-                    <input type="text" class="form-control" />
-                </div>
-                <div class="form-group pt-2">
-                    <label class="text-warning">Phone</label>
-                    <input type="text" class="form-control" />
-                </div>
-                <div class="form-group pt-2">
-                    <label class="text-warning">Email</label>
-                    <input type="text" class="form-control" />
-                </div>
-                <div class="form-group pt-2">
-                    <label class="text-warning">Street Address</label>
-                    <input type="text" class="form-control" />
-                </div>
-                <div class="form-group pt-2">
-                    <label class="text-warning">City</label>
-                    <input type="text" class="form-control" />
-                </div>
-                <div class="form-group pt-2">
-                    <label class="text-warning">State</label>
-                    <input type="text" class="form-control" />
-                </div>
-                <div class="form-group pt-2">
-                    <label class="text-warning">Postal Code</label>
-                    <input type="text" class="form-control" />
-                </div>
+            <div class="col-12 col-lg-5 p-4 ml-4 ml-md-0 mt-4 mt-md-0 border">
+                <form method="post">
+                    <div class="row px-2 text-success border-bottom">
+                        <div class="col-7 py-1">
+                            <p style="font-size:x-large;margin:0px;">Enter Details</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group pt-2">
+                        <label class="text-warning">Name</label>
+                        <input type="text" class="form-control" />
+                    </div>
+                    <div class="form-group pt-2">
+                        <label class="text-warning">Phone</label>
+                        <input type="text" class="form-control" />
+                    </div>
+                    <div class="form-group pt-2">
+                        <label class="text-warning">Email</label>
+                        <input type="text" class="form-control" />
+                    </div>
+                    <div class="form-group pt-2">
+                        <label class="text-warning">Street Address</label>
+                        <input type="text" class="form-control" />
+                    </div>
+                    <div class="form-group pt-2">
+                        <label class="text-warning">City</label>
+                        <input type="text" class="form-control" />
+                    </div>
+                    <div class="form-group pt-2">
+                        <label class="text-warning">State</label>
+                        <input type="text" class="form-control" />
+                    </div>
+                    <div class="form-group pt-2">
+                        <label class="text-warning">Postal Code</label>
+                        <input type="text" class="form-control" />
+                    </div>
 
 
-                <div class="form-group pt-2">
-                    <button type="submit" class="btn btn-success form-control">Checkout Now</button>
-                </div>
-            </form>
+                    <div class="form-group pt-2">
+                        <button type="submit" class="btn btn-success form-control">Checkout Now</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+}
+
 
 @code {
+    private OrderDto? Order { get; set; }
 
+    protected override void OnInitialized()
+    {
+        GetOrder();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!CartState.Value.Updating && CartState.Value.Updated) GetOrder();
+
+        await Task.CompletedTask;
+    }
+
+    private void GetOrder()
+    {
+        Order = new OrderDto
+            {
+                OrderHeader = new OrderHeaderDto
+                {
+                    OrderTotal = CartState.Value.Cart.Sum(c => c.Value.Count * c.Value.ProductPrice.Price),
+                    UserId = string.Empty,
+                    Name = string.Empty,
+                    PhoneNumber = string.Empty,
+                    StreetAddress = string.Empty,
+                    State = string.Empty,
+                    City = string.Empty,
+                    PostalCode = string.Empty,
+                    Status = SD.OrderStatusPending
+                },
+                OrderDetails = CartState.Value.Cart.Select(c => new OrderDetailDto
+                {
+                    ProductId = c.Value.ProductId,
+                    Price = c.Value.ProductPrice.Price,
+                    Size = c.Value.ProductPrice.Size,
+                    Count = c.Value.Count,
+                    ProductName = c.Value.Product.Name,
+                    Product = c.Value.Product
+                }).ToList()
+            };
+    }
+
+    // Fluxor Plumbing
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            CartState.StateChanged += AppStateHasChanged;
+        }
+    }
+
+    private void AppStateHasChanged(object? sender, EventArgs args)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        CartState.StateChanged -= AppStateHasChanged;
+    }
 }

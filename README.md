@@ -67,7 +67,7 @@
                 1.  builder.Services.AddRazorPages();
                 2.  app.MapRazorPages();
          2. Now update migrations after adding these packages
-            1. dotnet ef migration add MyMigration --project YourClassLibraryProjectName --startup-project YourWebAppProjectName
+            1. dotnet ef migrations add MyMigration --project YourClassLibraryProjectName --startup-project YourWebAppProjectName
             2. dotnet ef database update --startup-project path\to\your\startup\project.csproj
          3. We may want to extend the ApplicationUser and what fields it has. Example we may want to  give this user an Address.  
             1. In Models project add the "dotnet add package Microsoft.Extensions.Identity.Stores --version 8.0.0" 
@@ -93,7 +93,7 @@
             now perform the apply migrations below
          8. Apply migrations
             1. dotnet ef migrations add [<NameOfMigrationCanBeAnythingYouWantSoMakeItDescriptive>]
-            2. dotnet ef database update
+            2. dotnet ef database update --startup-project [<MainProject>]
             3. IMPORTANT: IF YOU HAVE MOVED Data AND Migrations to their own start libray the comand to use would be
             ```
             dotnet ef migrations add MyMigration --project YourClassLibraryProjectName --startup-project YourWebAppProjectName 

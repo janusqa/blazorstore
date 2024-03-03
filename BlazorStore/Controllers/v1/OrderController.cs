@@ -1,12 +1,7 @@
 using Asp.Versioning;
-using BlazorStore.DataAccess.UnitOfWork;
 using BlazorStore.Dto;
-using BlazorStore.Models.Domain;
-using BlazorStore.Models.Extensions;
-using BlazorStore.Models.Helper;
 using BlazorStore.Service.IService;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
 
 namespace BlazorStore.Controllers
 {

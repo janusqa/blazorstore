@@ -95,7 +95,7 @@ namespace BlazorStore.Service
                     var inParams = new StringBuilder();
                     var sqlParams = new List<SqliteParameter>();
 
-                    foreach (var (orderDetail, idx) in orderDto.OderDetails.Select((od, idx) => (od, idx)))
+                    foreach (var (orderDetail, idx) in orderDto.OrderDetails.Select((od, idx) => (od, idx)))
                     {
                         inParams.Append($@"
                             (@OrderHeaderId{idx}, 
@@ -154,7 +154,7 @@ namespace BlazorStore.Service
                     return new OrderDto
                     {
                         OrderHeader = orderHeader.ToDto(),
-                        OderDetails = orderDetails.Select(od => od.ToDto()).ToList()
+                        OrderDetails = orderDetails.Select(od => od.ToDto()).ToList()
                     };
                 }
 
@@ -208,7 +208,7 @@ namespace BlazorStore.Service
                         new OrderDto
                         {
                             OrderHeader = orderHeader.ToDto(),
-                            OderDetails = orderDetails.Where(od => od.OrderHeaderId == orderHeader.Id).Select(od => od.ToDto()).ToList()
+                            OrderDetails = orderDetails.Where(od => od.OrderHeaderId == orderHeader.Id).Select(od => od.ToDto()).ToList()
                         }
                     );
                 }
