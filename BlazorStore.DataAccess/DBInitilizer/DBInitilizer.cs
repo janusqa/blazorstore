@@ -2,7 +2,9 @@
 using BlazorStore.Common;
 using BlazorStore.DataAccess.Data;
 using BlazorStore.DataAccess.UnitOfWork;
+using BlazorStore.Models.Domain;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlazorStore.DataAccess.DBInitilizer
@@ -12,20 +14,25 @@ namespace BlazorStore.DataAccess.DBInitilizer
         private readonly ApplicationDbContext _db;
         private readonly IUnitOfWork _uow;
         private readonly RoleManager<IdentityRole> _rm;
+        private readonly UserManager<ApplicationUser> _um;
+
 
         public DBInitilizer(
             ApplicationDbContext db,
             IUnitOfWork uow,
-            RoleManager<IdentityRole> rm
+            RoleManager<IdentityRole> rm,
+            UserManager<ApplicationUser> um
         )
         {
             _db = db;
             _uow = uow;
             _rm = rm;
+            _um = um;
         }
 
         public async Task Initilize()
         {
+            // ****
             // 1. Run any unapplied migrations
             // ****
             try
@@ -38,6 +45,7 @@ namespace BlazorStore.DataAccess.DBInitilizer
                 Console.WriteLine($"Migration Error: {ex.Message}");
             }
 
+            // ****
             // 2. Create Triggers
             // ****
             var triggers = new List<string>();
@@ -65,6 +73,7 @@ namespace BlazorStore.DataAccess.DBInitilizer
             }
             transaction.Commit();
 
+            // ****
             // 3. Create Roles if the do not already exist
             // ****
             var roles = new List<string> {
@@ -85,6 +94,27 @@ namespace BlazorStore.DataAccess.DBInitilizer
             foreach (var task in rolesToCreate)
             {
                 await _rm.CreateAsync(new IdentityRole(task));
+            }
+
+            // ****
+            // 4. Create Admin user
+            // ****
+            if (rolesToCreate.Contains(SD.Role_Admin))
+            {
+                var adminEmail = "admin@retrievo.net";
+                var adminUser = await _um.FindByNameAsync(adminEmail);
+                if (adminUser is null)
+                {
+                    await _um.CreateAsync(new ApplicationUser
+                    {
+                        UserName = adminEmail,
+                        Email = adminEmail,
+                        PhoneNumber = "1-234-567-8901",
+                    }, "P@ssw0rd");
+
+                    adminUser = await _um.FindByNameAsync(adminEmail);
+                    if (adminUser is not null) await _um.AddToRoleAsync(adminUser, SD.Role_Admin);
+                }
             }
 
             return;

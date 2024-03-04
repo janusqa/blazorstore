@@ -44,6 +44,7 @@
                 <label for="confirm-password">Confirm Password</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
+            @* *** BEGIN CUSTOM CODE*@
             <AuthorizeView Roles="@($@"{SD.Role_Admin}")" Context="registerRoleContext">
                 <div class="form-floating mb-3">
                     <InputSelect @bind-Value="Input.Role" class="form-select">
@@ -57,6 +58,7 @@
                     <ValidationMessage For="() => Input.Role" class="text-danger"/>
                 </div>
             </AuthorizeView>
+            @* *** END CUSTOM CODE*@
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
     </div>
@@ -103,7 +105,7 @@
 
         // *** BEGIN CUSTOM CODE TO ASSIGN A USER TO A ROLE WHEN THEY REGISTER
         // *** FOR DEMO ONLY. USER CHOOSES ROLE WHEN REGISTERING. JUST FOR TESTING
-        // *** IN PRODUCTING USER SHOULD BE GIVEN A DEFALUT ROLE AND THEN ADMIN SHOULD
+        // *** IN PRODUCTION USER SHOULD BE GIVEN A DEFALUT ROLE AND THEN ADMIN SHOULD
         // *** THEN FURTHER ASSIGN FINAL ROLE 
         if (Input.Role is not null && Input.Role != "")
         {
@@ -192,7 +194,7 @@
         // *** END CUSTOM FIELDS WE WANT TO ADD FOR A USER 
     }
 
-    // *** BEGIN CUSTOM FIELDS WE WANT TO ADD FOR A USER 
+    // *** BEGIN CUSTOM FIELDS FOR THIS COMPONENT
     private List<string> RoleList { get; set; } = [];
-    // *** END CUSTOM FIELDS WE WANT TO ADD FOR A USER 
+    // *** END CUSTOM FIELDS FOR THIS COMPONENT
 }
