@@ -1,6 +1,7 @@
 @page "/category/create"
 @page "/category/edit/{entityId:int}"
 @attribute [StreamRendering]
+@attribute [Authorize]
 
 @inject IUnitOfWork _uow
 @inject NavigationManager _nm

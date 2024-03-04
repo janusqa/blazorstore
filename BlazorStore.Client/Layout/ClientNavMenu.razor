@@ -1,5 +1,4 @@
 @implements IDisposable
-@inject NavigationManager NavigationManager
 @inject IState<AppState.Cart.CartState> cartState
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -17,52 +16,12 @@
                     </NavLink>
                 </li>
             </ul>
-            <ul class="navbar-nav">
-                <AuthorizeView>
-                    <Authorized>
-                        <li class="nav-item p-0">
-                            <NavLink class="nav-link" href="Account/Manage">
-                                <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>
-                                @context.User.Identity?.Name
-                            </NavLink>
-                        </li>
-                        <li class="nav-item p-0">
-                            <form action="Account/Logout" method="post">
-                                <AntiforgeryToken />
-                                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                                <button type="submit" class="nav-link">
-                                    <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                                </button>
-                            </form>
-                        </li>
-                    </Authorized>
-                    <NotAuthorized>
-                        <li class="nav-item p-0">
-                            <NavLink class="nav-link" href="Account/Register">
-                                <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                            </NavLink>
-                        </li>
-                        <li class="nav-item p-0">
-                            <NavLink class="nav-link" href="Account/Login">
-                                <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                            </NavLink>
-                        </li>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </ul>
+            <LoginMenu />
         </div>
     </div>
 </nav>
 
 @code {
-    private string? currentUrl;
-
-    protected override void OnInitialized()
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
-    }
-
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
@@ -73,7 +32,6 @@
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
     }
 
@@ -84,7 +42,6 @@
 
     public void Dispose()
     {
-        NavigationManager.LocationChanged -= OnLocationChanged;
         cartState.StateChanged -= AppStateHasChanged;
     }
 }

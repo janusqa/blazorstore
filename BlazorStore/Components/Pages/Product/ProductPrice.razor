@@ -1,5 +1,6 @@
 @page "/product/price/{entityId:int}"
 @attribute [StreamRendering]
+@attribute [Authorize]
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 @using Syncfusion.Blazor.Grids

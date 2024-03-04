@@ -1,6 +1,7 @@
 @page "/product/create"
 @page "/product/edit/{entityId:int}"
 @attribute [StreamRendering]
+@attribute [Authorize]
 
 @inject IUnitOfWork _uow
 @inject NavigationManager _nm
