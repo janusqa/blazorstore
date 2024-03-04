@@ -43,36 +43,43 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 
 // Add Custmom Autentication
 // add (jwt, could be other types of auth too) authentication
-builder.Services.AddScoped<ICustomJwtBearerHandler, CustomJwtBearerHandler>();
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = "BlazorStore";
-    options.DefaultChallengeScheme = "BlazorStore";
-})
-.AddScheme<JwtBearerOptions, CustomJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.IncludeErrorDetails = true;
-}).AddGoogle(options =>
+builder.Services.AddAuthentication().AddGoogle(options =>
 {
     options.ClientId = builder.Configuration.GetValue<string>("Google:AppId") ?? "";
     options.ClientSecret = builder.Configuration.GetValue<string>("Google:AppSecret") ?? "";
-})
-.AddPolicyScheme("BlazorStore", "BlazorStore", options =>
-{
-    // runs on each request
-    options.ForwardDefaultSelector = context =>
-    {
-        // filter by auth type
-        string? authorization = context.Request.Headers[HeaderNames.Authorization];
-        if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
-            return JwtBearerDefaults.AuthenticationScheme; ;
-
-        // otherwise always check for cookie auth
-        return IdentityConstants.ApplicationScheme;
-    };
 });
+//
+// builder.Services.AddScoped<ICustomJwtBearerHandler, CustomJwtBearerHandler>();
+// builder.Services.AddAuthentication(options =>
+// {
+//     options.DefaultAuthenticateScheme = "BlazorStore";
+//     options.DefaultChallengeScheme = "BlazorStore";
+// })
+// .AddScheme<JwtBearerOptions, CustomJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options =>
+// {
+//     options.RequireHttpsMetadata = false;
+//     options.SaveToken = true;
+//     options.IncludeErrorDetails = true;
+// }).AddGoogle(options =>
+// {
+//     options.ClientId = builder.Configuration.GetValue<string>("Google:AppId") ?? "";
+//     options.ClientSecret = builder.Configuration.GetValue<string>("Google:AppSecret") ?? "";
+// })
+// .AddPolicyScheme("BlazorStore", "BlazorStore", options =>
+// {
+//     // runs on each request
+//     options.ForwardDefaultSelector = context =>
+//     {
+//         // filter by auth type
+//         string? authorization = context.Request.Headers[HeaderNames.Authorization];
+//         if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
+//             return JwtBearerDefaults.AuthenticationScheme; ;
+
+//         // otherwise always check for cookie auth
+//         return IdentityConstants.ApplicationScheme;
+//     };
+// });
+//
 // builder.Services.AddAuthentication(options =>
 // {
 //     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -84,6 +91,7 @@ builder.Services.AddAuthentication(options =>
 //     options.SaveToken = true;
 //     options.IncludeErrorDetails = true;
 // });
+//
 // builder.Services.AddAuthentication(options =>
 //     {
 //         options.DefaultScheme = IdentityConstants.ApplicationScheme;

@@ -51,13 +51,13 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             [FromForm] string returnUrl) =>
         {
             // *** Begin custom code
-            if (principal.Identity?.Name is not null)
-            {
-                var user = await _um.FindByNameAsync(principal.Identity.Name);
-                if (user is not null) await _uow.ApplicationUsers.RevokeToken(user);
-            }
-            context.Response.Cookies.Delete(SD.JwtRrefreshTokenCookie);
-            context.Response.Cookies.Delete(SD.ApiXsrfCookie);
+            // if (principal.Identity?.Name is not null)
+            // {
+            //     var user = await _um.FindByNameAsync(principal.Identity.Name);
+            //     if (user is not null) await _uow.ApplicationUsers.RevokeToken(user);
+            // }
+            // context.Response.Cookies.Delete(SD.JwtRrefreshTokenCookie);
+            // context.Response.Cookies.Delete(SD.ApiXsrfCookie);
             // *** End custom code
 
             await signInManager.SignOutAsync();
@@ -74,16 +74,6 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             [FromServices] SignInManager<ApplicationUser> signInManager,
             [FromForm] string provider) =>
         {
-            // *** Begin custom code
-            // if (principal.Identity?.Name is not null)
-            // {
-            //     var user = await _um.FindByNameAsync(principal.Identity.Name);
-            //     if (user is not null) await _uow.ApplicationUsers.RevokeToken(user);
-            // }
-            // context.Response.Cookies.Delete(SD.JwtRrefreshTokenCookie);
-            // context.Response.Cookies.Delete(SD.ApiXsrfCookie);
-            // *** End custom code
-
             // Clear the existing external cookie to ensure a clean login process
             await context.SignOutAsync(IdentityConstants.ExternalScheme);
 

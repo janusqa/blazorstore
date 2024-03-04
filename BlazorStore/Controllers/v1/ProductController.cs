@@ -4,6 +4,7 @@ using BlazorStore.Dto;
 using BlazorStore.Models.Domain;
 using BlazorStore.Models.Extensions;
 using BlazorStore.Models.Helper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 

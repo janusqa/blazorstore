@@ -100,47 +100,49 @@
         if (result.Succeeded)
         {
             // *** Begin custom code
+            /*
             var tokenResult = await _uow.ApplicationUsers.LoginLite(Input.Email);
             if (tokenResult?.AccessToken is not null && tokenResult?.RefreshToken is not null && tokenResult?.XsrfToken is not null)
             {
-                // refresh
-                HttpContext.Response.Cookies.Append(
-                SD.JwtRrefreshTokenCookie,
-                tokenResult.RefreshToken,
-                new CookieOptions()
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.Lax,
-                        Path = "/",
-                        MaxAge = DateTime.UtcNow.AddMinutes(SD.JwtRefreshTokenExpiry) - DateTime.UtcNow
-                    });
+            // refresh
+            HttpContext.Response.Cookies.Append(
+            SD.JwtRrefreshTokenCookie,
+            tokenResult.RefreshToken,
+            new CookieOptions()
+            {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
+            MaxAge = DateTime.UtcNow.AddMinutes(SD.JwtRefreshTokenExpiry) - DateTime.UtcNow
+            });
 
-                // xsrf
-                HttpContext.Response.Cookies.Append(
-                SD.ApiXsrfCookie,
-                tokenResult.XsrfToken,
-                new CookieOptions()
-                    {
-                        HttpOnly = false,
-                        Secure = true,
-                        SameSite = SameSiteMode.Lax,
-                        Path = "/",
-                        MaxAge = DateTime.UtcNow.AddMinutes(SD.JwtAccessTokenExpiry) - DateTime.UtcNow
-                    });
+            // xsrf
+            HttpContext.Response.Cookies.Append(
+            SD.ApiXsrfCookie,
+            tokenResult.XsrfToken,
+            new CookieOptions()
+            {
+            HttpOnly = false,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
+            MaxAge = DateTime.UtcNow.AddMinutes(SD.JwtAccessTokenExpiry) - DateTime.UtcNow
+            });
 
-                Logger.LogInformation("User logged in.");
-                RedirectManager.RedirectTo(ReturnUrl);
+            Logger.LogInformation("User logged in.");
+            RedirectManager.RedirectTo(ReturnUrl);
             }
             else
             {
-                errorMessage = "Error: Invalid login attempt.";
+            errorMessage = "Error: Invalid login attempt.";
             }
+            */
             // *** end custom code
 
             // *** Previous code
-            // Logger.LogInformation("User logged in.");
-            // RedirectManager.RedirectTo(ReturnUrl);
+            Logger.LogInformation("User logged in.");
+            RedirectManager.RedirectTo(ReturnUrl);
         }
         else if (result.RequiresTwoFactor)
         {
