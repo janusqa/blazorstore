@@ -6,6 +6,7 @@
 @inject IState<AppState.Cart.CartState> CartState
 
 @inject IJSRuntime _jsruntime
+@inject IConfiguration _config
 
 @if (Order is null)
 {
@@ -32,7 +33,7 @@ else
                     <div class="row border p-1 m-1">
 
                         <div class="col-3 col-md-2 ">
-                            <img src="" width="100%">
+                            <img src="@($"{baseImageUrl}{item.Product?.ImageUrl}")" width="100%" alt="@item.ProductName">
                         </div>
                         <div class="col-5 col-md-5 ">
                             <span class="">Product : @item.ProductName </span><br />
@@ -59,7 +60,9 @@ else
             </div>
 
             <div class="col-12 col-lg-5 p-4 ml-4 ml-md-0 mt-4 mt-md-0 border">
-                <form method="post">
+                <EditForm Model="Order.OrderHeader" OnValidSubmit="Checkout" FormName="checkout" method="POST">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" role="alert" />
                     <div class="row px-2 text-success border-bottom">
                         <div class="col-7 py-1">
                             <p style="font-size:x-large;margin:0px;">Enter Details</p>
@@ -68,38 +71,45 @@ else
 
                     <div class="form-group pt-2">
                         <label class="text-warning">Name</label>
-                        <input type="text" class="form-control" />
+                        <InputText @bind-Value="Order.OrderHeader.Name" class="form-control" />
+                        <ValidationMessage For="() => Order.OrderHeader.Name" />
                     </div>
                     <div class="form-group pt-2">
                         <label class="text-warning">Phone</label>
-                        <input type="text" class="form-control" />
+                        <InputText @bind-Value="Order.OrderHeader.PhoneNumber" class="form-control" />
+                        <ValidationMessage For="() => Order.OrderHeader.PhoneNumber" />
                     </div>
                     <div class="form-group pt-2">
                         <label class="text-warning">Email</label>
-                        <input type="text" class="form-control" />
+                        <InputText @bind-Value="Order.OrderHeader.Email" class="form-control" />
+                        <ValidationMessage For="() => Order.OrderHeader.Email" />
                     </div>
                     <div class="form-group pt-2">
                         <label class="text-warning">Street Address</label>
-                        <input type="text" class="form-control" />
+                        <InputText @bind-Value="Order.OrderHeader.StreetAddress" class="form-control" />
+                        <ValidationMessage For="() => Order.OrderHeader.StreetAddress" />
                     </div>
                     <div class="form-group pt-2">
                         <label class="text-warning">City</label>
-                        <input type="text" class="form-control" />
+                        <InputText @bind-Value="Order.OrderHeader.City" class="form-control" />
+                        <ValidationMessage For="() => Order.OrderHeader.City" />
                     </div>
                     <div class="form-group pt-2">
                         <label class="text-warning">State</label>
-                        <input type="text" class="form-control" />
+                        <InputText @bind-Value="Order.OrderHeader.State" class="form-control" />
+                        <ValidationMessage For="() => Order.OrderHeader.State" />
                     </div>
                     <div class="form-group pt-2">
                         <label class="text-warning">Postal Code</label>
-                        <input type="text" class="form-control" />
+                        <InputText @bind-Value="Order.OrderHeader.PostalCode" class="form-control" />
+                        <ValidationMessage For="() => Order.OrderHeader.PostalCode" />
                     </div>
 
 
                     <div class="form-group pt-2">
                         <button type="submit" class="btn btn-success form-control">Checkout Now</button>
                     </div>
-                </form>
+                </EditForm>
             </div>
         </div>
     </div>
@@ -107,10 +117,13 @@ else
 
 
 @code {
+    [SupplyParameterFromForm(FormName = "checkout")]
     private OrderDto? Order { get; set; }
+    private string? baseImageUrl;
 
     protected override void OnInitialized()
     {
+        baseImageUrl = _config.GetSection("AppUrls:BaseServerUrl").Value!;
         GetOrder();
     }
 
@@ -121,6 +134,11 @@ else
         await Task.CompletedTask;
     }
 
+    private void Checkout()
+    {
+
+    }
+
     private void GetOrder()
     {
         Order = new OrderDto
@@ -129,6 +147,7 @@ else
                 {
                     OrderTotal = CartState.Value.Cart.Sum(c => c.Value.Count * c.Value.ProductPrice.Price),
                     UserId = string.Empty,
+                    Email = string.Empty,
                     Name = string.Empty,
                     PhoneNumber = string.Empty,
                     StreetAddress = string.Empty,

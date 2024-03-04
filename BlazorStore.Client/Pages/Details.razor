@@ -115,7 +115,7 @@ else
 
     protected override void OnInitialized()
     {
-        baseImageUrl = _config.GetSection("AppUrls:BaseApiUrl").Value!;
+        baseImageUrl = _config.GetSection("AppUrls:BaseServerUrl").Value!;
     }
 
     protected override async Task OnParametersSetAsync()

@@ -10,6 +10,9 @@ namespace BlazorStore.Models.Domain
         public required string UserId { get; set; }
         // TODO: add navigation propert for user
         [Required]
+        [EmailAddress]
+        public required string Email { get; set; }
+        [Required]
         [Display(Name = "Order Total")]
         public double OrderTotal { get; set; }
         [Required]

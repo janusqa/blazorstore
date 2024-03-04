@@ -6,6 +6,9 @@
 @inject IState<AppState.Cart.CartState> CartState
 @inject IDispatcher _dispatcher
 
+@inject IConfiguration _config
+
+
 @if (CartState.Value.Cart.Count < 1)
 {
     <div>You have @CartState.Value.Cart.Count items in your cart</div>
@@ -29,7 +32,7 @@ else
                 {
                     <div class="row">
                         <div class="col-3 col-md-1 text-center py-2">
-                            <img src="@item.Value.Product.ImageUrl" class="rounded" width="100%" />
+                            <img src="@($"{baseImageUrl}{item.Value.Product.ImageUrl}")" class="rounded" width="100%" />
                         </div>
                         <div class="col-9 text-sm-center text-md-start col-md-4 pt-lg-1 ">
                             <h4><strong>@item.Value.Product.Name</strong></h4>
@@ -103,6 +106,12 @@ else
         INCREMENT,
         DECREMENT,
         DELETE
+    }
+    private string? baseImageUrl;
+
+    protected override void OnInitialized()
+    {
+        baseImageUrl = _config.GetSection("AppUrls:BaseServerUrl").Value!;
     }
 
     private void UpdateCart(CartOperation operation, CartItemDto item)

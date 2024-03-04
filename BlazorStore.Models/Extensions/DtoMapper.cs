@@ -55,6 +55,7 @@ namespace BlazorStore.Models.Extensions
             {
                 Id = OrderHeader.Id,
                 UserId = OrderHeader.UserId,
+                Email = OrderHeader.Email,
                 OrderTotal = OrderHeader.OrderTotal,
                 OrderDate = OrderHeader.OrderDate,
                 ShippingDate = OrderHeader.ShippingDate,

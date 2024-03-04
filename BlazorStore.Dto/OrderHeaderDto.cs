@@ -8,6 +8,9 @@ namespace BlazorStore.Dto
         [Required]
         public required string UserId { get; set; }
         [Required]
+        [EmailAddress]
+        public required string Email { get; set; }
+        [Required]
         [Display(Name = "Order Total")]
         public double OrderTotal { get; set; }
         [Required]
