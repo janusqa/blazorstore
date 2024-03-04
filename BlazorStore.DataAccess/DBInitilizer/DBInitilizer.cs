@@ -38,7 +38,6 @@ namespace BlazorStore.DataAccess.DBInitilizer
             try
             {
                 if (_db.Database.GetPendingMigrations().Any()) await _db.Database.MigrateAsync();
-
             }
             catch (Exception ex)
             {
@@ -82,24 +81,18 @@ namespace BlazorStore.DataAccess.DBInitilizer
                 SD.Role_Employee,
             };
 
-            var rolesToCreate = new List<string>();
             foreach (var role in roles)
             {
-                if (!await _rm.RoleExistsAsync(role))
+                if (!(await _rm.RoleExistsAsync(role)))
                 {
-                    rolesToCreate.Add(role);
+                    await _rm.CreateAsync(new IdentityRole(role));
                 }
-            }
-
-            foreach (var task in rolesToCreate)
-            {
-                await _rm.CreateAsync(new IdentityRole(task));
             }
 
             // ****
             // 4. Create Admin user
             // ****
-            if (rolesToCreate.Contains(SD.Role_Admin))
+            if (await _rm.RoleExistsAsync(SD.Role_Admin))
             {
                 var adminEmail = "admin@retrievo.net";
                 var adminUser = await _um.FindByNameAsync(adminEmail);
@@ -109,7 +102,8 @@ namespace BlazorStore.DataAccess.DBInitilizer
                     {
                         UserName = adminEmail,
                         Email = adminEmail,
-                        PhoneNumber = "1-234-567-8901",
+                        EmailConfirmed = true,
+                        UserSecret = BcryptUtils.CreateSalt()
                     }, "P@ssw0rd");
 
                     adminUser = await _um.FindByNameAsync(adminEmail);

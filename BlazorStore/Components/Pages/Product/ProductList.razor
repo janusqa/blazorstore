@@ -24,7 +24,7 @@
             _nm.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString((new Uri(_nm.Uri)).LocalPath)}", forceLoad: true);
         }
 
-        if (!user.IsInRole(SD.Role_Admin))
+        if (user is not null && !user.IsInRole(SD.Role_Admin))
         {
             _nm.NavigateTo($"/Account/AccessDenied?returnUrl={Uri.EscapeDataString((new Uri(_nm.Uri)).LocalPath)}", forceLoad:
             true);
