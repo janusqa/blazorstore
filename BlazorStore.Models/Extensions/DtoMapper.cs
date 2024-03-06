@@ -85,5 +85,17 @@ namespace BlazorStore.Models.Extensions
                 ProductName = OrderDetail.ProductName
             };
         }
+
+        public static ApplicationUserDto ToDto(this ApplicationUser ApplicationUser)
+        {
+            return new ApplicationUserDto
+            {
+                Id = ApplicationUser.Id,
+                UserName = ApplicationUser.UserName ?? string.Empty,
+                Email = ApplicationUser.Email ?? string.Empty,
+                PhoneNumber = ApplicationUser.PhoneNumber,
+                Name = ApplicationUser.Name,
+            };
+        }
     }
 }

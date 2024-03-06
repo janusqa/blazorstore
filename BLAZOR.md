@@ -169,4 +169,4 @@ builder.Services.AddFluxor(options =>
 });
 ```
 
-3.
+

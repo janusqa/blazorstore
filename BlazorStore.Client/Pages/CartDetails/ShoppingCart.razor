@@ -8,14 +8,21 @@
 
 @inject IConfiguration _config
 
-
-@if (CartState.Value.Cart.Count < 1)
+@if (IsLoading)
 {
-    <div>You have @CartState.Value.Cart.Count items in your cart</div>
+    <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
+    <img src="images/ajax-loader.gif" alt="Loading..." />
+</div>
 }
 else
 {
-    <div class="container mt-4">
+    @if (CartState.Value.Cart.Count < 1)
+    {
+        <div>You have @CartState.Value.Cart.Count items in your cart</div>
+    }
+    else
+    {
+        <div class="container mt-4">
     <div class="card">
         <div class="card-header bg-dark text-light ml-0 ">
             <div class="row">
@@ -29,76 +36,76 @@ else
         </div>
         <div class="card-body">
             @foreach (var item in CartState.Value.Cart)
-                {
+                    {
+                        <div class="row">
+                            <div class="col-3 col-md-1 text-center py-2">
+                                <img src="@($"{baseImageUrl}{item.Value.Product.ImageUrl}")" class="rounded" width="100%" />
+                            </div>
+                            <div class="col-9 text-sm-center text-md-start col-md-4 pt-lg-1 ">
+                                <h4><strong>@item.Value.Product.Name</strong></h4>
+
+                                <div class="badge bg-primary text-center" style="font-size:12px;">
+                                    @item.Value.Product.CategoryDto?.Name
+                                </div>
+                                <div class="badge bg-info text-center" style="font-size:12px;">
+                                    @item.Value.Product.Color
+                                </div>
+                                <div>
+                                    <p>Size : @item.Value.ProductPrice.Size</p>
+                                </div>
+                            </div>
+                            <div class="col-12 text-sm-center col-md-7 text-md-start row  pt-lg-3 mt-3">
+                                <div class="col-4 pt-1 ">
+
+                                    <h6><strong>@item.Value.ProductPrice.Price.ToString("c") <span class="text-muted">x</span>
+                                            @item.Value.Count </strong></h6>
+                                </div>
+                                <div class="col-6 col-sm-4 col-lg-6">
+                                    <button @onclick="() => UpdateCart(CartOperation.INCREMENT, item.Value)" type="submit"
+                                        class="btn btn-primary">
+                                        <i class="bi bi-plus-square"></i>
+                                    </button>
+                                    <button @onclick="() => UpdateCart(CartOperation.DECREMENT, item.Value)" type="submit"
+                                        class="btn btn-warning">
+                                        <i class="bi bi-dash-square"></i>
+                                    </button>
+                                </div>
+                                <div class="col-2 col-sm-4 col-lg-2 text-right">
+                                    <button @onclick="() => UpdateCart(CartOperation.DELETE, item.Value)" type="submit"
+                                        class="btn btn-outline-danger">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <hr />
+
                     <div class="row">
-                        <div class="col-3 col-md-1 text-center py-2">
-                            <img src="@($"{baseImageUrl}{item.Value.Product.ImageUrl}")" class="rounded" width="100%" />
+                        <div class="col-12 col-md-5">
                         </div>
-                        <div class="col-9 text-sm-center text-md-start col-md-4 pt-lg-1 ">
-                            <h4><strong>@item.Value.Product.Name</strong></h4>
-
-                            <div class="badge bg-primary text-center" style="font-size:12px;">
-                                @item.Value.Product.CategoryDto?.Name
-                            </div>
-                            <div class="badge bg-info text-center" style="font-size:12px;">
-                                @item.Value.Product.Color
-                            </div>
-                            <div>
-                                <p>Size : @item.Value.ProductPrice.Size</p>
-                            </div>
-                        </div>
-                        <div class="col-12 text-sm-center col-md-7 text-md-start row  pt-lg-3 mt-3">
-                            <div class="col-4 pt-1 ">
-
-                                <h6><strong>@item.Value.ProductPrice.Price.ToString("c") <span class="text-muted">x</span>
-                                        @item.Value.Count </strong></h6>
-                            </div>
-                            <div class="col-6 col-sm-4 col-lg-6">
-                                <button @onclick="() => UpdateCart(CartOperation.INCREMENT, item.Value)" type="submit"
-                                    class="btn btn-primary">
-                                    <i class="bi bi-plus-square"></i>
-                                </button>
-                                <button @onclick="() => UpdateCart(CartOperation.DECREMENT, item.Value)" type="submit"
-                                    class="btn btn-warning">
-                                    <i class="bi bi-dash-square"></i>
-                                </button>
-                            </div>
-                            <div class="col-2 col-sm-4 col-lg-2 text-right">
-                                <button @onclick="() => UpdateCart(CartOperation.DELETE, item.Value)" type="submit"
-                                    class="btn btn-outline-danger">
-                                    <i class="bi bi-trash-fill"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                }
-                <hr />
-
-                <div class="row">
-                    <div class="col-12 col-md-5">
-                    </div>
-                    <div class="col-12 col-md-6 offset-md-1 col-lg-4 offset-lg-3 pr-4">
-                        <ul class="list-group">
-                            <li class="list-group-item d-flex justify-content-between bg-light">
-                                <span class="text-info"> Total (USD)</span>
-                                <strong class="text-info">@(CartState.Value.Cart.Sum(c => c.Value.Count *
+                        <div class="col-12 col-md-6 offset-md-1 col-lg-4 offset-lg-3 pr-4">
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between bg-light">
+                                    <span class="text-info"> Total (USD)</span>
+                                    <strong class="text-info">@(CartState.Value.Cart.Sum(c => c.Value.Count *
                                 c.Value.ProductPrice.Price).ToString("c"))</strong>
-                            </li>
-                        </ul>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
+
+
                 </div>
-
-
-            </div>
-            <div class="card-footer">
-                <div class="col-12  col-md-3 offset-md-9">
-                    <a href="/summary" class="btn btn-secondary form-control">Summary</a>
+                <div class="card-footer">
+                    <div class="col-12  col-md-3 offset-md-9">
+                        <a href="/summary" class="btn btn-secondary form-control">Summary</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
 }
-
 
 @code {
     private enum CartOperation
@@ -108,6 +115,8 @@ else
         DELETE
     }
     private string? baseImageUrl;
+    protected bool IsLoading => (CartState.Value.IsLoading);
+
 
     protected override void OnInitialized()
     {
@@ -119,23 +128,23 @@ else
         if (operation == CartOperation.INCREMENT)
         {
             item.Count++;
-            _dispatcher.Dispatch(new AppState.Cart.UpsertedItemInCart(item));
+            _dispatcher.Dispatch(new AppState.Cart.ItemUpserted(item));
         }
         else if (operation == CartOperation.DECREMENT)
         {
             item.Count--;
             if (item.Count > 0)
             {
-                _dispatcher.Dispatch(new AppState.Cart.UpsertedItemInCart(item));
+                _dispatcher.Dispatch(new AppState.Cart.ItemUpserted(item));
             }
             else
             {
-                _dispatcher.Dispatch(new AppState.Cart.RemovedItemFromCart(item.ProductPriceId));
+                _dispatcher.Dispatch(new AppState.Cart.ItemRemoved(item.ProductPriceId));
             }
         }
         else if (operation == CartOperation.DELETE)
         {
-            _dispatcher.Dispatch(new AppState.Cart.RemovedItemFromCart(item.ProductPriceId));
+            _dispatcher.Dispatch(new AppState.Cart.ItemRemoved(item.ProductPriceId));
         }
     }
 

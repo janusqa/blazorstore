@@ -6,5 +6,6 @@ namespace BlazorStore.ApiAccess.Service
         IAuthService Auth { get; init; }
         IProductService Products { get; init; }
         IOrderService Orders { get; init; }
+        IApplicationUserService ApplicationUsers { get; init; }
     }
 }

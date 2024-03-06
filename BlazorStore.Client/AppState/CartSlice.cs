@@ -12,8 +12,7 @@ namespace BlazorStore.Client.AppState.Cart
     public record CartState
     {
         public Dictionary<int, CartItemDto> Cart { get; init; } = [];
-        public bool Updating { get; init; } = false;
-        public bool Updated { get; init; } = false;
+        public bool IsLoading { get; init; } = false;
     }
 
     // ********************
@@ -22,7 +21,7 @@ namespace BlazorStore.Client.AppState.Cart
     public static class Reducers
     {
         [ReducerMethod]
-        public static CartState UpsertItemInCartReducer(CartState state, UpsertedItemInCart action)
+        public static CartState ItemUpsertedReducer(CartState state, ItemUpserted action)
         {
             var tempCart = FastDeepCloner.DeepCloner.Clone(state.Cart);
             var cartItem = FastDeepCloner.DeepCloner.Clone(action.CartItem);
@@ -49,29 +48,23 @@ namespace BlazorStore.Client.AppState.Cart
         }
 
         [ReducerMethod]
-        public static CartState RemoveItemInCartReducer(CartState state, RemovedItemFromCart action)
+        public static CartState ItemRemovedReducer(CartState state, ItemRemoved action)
         {
-            var tempCart = state.Cart.ToDictionary(c => c.Key, c => c.Value);
+            var tempCart = FastDeepCloner.DeepCloner.Clone(state.Cart);
             tempCart.Remove(action.CartItemKey);
             return state with { Cart = tempCart };
         }
 
         [ReducerMethod]
-        public static CartState CartUpdatingReducer(CartState state, CartUpdating action)
-        {
-            return state with { Updating = action.IsUpdating };
-        }
-
-        [ReducerMethod]
-        public static CartState CartUpdatedReducer(CartState state, CartUpdated action)
-        {
-            return state with { Updated = action.IsUpdated };
-        }
-
-        [ReducerMethod]
         public static CartState CartFetchedReducer(CartState state, CartFetched action)
         {
-            return state with { Cart = action.Cart, Updating = false, Updated = true };
+            return state with { Cart = action.Cart, IsLoading = false };
+        }
+
+        [ReducerMethod]
+        public static CartState IsLoadingReducer(CartState state, IsLoading action)
+        {
+            return state with { IsLoading = action.Loading };
         }
     }
 
@@ -90,22 +83,15 @@ namespace BlazorStore.Client.AppState.Cart
         }
 
         [EffectMethod(typeof(CartPersisted))]
-        public async Task CartPersistedReducer(IDispatcher dispatcher)
+        public async Task CartPersistedReducer()
         {
             try
             {
-                dispatcher.Dispatch(new CartUpdating(true));
-                dispatcher.Dispatch(new CartUpdated(false));
                 await _localStorage.SetItemAsync(SD.cartKey, _state.Value.Cart);
-                dispatcher.Dispatch(new CartUpdated(true));
             }
-            catch
+            catch (Exception)
             {
-                dispatcher.Dispatch(new CartUpdated(false));
-            }
-            finally
-            {
-                dispatcher.Dispatch(new CartUpdating(false));
+                // TODO: Set an error message and log error
             }
         }
 
@@ -114,18 +100,13 @@ namespace BlazorStore.Client.AppState.Cart
         {
             try
             {
-                dispatcher.Dispatch(new CartUpdating(true));
-                dispatcher.Dispatch(new CartUpdated(false));
+                dispatcher.Dispatch(new IsLoading(true));
                 await _localStorage.RemoveItemAsync(SD.cartKey);
-                dispatcher.Dispatch(new CartUpdated(true));
+                dispatcher.Dispatch(new CartFetched([]));
             }
-            catch
+            catch (Exception)
             {
-                dispatcher.Dispatch(new CartUpdated(false));
-            }
-            finally
-            {
-                dispatcher.Dispatch(new CartUpdating(false));
+                dispatcher.Dispatch(new IsLoading(false));
             }
         }
 
@@ -134,23 +115,14 @@ namespace BlazorStore.Client.AppState.Cart
         {
             try
             {
-                dispatcher.Dispatch(new CartUpdating(true));
-                dispatcher.Dispatch(new CartUpdated(false));
-                var cart = await _localStorage.GetItemAsync<Dictionary<int, CartItemDto>>(SD.cartKey);
-                if (cart is not null)
-                {
-                    dispatcher.Dispatch(new CartFetched(cart));
-                }
-                else
-                {
-                    dispatcher.Dispatch(new CartUpdated(false));
-                    dispatcher.Dispatch(new CartUpdating(false));
-                }
+                Dictionary<int, CartItemDto> cart = [];
+                dispatcher.Dispatch(new IsLoading(true));
+                cart = (await _localStorage.GetItemAsync<Dictionary<int, CartItemDto>>(SD.cartKey)) ?? cart;
+                dispatcher.Dispatch(new CartFetched(cart));
             }
-            catch
+            catch (Exception)
             {
-                dispatcher.Dispatch(new CartUpdated(false));
-                dispatcher.Dispatch(new CartUpdating(false));
+                dispatcher.Dispatch(new IsLoading(false));
             }
         }
     }
@@ -158,13 +130,11 @@ namespace BlazorStore.Client.AppState.Cart
     // ********************
     // Actions
     // ********************
-    public record UpsertedItemInCart(CartItemDto CartItem);
-    public record RemovedItemFromCart(int CartItemKey);
+    public record ItemUpserted(CartItemDto CartItem);
+    public record ItemRemoved(int CartItemKey);
     public record CartPersisted();
     public record CartRemoved();
     public record CartInitilized();
     public record CartFetched(Dictionary<int, CartItemDto> Cart);
-    public record CartUpdating(bool IsUpdating);
-    public record CartUpdated(bool IsUpdated);
-
+    public record IsLoading(bool Loading);
 }

@@ -1,9 +1,12 @@
 @page "/summary"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
+@attribute [Authorize]
 
 @* Fluxor Plumbing *@
 @implements IDisposable
 @inject IState<AppState.Cart.CartState> CartState
+@inject IState<AppState.Auth.AuthState> AuthState
+@inject IDispatcher _dispatcher
 
 @inject IJSRuntime _jsruntime
 @inject IConfiguration _config
@@ -17,7 +20,6 @@
 else
 {
     <div class="mt-4 mx-4 px-md-5 mx-md-5 p-1">
-
     <div class="row p-2 my-3">
         <div class="col-12 col-lg-7 p-4">
             <div class="row px-2 text-success ">
@@ -113,6 +115,7 @@ else
             </div>
         </div>
     </div>
+
 }
 
 
@@ -121,18 +124,28 @@ else
     private OrderDto? Order { get; set; }
     private string? baseImageUrl;
 
-    protected override void OnInitialized()
+    // Alternative method to check if user is Authtenticated
+    [CascadingParameter]
+    public Task<AuthenticationState>? authenticationState { get; set; }
+    protected bool IsLoading => (CartState.Value.IsLoading || AuthState.Value.IsLoading);
+
+    protected override async Task OnInitializedAsync()
     {
         baseImageUrl = _config.GetSection("AppUrls:BaseServerUrl").Value!;
-        GetOrder();
+        if (AuthState.Value.UserInfo is null)
+        {
+            await GetUserInfo();
+        }
+
+        if (AuthState.Value.UserInfo is not null) GetOrder();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!CartState.Value.Updating && CartState.Value.Updated) GetOrder();
-
+        if (AuthState.Value.UserInfo is not null) GetOrder();
         await Task.CompletedTask;
     }
+
 
     private void Checkout()
     {
@@ -146,9 +159,9 @@ else
                 OrderHeader = new OrderHeaderDto
                 {
                     OrderTotal = CartState.Value.Cart.Sum(c => c.Value.Count * c.Value.ProductPrice.Price),
-                    UserId = string.Empty,
-                    Email = string.Empty,
-                    Name = string.Empty,
+                    UserId = AuthState.Value.UserInfo?.Id ?? string.Empty,
+                    Email = AuthState.Value.UserInfo?.Email ?? string.Empty,
+                    Name = AuthState.Value.UserInfo?.Name ?? string.Empty,
                     PhoneNumber = string.Empty,
                     StreetAddress = string.Empty,
                     State = string.Empty,
@@ -168,12 +181,24 @@ else
             };
     }
 
+    private async Task GetUserInfo()
+    {
+        // Alternative method to check if user is Authtenticated
+        var authState = authenticationState is not null ? await authenticationState : null;
+        var user = authState?.User;
+        if (user?.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            _dispatcher.Dispatch(new AppState.Auth.UserInfoFetched());
+        }
+    }
+
     // Fluxor Plumbing
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
             CartState.StateChanged += AppStateHasChanged;
+            AuthState.StateChanged += AppStateHasChanged;
         }
     }
 
@@ -185,5 +210,6 @@ else
     public void Dispose()
     {
         CartState.StateChanged -= AppStateHasChanged;
+        AuthState.StateChanged -= AppStateHasChanged;
     }
 }

@@ -141,16 +141,16 @@ else
 
     private void AddToCart()
     {
-        dispatcher.Dispatch(new AppState.Cart.UpsertedItemInCart(CartItem));
+        dispatcher.Dispatch(new AppState.Cart.ItemUpserted(CartItem));
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!CartState.Value.Updating && CartState.Value.Updated)
-        {
-            await _jsruntime.InvokeVoidAsync("blazorInterop.ShowToastr", "success", "Cart updated");
-        }
-    }
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    // if (!CartState.Value.Updating && CartState.Value.Updated)
+    // {
+    // await _jsruntime.InvokeVoidAsync("blazorInterop.ShowToastr", "success", "Cart updated");
+    // }
+    // }
 
     // Fluxor Plumbing
     protected override void OnAfterRender(bool firstRender)

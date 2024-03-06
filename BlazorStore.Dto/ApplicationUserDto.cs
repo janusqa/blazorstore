@@ -9,30 +9,29 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BlazorStore.Dto
 {
-    public record ApplicationUserDto(
-        string Id,
-        [Required][EmailAddress(ErrorMessage = "Invalid email address.")][MaxLength(30)] string UserName,
-        [Required][MaxLength(36)] string Role,
-        [MaxLength(30)] string? Name
-    );
+    public record ApplicationUserDto
+    {
+        [Required]
+        public required string Id { get; set; }
+        [Required]
+        [EmailAddress(ErrorMessage = "Invalid UserName.")]
+        public required string UserName { get; set; }
+        [Required]
+        [EmailAddress(ErrorMessage = "Invalid email address.")]
+        public required string Email { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Name { get; set; }
+    };
 
     public record CreateApplicationUserDto(
-        [Required][EmailAddress(ErrorMessage = "Invalid email address.")][MaxLength(30)] string UserName,
-        [Required][MaxLength(30)] string Password,
-        [MaxLength(36)] string? Role,
-        [MaxLength(30)] string? Name
-    );
-
-    public record UpdateApplicationUserDto(
-        string Id,
-        [Required][EmailAddress(ErrorMessage = "Invalid email address.")][MaxLength(30)] string UserName,
-        [Required][MaxLength(30)] string Password,
-        [Required][MaxLength(36)] string Role,
-        [MaxLength(30)] string? Name
-    );
+    [Required][EmailAddress(ErrorMessage = "Invalid email address.")][MaxLength(30)] string UserName,
+    [Required][MaxLength(30)] string Password,
+    [MaxLength(36)] string? Role,
+    [MaxLength(30)] string? Name
+);
 
     public record ApplicationUserLoginRequestDto(
-        [Required][EmailAddress(ErrorMessage = "Invalid email address.")][MaxLength(30)] string UserName,
-        [Required][MaxLength(30)] string Password
-    );
+    [Required][EmailAddress(ErrorMessage = "Invalid email address.")][MaxLength(30)] string UserName,
+    [Required][MaxLength(30)] string Password
+);
 }

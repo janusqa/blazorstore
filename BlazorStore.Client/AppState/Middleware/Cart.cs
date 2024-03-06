@@ -25,10 +25,6 @@ namespace BlazorStore.Client.AppState.FluxorMiddleware
             {
                 _dispatcher.Dispatch(new CartPersisted());
             }
-            if (!_cartState.Value.Updating && _cartState.Value.Updated)
-            {
-                _dispatcher.Dispatch(new CartUpdated(false));
-            }
         }
     }
 }

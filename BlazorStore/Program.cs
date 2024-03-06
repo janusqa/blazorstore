@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using Radzen;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Syncfusion.Blazor;
 
@@ -135,10 +134,9 @@ builder.Services.AddCors(options =>
 //     http => http.BaseAddress = new Uri(builder.Configuration.GetSection("AppUrls:BaseApiUrl").Value ?? "")
 // );
 
-// add custom components [syncfusion, radzen]
+// add custom components [syncfusion]
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configuration.GetValue<string>("SyncFusion:ApiKey"));
 builder.Services.AddSyncfusionBlazor();
-builder.Services.AddRadzenComponents();
 
 // Swagger Config
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

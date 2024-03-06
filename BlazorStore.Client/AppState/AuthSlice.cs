@@ -12,6 +12,8 @@ namespace BlazorStore.Client.AppState.Auth
     public record AuthState
     {
         public string? AccessToken { get; init; } = null;
+        public ApplicationUserDto? UserInfo { get; init; } = null;
+        public bool IsLoading { get; init; } = false;
     }
 
     // ********************
@@ -22,7 +24,19 @@ namespace BlazorStore.Client.AppState.Auth
         [ReducerMethod]
         public static AuthState AccessTokenRetrievedReducer(AuthState state, AccessTokenRetrieved action)
         {
-            return state with { AccessToken = action.AccessToken };
+            return state with { AccessToken = action.AccessToken, IsLoading = false };
+        }
+
+        [ReducerMethod]
+        public static AuthState UserInfoRetrievedReducer(AuthState state, UserInfoRetrieved action)
+        {
+            return state with { UserInfo = action.User, IsLoading = false };
+        }
+
+        [ReducerMethod]
+        public static AuthState IsLoadedReducer(AuthState state, IsLoading action)
+        {
+            return state with { IsLoading = action.Loading };
         }
     }
 
@@ -39,17 +53,42 @@ namespace BlazorStore.Client.AppState.Auth
         }
 
         [EffectMethod(typeof(AccessTokenFetched))]
-        public async Task HandleAccessTokenFetched(IDispatcher dispatcher)
+        public async Task AccessTokenFetchedReducer(IDispatcher dispatcher)
         {
-            var response = await _api.Auth.RefreshAsync();
-            if (response is not null && response.IsSuccess)
+            try
             {
-                var tokenDto = JsonSerializer.Deserialize<TokenDto>(JsonSerializer.Serialize(response.Result));
-                dispatcher.Dispatch(new AccessTokenRetrieved(tokenDto?.AccessToken));
+                TokenDto? token = null;
+                dispatcher.Dispatch(new IsLoading(true));
+                var response = await _api.Auth.RefreshAsync();
+                if (response is not null && response.IsSuccess)
+                {
+                    token = JsonSerializer.Deserialize<TokenDto>(JsonSerializer.Serialize(response.Result));
+                }
+                dispatcher.Dispatch(new AccessTokenRetrieved(token?.AccessToken));
             }
-            else
+            catch (Exception)
             {
-                dispatcher.Dispatch(new AccessTokenRetrieved(null));
+                dispatcher.Dispatch(new IsLoading(false));
+            }
+        }
+
+        [EffectMethod(typeof(UserInfoFetched))]
+        public async Task UserInfoFetchedReducer(IDispatcher dispatcher)
+        {
+            try
+            {
+                ApplicationUserDto? user = null;
+                dispatcher.Dispatch(new IsLoading(true));
+                var response = await _api.ApplicationUsers.GetUserInfoAsync();
+                if (response is not null && response.IsSuccess)
+                {
+                    user = JsonSerializer.Deserialize<ApplicationUserDto>(JsonSerializer.Serialize(response.Result));
+                }
+                dispatcher.Dispatch(new UserInfoRetrieved(user));
+            }
+            catch (Exception)
+            {
+                dispatcher.Dispatch(new IsLoading(false));
             }
         }
     }
@@ -59,5 +98,7 @@ namespace BlazorStore.Client.AppState.Auth
     // ********************
     public record AccessTokenFetched();
     public record AccessTokenRetrieved(string? AccessToken);
-
+    public record UserInfoFetched();
+    public record UserInfoRetrieved(ApplicationUserDto? User);
+    public record IsLoading(bool Loading);
 }
