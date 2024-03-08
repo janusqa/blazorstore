@@ -135,6 +135,11 @@ else
 
     protected override void OnAfterRender(bool firstRender)
     {
+        // we are in a strange situation here. We need to fetch userinfo and populate the form after we
+        // recieve this info. The best place so far to to this is in the OnafterRender hook. We need
+        // to check this is the first time UserInfo is set and that it is not null and indicate a state change
+        // since this is all set AFTER the page has renedred and we need to finally re-render to display it in
+        // the ui.
         UserInfoInitilized = AuthState.Value.UserInfo is not null ? ++UserInfoInitilized : UserInfoInitilized;
         if (AuthState.Value.UserInfo is not null && UserInfoInitilized == 1)
         {
