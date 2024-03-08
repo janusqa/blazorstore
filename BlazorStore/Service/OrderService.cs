@@ -53,9 +53,10 @@ namespace BlazorStore.Service
                     INSERT INTO OrderHeaders
                     (
                         UserId,
+                        Email,
                         OrderTotal,
                         OrderDate,
-                        ShippingDate
+                        ShippingDate,
                         Status,
                         Name,
                         PhoneNumber,
@@ -65,9 +66,10 @@ namespace BlazorStore.Service
                         PostalCode
                     ) VALUES (
                         @UserId,
+                        @Email,
                         @OrderTotal,
                         @OrderDate,
-                        @ShippingDate
+                        @ShippingDate,
                         @Status,
                         @Name,
                         @PhoneNumber,
@@ -78,10 +80,11 @@ namespace BlazorStore.Service
                     ) RETURNING Id;
                 ", [
                         new SqliteParameter("UserId", orderDto.OrderHeader.UserId),
+                        new SqliteParameter("Email", orderDto.OrderHeader.Email),
                         new SqliteParameter("OrderTotal",  orderDto.OrderHeader.OrderTotal),
-                        new SqliteParameter("OrderDate",  orderDto.OrderHeader.OrderDate),
-                        new SqliteParameter("ShippingDate",  orderDto.OrderHeader.ShippingDate),
+                        new SqliteParameter("OrderDate",  DateTime.UtcNow),
                         new SqliteParameter("Status",  orderDto.OrderHeader.Status),
+                        new SqliteParameter("ShippingDate",  orderDto.OrderHeader.ShippingDate),
                         new SqliteParameter("Name",  orderDto.OrderHeader.Name),
                         new SqliteParameter("PhoneNumber",  orderDto.OrderHeader.PhoneNumber),
                         new SqliteParameter("StreetAddress",  orderDto.OrderHeader.StreetAddress),
@@ -92,18 +95,18 @@ namespace BlazorStore.Service
 
                 if (orderHeaderId != 0)
                 {
-                    var inParams = new StringBuilder();
+                    List<string> inParams = [];
                     var sqlParams = new List<SqliteParameter>();
 
                     foreach (var (orderDetail, idx) in orderDto.OrderDetails.Select((od, idx) => (od, idx)))
                     {
-                        inParams.Append($@"
+                        inParams.Add($@"
                             (@OrderHeaderId{idx}, 
                             @ProductId{idx}, 
                             @Price{idx}, 
                             @Size{idx},
                             @Count{idx},
-                            @ProductName{idx}),
+                            @ProductName{idx})
                         ");
                         sqlParams.Add(new SqliteParameter($"OrderHeaderId{idx}", orderHeaderId));
                         sqlParams.Add(new SqliteParameter($"ProductId{idx}", orderDetail.ProductId));
@@ -116,13 +119,12 @@ namespace BlazorStore.Service
                     await _uow.OrderDetails.ExecuteSqlAsync($@"
                         INSERT INTO OrderDetails
                         (OrderHeaderId, ProductId, Price, Size, Count, ProductName)
-                        VALUES {inParams.ToString()[..^1]};
+                        VALUES {string.Join(", ", inParams)};
                     ", sqlParams);
 
                     transaction.Commit();
 
-                    var orderHeader = orderDto.OrderHeader with { Id = orderHeaderId };
-                    return orderDto with { OrderHeader = orderHeader };
+                    return orderDto with { OrderHeader = orderDto.OrderHeader with { Id = orderHeaderId } };
                 }
                 else
                 {
@@ -243,12 +245,6 @@ namespace BlazorStore.Service
             var orderHeaderDto = (await _uow.OrderHeaders.SqlQueryAsync<OrderHeader>($@"
                 UPDATE OrderHeaders 
                 SET 
-                    OrderTotal = @OrderTotal,
-                    OrderDate = @OrderDate,
-                    ShippingDate = @ShippingDate, 
-                    Status = @Status,
-                    SessionId = @SessionId, 
-                    PaymentIntentId = @PaymentIntentId,
                     Name = @Name, 
                     PhoneNumber = @PhoneNumber, 
                     StreetAddress = @StreetAddress, 
@@ -258,12 +254,7 @@ namespace BlazorStore.Service
                 WHERE Id = @Id
                 RETURNING *;
             ", [
-                new SqliteParameter("OrderTotal", orderHeader.OrderTotal),
-                new SqliteParameter("OrderDate", orderHeader.OrderDate),
-                new SqliteParameter("ShippingDate", orderHeader.ShippingDate),
-                new SqliteParameter("Status", orderHeader.Status),
-                new SqliteParameter("SessionId", orderHeader.SessionId ?? (object)DBNull.Value),
-                new SqliteParameter("PaymentIntentId", orderHeader.PaymentIntentId ?? (object)DBNull.Value),
+                new SqliteParameter("Id", orderHeader.Id),
                 new SqliteParameter("Name", orderHeader.Name),
                 new SqliteParameter("PhoneNumber", orderHeader.PhoneNumber),
                 new SqliteParameter("StreetAddress", orderHeader.StreetAddress),
@@ -284,7 +275,7 @@ namespace BlazorStore.Service
             var inParams = new List<string> { "Status = @NewStatus" };
             if (status == SD.OrderStatusShipped)
             {
-                sqlParams.Add(new SqliteParameter("ShippingDate", DateTime.Now));
+                sqlParams.Add(new SqliteParameter("ShippingDate", DateTime.UtcNow));
                 inParams.Add("ShippingDate = @ShippingDate");
             }
 

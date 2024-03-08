@@ -10,6 +10,7 @@
 
 @inject IJSRuntime _jsruntime
 @inject IConfiguration _config
+@inject IApiService _api
 
 @if (AuthState.Value.UserInfo is null || CartState.Value.IsLoading)
 {
@@ -148,9 +149,26 @@ else
         }
     }
 
-    private void Checkout()
+    private async Task Checkout()
     {
+        try
+        {
+            var response = await _api.Orders.AddAsync(new ApiRequest { Data = Order });
 
+            if (response is not null && response.IsSuccess)
+            {
+                var order = JsonSerializer.Deserialize<OrderDto>(JsonSerializer.Serialize(response.Result));
+                if (order is not null) _dispatcher.Dispatch(new AppState.Cart.CartRemoved());
+            }
+            else
+            {
+                throw new Exception(string.Join(" | ", response?.ErrorMessages ?? []));
+            }
+        }
+        catch (Exception ex)
+        {
+            await _jsruntime.InvokeVoidAsync("blazorInterop.ShowToastr", "error", ex.Message);
+        }
     }
 
     private void GetOrder()
@@ -168,7 +186,7 @@ else
         Order.OrderHeader = Order.OrderHeader with
             {
                 OrderTotal = CartState.Value.Cart.Sum(c => c.Value.Count * c.Value.ProductPrice.Price),
-                UserId = AuthState.Value.UserInfo?.Id ?? string.Empty,
+                UserId = AuthState.Value.UserInfo?.UserName ?? string.Empty,
                 Email = AuthState.Value.UserInfo?.Email ?? string.Empty,
                 Name = AuthState.Value.UserInfo?.Name ?? string.Empty,
                 PhoneNumber = AuthState.Value.UserInfo?.PhoneNumber ?? string.Empty,
