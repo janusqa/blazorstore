@@ -44,6 +44,19 @@
                 <label for="confirm-password">Confirm Password</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
+            @* *** BEGIN CUSTOM CODE *@
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Name" class="form-control" aria-required="true" placeholder="Please enter your name." />
+                <label for="name" class="form-label">Name</label>
+                <ValidationMessage For="() => Input.Name" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
+                <label for="phone-number" class="form-label">Phone number</label>
+                <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
+            </div>
+            @* *** END CUSTOM CODE *@
+
             @* *** BEGIN CUSTOM CODE*@
             <AuthorizeView Roles="@($@"{SD.Role_Admin}")" Context="registerRoleContext">
                 <div class="form-floating mb-3">
@@ -92,6 +105,8 @@
 
         // *** BEGIN custom code to add custom fields to user db 
         // put custom user fields here 
+        user.Name = Input.Name;
+        user.PhoneNumber = Input.PhoneNumber;
         user.UserSecret = BcryptUtils.CreateSalt();
         // *** END custom code to add custom fields to user db 
 
@@ -107,7 +122,7 @@
         // *** FOR DEMO ONLY. USER CHOOSES ROLE WHEN REGISTERING. JUST FOR TESTING
         // *** IN PRODUCTION USER SHOULD BE GIVEN A DEFALUT ROLE AND THEN ADMIN SHOULD
         // *** THEN FURTHER ASSIGN FINAL ROLE 
-        if (Input.Role is not null && Input.Role != "")
+        if (!string.IsNullOrWhiteSpace(Input.Role))
         {
             await UserManager.AddToRoleAsync(user, Input.Role);
         }
@@ -190,7 +205,12 @@
         public string ConfirmPassword { get; set; } = "";
 
         // *** BEGIN CUSTOM FIELDS WE WANT TO ADD FOR A USER 
-        public string Role { get; set; } = string.Empty;
+        public string Role { get; set; } = SD.Role_Customer;
+        [Required]
+        public string? Name { get; set; }
+        [Phone]
+        [Display(Name = "Phone Number")]
+        public string? PhoneNumber { get; set; }
         // *** END CUSTOM FIELDS WE WANT TO ADD FOR A USER 
     }
 

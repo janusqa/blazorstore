@@ -25,6 +25,12 @@
                 <label for="username" class="form-label">Username</label>
             </div>
             <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Name" class="form-control" aria-required="true"
+                    placeholder="Please enter your name." />
+                <label for="name" class="form-label">Name</label>
+                <ValidationMessage For="() => Input.Name" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.PhoneNumber" class="form-control"
                     placeholder="Please enter your phone number." />
                 <label for="phone-number" class="form-label">Phone number</label>
@@ -53,6 +59,14 @@
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
 
         Input.PhoneNumber ??= phoneNumber;
+
+        // *** BEGIN CUSTOM FIELDS WE WANT TO ADD FOR A USER
+        if (!string.IsNullOrWhiteSpace(username))
+        {
+            var applicationUser = await UserManager.FindByNameAsync(username);
+            Input.Name ??= applicationUser?.Name;
+        }
+        // *** END CUSTOM FIELDS WE WANT TO ADD FOR A USER
     }
 
     private async Task OnValidSubmitAsync()
@@ -66,12 +80,19 @@
             }
         }
 
+        // *** BEGIN CUSTOM FIELDS WE WANT TO ADD FOR A USER
+        if (Input.Name != user.Name) user.Name = Input.Name;
+        await UserManager.UpdateAsync(user);
+        // *** END CUSTOM FIELDS WE WANT TO ADD FOR A USER
+
         await SignInManager.RefreshSignInAsync(user);
         RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
     }
 
     private sealed class InputModel
     {
+        [Required]
+        public string? Name { get; set; }
         [Phone]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }

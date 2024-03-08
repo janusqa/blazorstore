@@ -171,7 +171,7 @@ else
                 UserId = AuthState.Value.UserInfo?.Id ?? string.Empty,
                 Email = AuthState.Value.UserInfo?.Email ?? string.Empty,
                 Name = AuthState.Value.UserInfo?.Name ?? string.Empty,
-                PhoneNumber = string.Empty,
+                PhoneNumber = AuthState.Value.UserInfo?.PhoneNumber ?? string.Empty,
                 StreetAddress = string.Empty,
                 State = string.Empty,
                 City = string.Empty,
