@@ -54,12 +54,10 @@ else
 
 @code {
     private List<ProductDto>? Products { get; set; }
-    private string? baseImageUrl;
+    private string? baseImageUrl => _config.GetSection("AppUrls:BaseServerUrl").Value!;
 
     protected override async Task OnInitializedAsync()
     {
-        baseImageUrl = _config.GetSection("AppUrls:BaseApiUrl").Value!;
-
         var response = await _api.Products.GetAllAsync(new ApiRequest());
         if (response is not null && response.IsSuccess && response.Result is not null)
         {

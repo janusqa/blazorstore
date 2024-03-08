@@ -160,6 +160,8 @@ Install the following to webassembly client project
 
 2.
 Update Program.cs of webassembly client project by adding to services section the below snippet
+This must be done on server as well.  So put it all in a CommonServices.cs and put it in Services part
+of Program.cs for client and server project
 ```
 // Fluxor
 builder.Services.AddFluxor(options =>
@@ -167,6 +169,12 @@ builder.Services.AddFluxor(options =>
     options.ScanAssemblies(typeof(Program).Assembly);
     options.UseReduxDevTools(rdt => { rdt.Name = "BlazorStore"; });
 });
+```
+
+3.
+Add the below to the top of "Routes.razor" file in server project. 
+```
+<Fluxor.Blazor.Web.StoreInitializer @rendermode="(new InteractiveWebAssemblyRenderMode(prerender: false))" />
 ```
 
 

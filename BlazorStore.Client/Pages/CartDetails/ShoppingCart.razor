@@ -8,7 +8,7 @@
 
 @inject IConfiguration _config
 
-@if (IsLoading)
+@if (CartState.Value.IsLoading)
 {
     <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
     <img src="images/ajax-loader.gif" alt="Loading..." />
@@ -114,14 +114,7 @@ else
         DECREMENT,
         DELETE
     }
-    private string? baseImageUrl;
-    protected bool IsLoading => (CartState.Value.IsLoading);
-
-
-    protected override void OnInitialized()
-    {
-        baseImageUrl = _config.GetSection("AppUrls:BaseServerUrl").Value!;
-    }
+    private string? baseImageUrl => _config.GetSection("AppUrls:BaseServerUrl").Value!;
 
     private void UpdateCart(CartOperation operation, CartItemDto item)
     {
@@ -149,12 +142,9 @@ else
     }
 
     // Fluxor Plumbing
-    protected override void OnAfterRender(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (firstRender)
-        {
-            CartState.StateChanged += AppStateHasChanged;
-        }
+        CartState.StateChanged += AppStateHasChanged;
     }
 
     private void AppStateHasChanged(object? sender, EventArgs args)

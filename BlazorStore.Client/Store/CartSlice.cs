@@ -83,7 +83,7 @@ namespace BlazorStore.Client.AppState.Cart
         }
 
         [EffectMethod(typeof(CartPersisted))]
-        public async Task CartPersistedReducer()
+        public async Task CartPersistedReducer(IDispatcher _)
         {
             try
             {

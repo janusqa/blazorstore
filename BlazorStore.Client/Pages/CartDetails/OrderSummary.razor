@@ -11,7 +11,7 @@
 @inject IJSRuntime _jsruntime
 @inject IConfiguration _config
 
-@if (Order is null)
+@if (AuthState.Value.UserInfo is null || CartState.Value.IsLoading)
 {
     <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
     <img src="images/ajax-loader.gif" alt="Loading..." />
@@ -115,37 +115,33 @@ else
             </div>
         </div>
     </div>
-
 }
-
 
 @code {
     [SupplyParameterFromForm(FormName = "checkout")]
-    private OrderDto? Order { get; set; }
-    private string? baseImageUrl;
+    private OrderDto Order { get; set; } = new OrderDto();
+    private string? baseImageUrl => _config.GetSection("AppUrls:BaseServerUrl").Value!;
 
     // Alternative method to check if user is Authtenticated
     [CascadingParameter]
     public Task<AuthenticationState>? authenticationState { get; set; }
-    protected bool IsLoading => (CartState.Value.IsLoading || AuthState.Value.IsLoading);
+
+    private int UserInfoInitilized;
 
     protected override async Task OnInitializedAsync()
     {
-        baseImageUrl = _config.GetSection("AppUrls:BaseServerUrl").Value!;
-        if (AuthState.Value.UserInfo is null)
-        {
-            await GetUserInfo();
-        }
-
-        if (AuthState.Value.UserInfo is not null) GetOrder();
+        if (AuthState.Value.UserInfo is null) await GetUserInfo();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
     {
-        if (AuthState.Value.UserInfo is not null) GetOrder();
-        await Task.CompletedTask;
+        UserInfoInitilized = AuthState.Value.UserInfo is not null ? ++UserInfoInitilized : UserInfoInitilized;
+        if (AuthState.Value.UserInfo is not null && UserInfoInitilized == 1)
+        {
+            GetOrder();
+            InvokeAsync(StateHasChanged);
+        }
     }
-
 
     private void Checkout()
     {
@@ -154,30 +150,28 @@ else
 
     private void GetOrder()
     {
-        Order = new OrderDto
+        Order.OrderDetails = CartState.Value.Cart.Select(c => new OrderDetailDto
             {
-                OrderHeader = new OrderHeaderDto
-                {
-                    OrderTotal = CartState.Value.Cart.Sum(c => c.Value.Count * c.Value.ProductPrice.Price),
-                    UserId = AuthState.Value.UserInfo?.Id ?? string.Empty,
-                    Email = AuthState.Value.UserInfo?.Email ?? string.Empty,
-                    Name = AuthState.Value.UserInfo?.Name ?? string.Empty,
-                    PhoneNumber = string.Empty,
-                    StreetAddress = string.Empty,
-                    State = string.Empty,
-                    City = string.Empty,
-                    PostalCode = string.Empty,
-                    Status = SD.OrderStatusPending
-                },
-                OrderDetails = CartState.Value.Cart.Select(c => new OrderDetailDto
-                {
-                    ProductId = c.Value.ProductId,
-                    Price = c.Value.ProductPrice.Price,
-                    Size = c.Value.ProductPrice.Size,
-                    Count = c.Value.Count,
-                    ProductName = c.Value.Product.Name,
-                    Product = c.Value.Product
-                }).ToList()
+                ProductId = c.Value.ProductId,
+                Price = c.Value.ProductPrice.Price,
+                Size = c.Value.ProductPrice.Size,
+                Count = c.Value.Count,
+                ProductName = c.Value.Product.Name,
+                Product = c.Value.Product
+            }).ToList();
+
+        Order.OrderHeader = Order.OrderHeader with
+            {
+                OrderTotal = CartState.Value.Cart.Sum(c => c.Value.Count * c.Value.ProductPrice.Price),
+                UserId = AuthState.Value.UserInfo?.Id ?? string.Empty,
+                Email = AuthState.Value.UserInfo?.Email ?? string.Empty,
+                Name = AuthState.Value.UserInfo?.Name ?? string.Empty,
+                PhoneNumber = string.Empty,
+                StreetAddress = string.Empty,
+                State = string.Empty,
+                City = string.Empty,
+                PostalCode = string.Empty,
+                Status = SD.OrderStatusPending
             };
     }
 
@@ -193,13 +187,10 @@ else
     }
 
     // Fluxor Plumbing
-    protected override void OnAfterRender(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (firstRender)
-        {
-            CartState.StateChanged += AppStateHasChanged;
-            AuthState.StateChanged += AppStateHasChanged;
-        }
+        CartState.StateChanged += AppStateHasChanged;
+        AuthState.StateChanged += AppStateHasChanged;
     }
 
     private void AppStateHasChanged(object? sender, EventArgs args)

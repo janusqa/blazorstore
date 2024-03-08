@@ -22,12 +22,9 @@
 </nav>
 
 @code {
-    protected override void OnAfterRender(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (firstRender)
-        {
-            cartState.StateChanged += AppStateHasChanged;
-        }
+        cartState.StateChanged += AppStateHasChanged;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)

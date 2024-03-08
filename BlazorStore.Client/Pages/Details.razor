@@ -108,15 +108,11 @@ else
 
 @code {
     [Parameter] public int EntityId { get; set; }
-    private string? baseImageUrl;
+    private string? baseImageUrl => _config.GetSection("AppUrls:BaseServerUrl").Value!;
+
     private ProductDto? Product { get; set; }
     [SupplyParameterFromForm(FormName = "add-to-cart")]
     private CartItemDto CartItem { get; set; } = new CartItemDto { };
-
-    protected override void OnInitialized()
-    {
-        baseImageUrl = _config.GetSection("AppUrls:BaseServerUrl").Value!;
-    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -139,26 +135,24 @@ else
         }
     }
 
-    private void AddToCart()
+    private async Task AddToCart()
     {
         dispatcher.Dispatch(new AppState.Cart.ItemUpserted(CartItem));
+        await _jsruntime.InvokeVoidAsync("blazorInterop.ShowToastr", "success", "Cart updated");
     }
 
     // protected override async Task OnAfterRenderAsync(bool firstRender)
     // {
     // if (!CartState.Value.Updating && CartState.Value.Updated)
     // {
-    // await _jsruntime.InvokeVoidAsync("blazorInterop.ShowToastr", "success", "Cart updated");
+    //
     // }
     // }
 
     // Fluxor Plumbing
-    protected override void OnAfterRender(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (firstRender)
-        {
-            CartState.StateChanged += AppStateHasChanged;
-        }
+        CartState.StateChanged += AppStateHasChanged;
     }
 
     private void AppStateHasChanged(object? sender, EventArgs args)
