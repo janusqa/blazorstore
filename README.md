@@ -631,3 +631,14 @@ eg. "CustomExceptionMiddleWare"
    app.UseMiddleWare<CustomExceptionMiddleWare>();
    ```
 
+Stripe
+------
+1. Signup and get Secret and publishable key
+2. Store these keys in Secrets or your choice of configuration/setttings
+3. dotnet add [<PROJECT>] package Stripe.net
+4. add to program.cs
+   ```
+   // Stripe Config
+   Stripe.StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
+   builder.Services.AddSyncfusionBlazor();
+   ```

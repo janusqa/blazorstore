@@ -158,7 +158,9 @@ else
             if (response is not null && response.IsSuccess)
             {
                 var order = JsonSerializer.Deserialize<OrderDto>(JsonSerializer.Serialize(response.Result));
-                if (order is not null) _dispatcher.Dispatch(new AppState.Cart.CartRemoved());
+                await _jsruntime.InvokeVoidAsync("blazorInterop.StripeRedirect", order?.PaymentUrl);
+
+                @* if (order is not null) _dispatcher.Dispatch(new AppState.Cart.CartRemoved()); *@
             }
             else
             {

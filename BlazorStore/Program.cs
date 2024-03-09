@@ -108,9 +108,18 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDBInitilizer, DBInitilizer>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<BlazorStore.Service.IService.IOrderService, BlazorStore.Service.OrderService>();
+builder.Services.AddScoped<IPaymentService<Stripe.Checkout.Session>, StripeService>();
+
 
 // Configure DPI for client services that will be neccessary on the server if pre-rendering is enabled 
 BlazorStore.Client.CommonServices.ConfigureCommonServices(builder.Services, builder.Configuration);
+
+// add custom components [syncfusion]
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configuration.GetValue<string>("SyncFusion:ApiKey"));
+
+// Stripe Config
+Stripe.StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
+builder.Services.AddSyncfusionBlazor();
 
 builder.Services.AddCors(options =>
 {
@@ -133,10 +142,6 @@ builder.Services.AddCors(options =>
 //     "BlazorStore",
 //     http => http.BaseAddress = new Uri(builder.Configuration.GetSection("AppUrls:BaseApiUrl").Value ?? "")
 // );
-
-// add custom components [syncfusion]
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configuration.GetValue<string>("SyncFusion:ApiKey"));
-builder.Services.AddSyncfusionBlazor();
 
 // Swagger Config
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

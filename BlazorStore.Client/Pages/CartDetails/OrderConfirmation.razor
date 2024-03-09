@@ -1,0 +1,96 @@
+@page "/orderconfirmation{entityId:int}"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
+@attribute [Authorize]
+
+@* Fluxor Plumbing *@
+@implements IDisposable
+@inject IState<AppState.Cart.CartState> CartState
+@inject IState<AppState.Auth.AuthState> AuthState
+@inject IDispatcher _dispatcher
+
+@inject IJSRuntime _jsruntime
+@inject IConfiguration _config
+@inject IApiService _api
+
+<div class="container">
+    @if (AuthState.Value.UserInfo is null || CartState.Value.IsLoading)
+    {
+        <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
+            <img src="images/ajax-loader.gif" alt="Loading..." />
+        </div>
+    }
+    else
+    {
+        <div class="row mt-4 pt-4">
+            <div class="col-10 offset-1 teext-center">
+                <h2 class="text-warning">Order Confirmed</h2>
+                <p>Your order has been placed successfully with Order Number: @EntityId</p>
+            </div>
+        </div>
+    }
+</div>
+
+
+@code {
+    [Parameter] public int EntityId { get; set; }
+
+    // Alternative method to check if user is Authtenticated
+    [CascadingParameter]
+    public Task<AuthenticationState>? authenticationState { get; set; }
+
+    private int UserInfoInitilized;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthState.Value.UserInfo is null) await GetUserInfo();
+    }
+
+    private async Task GetUserInfo()
+    {
+        // Alternative method to check if user is Authtenticated
+        var authState = authenticationState is not null ? await authenticationState : null;
+        var user = authState?.User;
+        if (user?.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            _dispatcher.Dispatch(new AppState.Auth.UserInfoFetched());
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        // we are in a strange situation here. We need to fetch userinfo and populate the form after we
+        // recieve this info. The best place so far to to this is in the OnafterRender hook. We need
+        // to check this is the first time UserInfo is set and that it is not null and indicate a state change
+        // since this is all set AFTER the page has renedred and we need to finally re-render to display it in
+        // the ui.
+        UserInfoInitilized = AuthState.Value.UserInfo is not null ? ++UserInfoInitilized : UserInfoInitilized;
+        if (AuthState.Value.UserInfo is not null && UserInfoInitilized == 1)
+        {
+            FinalizeOrder();
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void FinalizeOrder()
+    {
+
+    }
+
+    // Fluxor Plumbing
+    protected override void OnInitialized()
+    {
+        CartState.StateChanged += AppStateHasChanged;
+        AuthState.StateChanged += AppStateHasChanged;
+    }
+
+    private void AppStateHasChanged(object? sender, EventArgs args)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        CartState.StateChanged -= AppStateHasChanged;
+        AuthState.StateChanged -= AppStateHasChanged;
+    }
+}

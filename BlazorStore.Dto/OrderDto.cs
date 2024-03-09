@@ -6,6 +6,7 @@ namespace BlazorStore.Dto
     {
         public OrderHeaderDto OrderHeader { get; set; }
         public List<OrderDetailDto> OrderDetails { get; set; } = [];
+        public string? PaymentUrl { get; set; }
 
         public OrderDto()
         {

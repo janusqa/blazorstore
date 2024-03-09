@@ -7,16 +7,19 @@ using BlazorStore.Models.Extensions;
 using BlazorStore.Models.Helper;
 using BlazorStore.Service.IService;
 using Microsoft.Data.Sqlite;
+using Stripe.Checkout;
 
 namespace BlazorStore.Service
 {
     public class OrderService : IOrderService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IPaymentService<Session> _paymentService;
 
-        public OrderService(IUnitOfWork uow)
+        public OrderService(IUnitOfWork uow, IPaymentService<Session> ps)
         {
             _uow = uow;
+            _paymentService = ps;
         }
 
         public async Task<bool> Cancel(int entityId)
@@ -43,8 +46,13 @@ namespace BlazorStore.Service
             }
         }
 
-        public async Task<OrderDto?> Create(OrderDto orderDto)
+        public async Task<OrderDto?> Create(OrderDto order)
         {
+
+            var session = _paymentService.Checkout(order);
+
+            if (session is null) return null;
+
             using var transaction = _uow.Transaction();
 
             try
@@ -62,8 +70,9 @@ namespace BlazorStore.Service
                         PhoneNumber,
                         StreetAddress,
                         State,
-                        City ,
-                        PostalCode
+                        City,
+                        PostalCode,
+                        SessionId
                     ) VALUES (
                         @UserId,
                         @Email,
@@ -76,21 +85,23 @@ namespace BlazorStore.Service
                         @StreetAddress,
                         @State,
                         @City ,
-                        @PostalCode
+                        @PostalCode,
+                        @SessionId
                     ) RETURNING Id;
                 ", [
-                        new SqliteParameter("UserId", orderDto.OrderHeader.UserId),
-                        new SqliteParameter("Email", orderDto.OrderHeader.Email),
-                        new SqliteParameter("OrderTotal",  orderDto.OrderHeader.OrderTotal),
+                        new SqliteParameter("UserId", order.OrderHeader.UserId),
+                        new SqliteParameter("Email", order.OrderHeader.Email),
+                        new SqliteParameter("OrderTotal",  order.OrderHeader.OrderTotal),
                         new SqliteParameter("OrderDate",  DateTime.UtcNow),
-                        new SqliteParameter("Status",  orderDto.OrderHeader.Status),
-                        new SqliteParameter("ShippingDate",  orderDto.OrderHeader.ShippingDate),
-                        new SqliteParameter("Name",  orderDto.OrderHeader.Name),
-                        new SqliteParameter("PhoneNumber",  orderDto.OrderHeader.PhoneNumber),
-                        new SqliteParameter("StreetAddress",  orderDto.OrderHeader.StreetAddress),
-                        new SqliteParameter("State",  orderDto.OrderHeader.State),
-                        new SqliteParameter("City",  orderDto.OrderHeader.City),
-                        new SqliteParameter("PostalCode", orderDto.OrderHeader.PostalCode),
+                        new SqliteParameter("Status",  order.OrderHeader.Status),
+                        new SqliteParameter("ShippingDate",  order.OrderHeader.ShippingDate),
+                        new SqliteParameter("Name",  order.OrderHeader.Name),
+                        new SqliteParameter("PhoneNumber",  order.OrderHeader.PhoneNumber),
+                        new SqliteParameter("StreetAddress",  order.OrderHeader.StreetAddress),
+                        new SqliteParameter("State",  order.OrderHeader.State),
+                        new SqliteParameter("City",  order.OrderHeader.City),
+                        new SqliteParameter("PostalCode", order.OrderHeader.PostalCode),
+                        new SqliteParameter("SessionId", session.Id),
                 ])).FirstOrDefault();
 
                 if (orderHeaderId != 0)
@@ -98,7 +109,7 @@ namespace BlazorStore.Service
                     List<string> inParams = [];
                     var sqlParams = new List<SqliteParameter>();
 
-                    foreach (var (orderDetail, idx) in orderDto.OrderDetails.Select((od, idx) => (od, idx)))
+                    foreach (var (orderDetail, idx) in order.OrderDetails.Select((od, idx) => (od, idx)))
                     {
                         inParams.Add($@"
                             (@OrderHeaderId{idx}, 
@@ -124,7 +135,7 @@ namespace BlazorStore.Service
 
                     transaction.Commit();
 
-                    return orderDto with { OrderHeader = orderDto.OrderHeader with { Id = orderHeaderId } };
+                    return order with { OrderHeader = order.OrderHeader with { Id = orderHeaderId }, PaymentUrl = session.Url };
                 }
                 else
                 {

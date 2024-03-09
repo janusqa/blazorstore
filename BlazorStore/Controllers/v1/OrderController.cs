@@ -1,11 +1,13 @@
 using Asp.Versioning;
 using BlazorStore.Dto;
 using BlazorStore.Service.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorStore.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/v{version:apiVersion}/orders")]  // hard coded route name
     [ApiVersion("1.0")]
     public class OrderController : ControllerBase
@@ -78,9 +80,11 @@ namespace BlazorStore.Controllers
             {
                 var order = await _orderService.Create(Order);
 
-                if (order is null) return new ObjectResult(new ApiResponse { IsSuccess = false, ErrorMessages = ["Order creation failed"], StatusCode = System.Net.HttpStatusCode.InternalServerError }) { StatusCode = StatusCodes.Status500InternalServerError }; ;
+                if (order is null) return new ObjectResult(new ApiResponse { IsSuccess = false, ErrorMessages = ["Checkout failed"], StatusCode = System.Net.HttpStatusCode.InternalServerError }) { StatusCode = StatusCodes.Status500InternalServerError }; ;
 
                 return Ok(new ApiResponse { IsSuccess = true, Result = order, StatusCode = System.Net.HttpStatusCode.OK });
+                // Response.Headers.Append("Location", order.PaymentUrl);
+                // return new ObjectResult(new ApiResponse { IsSuccess = true, Result = order, StatusCode = System.Net.HttpStatusCode.SeeOther }) { StatusCode = StatusCodes.Status303SeeOther };
             }
             catch (Exception ex)
             {

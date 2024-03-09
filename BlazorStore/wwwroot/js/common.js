@@ -69,4 +69,8 @@ window.blazorInterop = {
         );
         return cookie ? cookie[1] : '';
     },
+
+    StripeRedirect: (url) => {
+        window.location.assign(url);
+    },
 };
