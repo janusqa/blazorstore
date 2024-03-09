@@ -48,11 +48,6 @@ namespace BlazorStore.Service
 
         public async Task<OrderDto?> Create(OrderDto order)
         {
-
-            var session = _paymentService.Checkout(order);
-
-            if (session is null) return null;
-
             using var transaction = _uow.Transaction();
 
             try
@@ -71,8 +66,7 @@ namespace BlazorStore.Service
                         StreetAddress,
                         State,
                         City,
-                        PostalCode,
-                        SessionId
+                        PostalCode
                     ) VALUES (
                         @UserId,
                         @Email,
@@ -85,8 +79,7 @@ namespace BlazorStore.Service
                         @StreetAddress,
                         @State,
                         @City ,
-                        @PostalCode,
-                        @SessionId
+                        @PostalCode
                     ) RETURNING Id;
                 ", [
                         new SqliteParameter("UserId", order.OrderHeader.UserId),
@@ -101,14 +94,23 @@ namespace BlazorStore.Service
                         new SqliteParameter("State",  order.OrderHeader.State),
                         new SqliteParameter("City",  order.OrderHeader.City),
                         new SqliteParameter("PostalCode", order.OrderHeader.PostalCode),
-                        new SqliteParameter("SessionId", session.Id),
                 ])).FirstOrDefault();
 
                 if (orderHeaderId != 0)
                 {
+                    order = order with { OrderHeader = order.OrderHeader with { Id = orderHeaderId } };
+                    var session = _paymentService.Checkout(order);
+                    if (session is null) return null;
+
+                    await _uow.OrderHeaders.ExecuteSqlAsync($@"
+                        UPDATE OrderHeaders SET SessionId = @SessionId WHERE Id = @Id;
+                    ", [
+                        new SqliteParameter("Id", orderHeaderId),
+                        new SqliteParameter("SessionId", session.Id),
+                    ]);
+
                     List<string> inParams = [];
                     var sqlParams = new List<SqliteParameter>();
-
                     foreach (var (orderDetail, idx) in order.OrderDetails.Select((od, idx) => (od, idx)))
                     {
                         inParams.Add($@"
@@ -126,7 +128,6 @@ namespace BlazorStore.Service
                         sqlParams.Add(new SqliteParameter($"Count{idx}", orderDetail.Count));
                         sqlParams.Add(new SqliteParameter($"ProductName{idx}", orderDetail.ProductName));
                     }
-
                     await _uow.OrderDetails.ExecuteSqlAsync($@"
                         INSERT INTO OrderDetails
                         (OrderHeaderId, ProductId, Price, Size, Count, ProductName)
@@ -236,19 +237,33 @@ namespace BlazorStore.Service
 
         public async Task<OrderHeaderDto?> PaymentConfirmation(int entityId)
         {
-            var orderHeaderDto = (await _uow.OrderHeaders.SqlQueryAsync<OrderHeader>($@"
+            var orderHeader = (await _uow.OrderHeaders.FromSqlAsync($@"
+                SELECT * FROM OrderHeaders WHERE Id = @Id;
+            ", [new SqliteParameter("Id", entityId)])).FirstOrDefault()?.ToDto();
+
+            if (orderHeader is null) return null;
+
+            var session = _paymentService.GetSession(orderHeader);
+
+            if (session is null || !session.PaymentStatus.Equals("paid", StringComparison.CurrentCultureIgnoreCase)) return null;
+
+            orderHeader = (await _uow.OrderHeaders.SqlQueryAsync<OrderHeader>($@"
                 UPDATE OrderHeaders 
                 SET 
+                    SessionId = @SessionId,
+                    PaymentIntentId = @PaymentIntentId,
                     Status = @NewStatus 
                 WHERE Id = @Id AND Status = @OldStatus
                 RETURNING *;
             ", [
                 new SqliteParameter("Id", entityId),
+                new SqliteParameter("SessionId", session.Id),
+                new SqliteParameter("PaymentIntentId", session.PaymentIntentId),
                 new SqliteParameter("OldStatus", SD.OrderStatusPending),
                 new SqliteParameter("NewStatus", SD.OrderStatusApproved)
             ])).FirstOrDefault()?.ToDto();
 
-            return orderHeaderDto;
+            return orderHeader;
         }
 
         public async Task<OrderHeaderDto?> UpdateOrderDetails(OrderHeaderDto orderHeader)

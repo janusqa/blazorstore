@@ -91,5 +91,31 @@ namespace BlazorStore.Controllers
                 return new ObjectResult(new ApiResponse { IsSuccess = false, ErrorMessages = [ex.Message], StatusCode = System.Net.HttpStatusCode.InternalServerError }) { StatusCode = StatusCodes.Status500InternalServerError };
             }
         }
+
+        [HttpGet("finalize/{entityId:int}")] // indicates that this endpoint expects an entityId
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> Finalize(int entityId)
+        {
+            // lets do some simple validation
+            if (entityId < 1) return BadRequest(new ApiResponse { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.BadRequest });
+
+            try
+            {
+                var order = await _orderService.PaymentConfirmation(entityId);
+
+                if (order is null) return NotFound(new ApiResponse { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.NotFound });
+
+                return Ok(new ApiResponse { IsSuccess = true, Result = order, StatusCode = System.Net.HttpStatusCode.OK });
+            }
+            catch (Exception ex)
+            {
+                return new ObjectResult(new ApiResponse { IsSuccess = false, ErrorMessages = [ex.Message], StatusCode = System.Net.HttpStatusCode.InternalServerError }) { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+        }
     }
 }

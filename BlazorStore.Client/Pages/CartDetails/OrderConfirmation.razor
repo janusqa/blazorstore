@@ -1,4 +1,4 @@
-@page "/orderconfirmation{entityId:int}"
+@page "/orderconfirmation/{entityId:int}"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
 @attribute [Authorize]
 
@@ -13,7 +13,7 @@
 @inject IApiService _api
 
 <div class="container">
-    @if (AuthState.Value.UserInfo is null || CartState.Value.IsLoading)
+    @if (AuthState.Value.UserInfo is null || CartState.Value.IsLoading || IsProcessing)
     {
         <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
             <img src="images/ajax-loader.gif" alt="Loading..." />
@@ -21,12 +21,30 @@
     }
     else
     {
-        <div class="row mt-4 pt-4">
-            <div class="col-10 offset-1 teext-center">
-                <h2 class="text-warning">Order Confirmed</h2>
-                <p>Your order has been placed successfully with Order Number: @EntityId</p>
+        @if (OrderHeader is not null && OrderHeader.Status == SD.OrderStatusApproved)
+        {
+            <div class="row mt-4 pt-4">
+                <div class="col-10 offset-1 teext-center">
+                    <h2 class="text-warning">Order Status</h2>
+                    <p>Your order has been placed successfully with Order Number: @EntityId</p>
+                </div>
+                <div class="col-8 offset-2">
+                    <img src="images/confirmation.jpg" width="100%" style="border-radius:30px" alt="Payment Successful" />
+                </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="row mt-4 pt-4">
+                <div class="col-10 offset-1 teext-center">
+                    <h2 class="text-warning">Order Status</h2>
+                    <p>There was an issue processing your payment. Contact us with Order Number: @EntityId</p>
+                </div>
+                <div class="col-8 offset-2">
+                    <img src="images/confirmation.jpg" width="100%" style="border-radius:30px" alt="Payment Failed" />
+                </div>
+            </div>
+        }
     }
 </div>
 
@@ -37,7 +55,8 @@
     // Alternative method to check if user is Authtenticated
     [CascadingParameter]
     public Task<AuthenticationState>? authenticationState { get; set; }
-
+    private bool IsProcessing { get; set; } = true;
+    private OrderHeaderDto? OrderHeader { get; set; }
     private int UserInfoInitilized;
 
     protected override async Task OnInitializedAsync()
@@ -56,7 +75,7 @@
         }
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         // we are in a strange situation here. We need to fetch userinfo and populate the form after we
         // recieve this info. The best place so far to to this is in the OnafterRender hook. We need
@@ -66,14 +85,41 @@
         UserInfoInitilized = AuthState.Value.UserInfo is not null ? ++UserInfoInitilized : UserInfoInitilized;
         if (AuthState.Value.UserInfo is not null && UserInfoInitilized == 1)
         {
-            FinalizeOrder();
-            InvokeAsync(StateHasChanged);
+            await FinalizeOrder();
+            await InvokeAsync(StateHasChanged);
         }
     }
 
-    private void FinalizeOrder()
+    private async Task FinalizeOrder()
     {
+        try
+        {
+            var response = await _api.Orders.FinalizeAsync(EntityId, new ApiRequest());
 
+            if (response is not null && response.IsSuccess)
+            {
+                var orderHeader = JsonSerializer.Deserialize<OrderHeaderDto>(JsonSerializer.Serialize(response.Result));
+                if (orderHeader is not null)
+                {
+                    _dispatcher.Dispatch(new AppState.Cart.CartRemoved());
+                    OrderHeader = orderHeader;
+                    IsProcessing = false;
+                }
+                else
+                {
+                    throw new Exception(string.Join(" | ", response?.ErrorMessages ?? []));
+                }
+            }
+            else
+            {
+                throw new Exception(string.Join(" | ", response?.ErrorMessages ?? []));
+            }
+        }
+        catch (Exception ex)
+        {
+            IsProcessing = false;
+            await _jsruntime.InvokeVoidAsync("blazorInterop.ShowToastr", "error", ex.Message);
+        }
     }
 
     // Fluxor Plumbing

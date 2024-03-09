@@ -13,19 +13,19 @@ namespace BlazorStore.Service
             _config = config;
         }
 
-        public Session Checkout(OrderDto Order)
+        public Session Checkout(OrderDto order)
         {
             var baseUrl = _config.GetSection("AppUrls")["BaseServerUrl"];
 
             var options = new SessionCreateOptions
             {
-                SuccessUrl = $"{baseUrl}/orderconfirmation?entityId={Order.OrderHeader.Id}",
+                SuccessUrl = $"{baseUrl}/orderconfirmation/{order.OrderHeader.Id}",
                 CancelUrl = $"{baseUrl}/summary",
                 LineItems = new List<SessionLineItemOptions>(),
                 Mode = "payment",
             };
 
-            foreach (var item in Order.OrderDetails)
+            foreach (var item in order.OrderDetails)
             {
                 options.LineItems.Add(
                     new SessionLineItemOptions
@@ -49,5 +49,13 @@ namespace BlazorStore.Service
 
             return session;
         }
+
+        public Session GetSession(OrderHeaderDto orderHeader)
+        {
+            var service = new SessionService();
+            var session = service.Get(orderHeader.SessionId);
+            return session;
+        }
+
     }
 }
