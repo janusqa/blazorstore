@@ -106,7 +106,8 @@ namespace BlazorStore.Controllers
 
             try
             {
-                var order = await _orderService.PaymentConfirmation(entityId);
+                var userName = User.Identity?.Name ?? "";
+                var order = await _orderService.PaymentConfirmation(entityId, userName);
 
                 if (order is null) return NotFound(new ApiResponse { IsSuccess = false, StatusCode = System.Net.HttpStatusCode.NotFound });
 

@@ -9,7 +9,7 @@ namespace BlazorStore.Service.IService
         public Task<OrderDto?> Create(OrderDto orderDto);
         public Task<bool> Cancel(int entityId);
         public Task<OrderHeaderDto?> UpdateOrderDetails(OrderHeaderDto orderHeader);
-        public Task<OrderHeaderDto?> PaymentConfirmation(int entityId);
+        public Task<OrderHeaderDto?> PaymentConfirmation(int entityId, string userName);
         public Task<bool> UpdateOrderStatus(int entityId, string status);
     }
 

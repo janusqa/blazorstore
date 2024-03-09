@@ -235,11 +235,14 @@ namespace BlazorStore.Service
             }
         }
 
-        public async Task<OrderHeaderDto?> PaymentConfirmation(int entityId)
+        public async Task<OrderHeaderDto?> PaymentConfirmation(int entityId, string userName)
         {
             var orderHeader = (await _uow.OrderHeaders.FromSqlAsync($@"
-                SELECT * FROM OrderHeaders WHERE Id = @Id;
-            ", [new SqliteParameter("Id", entityId)])).FirstOrDefault()?.ToDto();
+                SELECT * FROM OrderHeaders WHERE Id = @Id AND UserId = @UserId;
+            ", [
+                new SqliteParameter("Id", entityId),
+                new SqliteParameter("UserId", userName)
+            ])).FirstOrDefault()?.ToDto();
 
             if (orderHeader is null) return null;
 
@@ -253,10 +256,12 @@ namespace BlazorStore.Service
                     SessionId = @SessionId,
                     PaymentIntentId = @PaymentIntentId,
                     Status = @NewStatus 
-                WHERE Id = @Id AND Status = @OldStatus
+                WHERE 
+                    Id = @Id AND Status = @OldStatus AND UserId = @UserId
                 RETURNING *;
             ", [
                 new SqliteParameter("Id", entityId),
+                new SqliteParameter("UserId", userName),
                 new SqliteParameter("SessionId", session.Id),
                 new SqliteParameter("PaymentIntentId", session.PaymentIntentId),
                 new SqliteParameter("OldStatus", SD.OrderStatusPending),
