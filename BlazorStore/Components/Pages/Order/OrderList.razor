@@ -1,0 +1,143 @@
+@page "/order"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@attribute [Authorize(Roles = SD.Role_Admin)]
+
+@using Syncfusion.Blazor.Grids
+
+@inject IUnitOfWork _uow
+@inject NavigationManager _navigationManager
+
+<div>
+    <h4 class="card-title text-primary">Order's List</h4>
+    @if (OrderHeaders is null)
+    {
+        <div class="text-center">
+            <img src="/images/loading.gif">
+        </div>
+    }
+    else
+    {
+        <SfGrid @ref="sfGridRef" DataSource="@OrderHeaders" AllowPaging="true" AllowFiltering="true" AllowSorting="true"
+            Toolbar="@(new List<string>() { "Cancel", "Update" })">
+            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
+            <GridPageSettings PageSize="@SD.paginationDefaultSize" PageCount="5" PageSizes="true" />
+            <GridEditSettings AllowEditing="true" AllowDeleting="true" ShowDeleteConfirmDialog="true"
+                Mode="EditMode.Normal" />
+            <GridEvents OnActionBegin="OnGridActionBegin" OnActionComplete="OnGridActionComplete" TValue="OrderHeaderDto" />
+            <GridColumns>
+                <GridColumn Field=@nameof(OrderHeaderDto.Id) HeaderText="Id" IsPrimaryKey="true" Visible="false" />
+                <GridColumn Field=@nameof(OrderHeaderDto.Name) HeaderText="Name" />
+                <GridColumn Field=@nameof(OrderHeaderDto.Email) HeaderText="Email" />
+                <GridColumn Field=@nameof(OrderHeaderDto.PhoneNumber) HeaderText="Phone Number" />
+                <GridColumn Field=@nameof(OrderHeaderDto.OrderTotal) HeaderText="Order Total" Format="C2" />
+                <GridColumn Field=@nameof(OrderHeaderDto.OrderDate) HeaderText="Order Date" Format="yyyy-dd--MM" />
+                <GridColumn HeaderText="Manage">
+                    <GridCommandColumns>
+                        <GridCommandColumn Type="CommandButtonType.Edit"
+                            ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-edit", CssClass="e-flat" })">
+                        </GridCommandColumn>
+                        <GridCommandColumn Type="CommandButtonType.Delete"
+                            ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-delete", CssClass="e-flat" })">
+                        </GridCommandColumn>
+                        <GridCommandColumn Type="CommandButtonType.Save"
+                            ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-save", CssClass="e-flat" })">
+                        </GridCommandColumn>
+                        <GridCommandColumn Type="CommandButtonType.Cancel"
+                            ButtonOption="@(new CommandButtonOptions() {IconCss="e-icons e-cancel-icon", CssClass="e-flat" })">
+                        </GridCommandColumn>
+                    </GridCommandColumns>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    }
+</div>
+
+@code {
+    private List<OrderHeaderDto>? OrderHeaders { get; set; }
+
+    // syncfuscion
+    private SfGrid<OrderHeaderDto>? sfGridRef;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await GetAll();
+        OrderHeaders ??= result.Data.ToList();
+    }
+
+    private async Task<(IEnumerable<OrderHeaderDto> Data, int Count)> GetAll(int offset = SD.paginationDefaultPage, int?
+    limit
+    =
+    SD.paginationDefaultSize)
+    {
+        var numRecords = (await _uow.Products.SqlQueryAsync<int>($@"SELECT COUNT(Id) FROM OrderHeaders;", [])).FirstOrDefault();
+
+        var data = (await _uow.OrderHeaders.FromSqlAsync($@"
+SELECT oh.*
+FROM
+OrderHeaders oh
+INNER JOIN
+(SELECT Id FROM OrderHeaders LIMIT @Limit OFFSET @Offset) AS fast
+USING (Id);",
+        [
+        new SqliteParameter("Offset", offset), new SqliteParameter("Limit", limit)
+        ])).Select(oh => oh.ToDto());
+
+        return (data, numRecords);
+    }
+
+    private async Task Update(OrderHeaderDto orderHeader)
+    {
+        await _uow.OrderHeaders.ExecuteSqlAsync(@"
+UPDATE OrderHeaders
+SET
+Email = @Email
+WHERE
+Id = @Id"
+        , [
+        new SqliteParameter("Id", orderHeader.Id),
+new SqliteParameter("Email", orderHeader.Email),
+        ]);
+    }
+
+    private async Task Delete(OrderHeaderDto orderheader)
+    {
+        var transaction = _uow.Transaction();
+
+        try
+        {
+            await _uow.OrderHeaders.ExecuteSqlAsync(@"DELETE FROM OrderHeaders WHERE Id = @Id;"
+            , [new SqliteParameter("Id", orderheader.Id)]);
+
+            await _uow.OrderDetails.ExecuteSqlAsync(@"DELETE FROM OrderDetails WHERE OrderHeaderId = @OrderHeaderId;"
+            , [new SqliteParameter("OrderHeaderId", orderheader.Id)]);
+
+            transaction.Commit();
+        }
+        catch
+        {
+            transaction.Rollback();
+        }
+    }
+
+    private async void OnGridActionComplete(ActionEventArgs<OrderHeaderDto> args)
+    {
+        if (
+        args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save) ||
+        args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
+        {
+            OrderHeaders = (await GetAll()).Data.ToList();
+        }
+    }
+
+    private async void OnGridActionBegin(ActionEventArgs<OrderHeaderDto> args)
+    {
+        if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save))
+        {
+            await Update(args.Data);
+        }
+        else if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
+        {
+            await Delete(args.Data);
+        }
+    }
+}

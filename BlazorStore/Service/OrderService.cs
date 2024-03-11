@@ -22,6 +22,90 @@ namespace BlazorStore.Service
             _paymentService = ps;
         }
 
+        public async Task<OrderDto?> Get(int entityId)
+        {
+            try
+            {
+                var orderHeader = (await _uow.OrderHeaders.FromSqlAsync($@"
+                    SELECT * FROM OrderHeaders WHERE Id = @Id;
+                ", [new SqliteParameter("Id", entityId)])).FirstOrDefault();
+
+                if (orderHeader is not null)
+                {
+                    var orderDetails = await _uow.OrderDetails.FromSqlAsync($@"
+                        SELECT * FROM OrderDetails WHERE Id = @Id;
+                    ", [new SqliteParameter("Id", entityId)]);
+
+                    return new OrderDto
+                    {
+                        OrderHeader = orderHeader.ToDto(),
+                        OrderDetails = orderDetails.Select(od => od.ToDto()).ToList()
+                    };
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            };
+        }
+
+        public async Task<IEnumerable<OrderDto>?> GetAll(string? userId = null, string? status = null)
+        {
+            try
+            {
+                var sqlParams = new List<SqliteParameter>();
+                var inParams = new List<string>();
+                if (userId is not null)
+                {
+                    sqlParams.Add(new SqliteParameter($"UserId", userId));
+                    inParams.Add("oh.UserId = @UserId");
+                }
+                if (userId is not null)
+                {
+                    sqlParams.Add(new SqliteParameter($"Status", status));
+                    inParams.Add("oh.Status = @Status");
+                }
+
+                var orderHeaders = await _uow.OrderHeaders.FromSqlAsync($@"
+                    SELECT * FROM OrderHeaders WHERE {string.Join(" AND ", inParams)};
+                ", sqlParams);
+
+                var orderHeaderIds = orderHeaders.Select(oh => oh.Id).ToList();
+
+                inParams.Clear();
+                sqlParams.Clear();
+                foreach (var (ohId, idx) in orderHeaderIds.Select((ohId, idx) => (ohId, idx)))
+                {
+                    inParams.Add($"@oh{idx}");
+                    sqlParams.Add(new SqliteParameter($"oh{idx}", ohId));
+                }
+
+                var orderDetails = await _uow.OrderDetails.FromSqlAsync($@"
+                    SELECT * FROM OrderDetails WHERE OrderHeaderId IN ({string.Join(", ", inParams)});
+                ", sqlParams);
+
+                List<OrderDto> orderDtos = [];
+                foreach (var orderHeader in orderHeaders)
+                {
+                    orderDtos.Add(
+                        new OrderDto
+                        {
+                            OrderHeader = orderHeader.ToDto(),
+                            OrderDetails = orderDetails.Where(od => od.OrderHeaderId == orderHeader.Id).Select(od => od.ToDto()).ToList()
+                        }
+                    );
+                }
+
+                return orderDtos;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         public async Task<bool> Cancel(int entityId)
         {
             using var transaction = _uow.Transaction();
@@ -147,90 +231,6 @@ namespace BlazorStore.Service
             catch (Exception)
             {
                 transaction.Rollback();
-                return null;
-            }
-        }
-
-        public async Task<OrderDto?> Get(int entityId)
-        {
-            try
-            {
-                var orderHeader = (await _uow.OrderHeaders.FromSqlAsync($@"
-                    SELECT * FROM OrderHeaders WHERE Id = @Id;
-                ", [new SqliteParameter("Id", entityId)])).FirstOrDefault();
-
-                if (orderHeader is not null)
-                {
-                    var orderDetails = await _uow.OrderDetails.FromSqlAsync($@"
-                        SELECT * FROM OrderDetails WHERE Id = @Id;
-                    ", [new SqliteParameter("Id", entityId)]);
-
-                    return new OrderDto
-                    {
-                        OrderHeader = orderHeader.ToDto(),
-                        OrderDetails = orderDetails.Select(od => od.ToDto()).ToList()
-                    };
-                }
-
-                return null;
-            }
-            catch (Exception)
-            {
-                return null;
-            };
-        }
-
-        public async Task<IEnumerable<OrderDto>?> GetAll(string? userId = null, string? status = null)
-        {
-            try
-            {
-                var sqlParams = new List<SqliteParameter>();
-                var inParams = new List<string>();
-                if (userId is not null)
-                {
-                    sqlParams.Add(new SqliteParameter($"UserId", userId));
-                    inParams.Add("oh.UserId = @UserId");
-                }
-                if (userId is not null)
-                {
-                    sqlParams.Add(new SqliteParameter($"Status", status));
-                    inParams.Add("oh.Status = @Status");
-                }
-
-                var orderHeaders = await _uow.OrderHeaders.FromSqlAsync($@"
-                    SELECT * FROM OrderHeaders WHERE {string.Join(" AND ", inParams)};
-                ", sqlParams);
-
-                var orderHeaderIds = orderHeaders.Select(oh => oh.Id).ToList();
-
-                inParams.Clear();
-                sqlParams.Clear();
-                foreach (var (ohId, idx) in orderHeaderIds.Select((ohId, idx) => (ohId, idx)))
-                {
-                    inParams.Add($"@oh{idx}");
-                    sqlParams.Add(new SqliteParameter($"oh{idx}", ohId));
-                }
-
-                var orderDetails = await _uow.OrderDetails.FromSqlAsync($@"
-                    SELECT * FROM OrderDetails WHERE OrderHeaderId IN ({string.Join(", ", inParams)});
-                ", sqlParams);
-
-                List<OrderDto> orderDtos = [];
-                foreach (var orderHeader in orderHeaders)
-                {
-                    orderDtos.Add(
-                        new OrderDto
-                        {
-                            OrderHeader = orderHeader.ToDto(),
-                            OrderDetails = orderDetails.Where(od => od.OrderHeaderId == orderHeader.Id).Select(od => od.ToDto()).ToList()
-                        }
-                    );
-                }
-
-                return orderDtos;
-            }
-            catch (Exception)
-            {
                 return null;
             }
         }
