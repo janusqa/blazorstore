@@ -62,6 +62,8 @@ namespace BlazorStore.Models.Extensions
                 Status = OrderHeader.Status,
                 SessionId = OrderHeader.SessionId,
                 PaymentIntentId = OrderHeader.PaymentIntentId,
+                Tracking = OrderHeader.Tracking,
+                Carrier = OrderHeader.Carrier,
                 Name = OrderHeader.Name,
                 PhoneNumber = OrderHeader.PhoneNumber,
                 StreetAddress = OrderHeader.StreetAddress,

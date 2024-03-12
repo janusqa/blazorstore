@@ -47,6 +47,15 @@
                         </GridCommandColumn>
                     </GridCommandColumns>
                 </GridColumn>
+                <GridColumn HeaderText="Details" TextAlign="TextAlign.Center">
+                    <Template>
+                        @{
+                            <NavLink href="@($"/order/{(context as OrderHeaderDto)!.Id}")" class="btn btn-primary"><i
+                                    class=" bi bi-stack"></i>
+                            </NavLink>
+                        }
+                    </Template>
+                </GridColumn>
             </GridColumns>
         </SfGrid>
     }

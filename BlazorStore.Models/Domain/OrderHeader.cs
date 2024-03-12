@@ -25,6 +25,8 @@ namespace BlazorStore.Models.Domain
         public required string Status { get; set; }
         public string? SessionId { get; set; }
         public string? PaymentIntentId { get; set; }
+        public string? Tracking { get; set; }
+        public string? Carrier { get; set; }
         [Required]
         public required string Name { get; set; }
         [Required]

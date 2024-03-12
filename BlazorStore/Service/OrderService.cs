@@ -33,8 +33,8 @@ namespace BlazorStore.Service
                 if (orderHeader is not null)
                 {
                     var orderDetails = await _uow.OrderDetails.FromSqlAsync($@"
-                        SELECT * FROM OrderDetails WHERE Id = @Id;
-                    ", [new SqliteParameter("Id", entityId)]);
+                        SELECT * FROM OrderDetails WHERE OrderHeaderId = @OrderHeaderId;
+                    ", [new SqliteParameter("OrderHeaderId", entityId)]);
 
                     return new OrderDto
                     {
@@ -281,7 +281,9 @@ namespace BlazorStore.Service
                     StreetAddress = @StreetAddress, 
                     State = @State, 
                     City = @City, 
-                    PostalCode = @PostalCode 
+                    PostalCode = @PostalCode,
+                    Carrier = ISNULL(@Carrier, Carrier),
+                    Tracking = ISNULL(@Tracking, Tracking)
                 WHERE Id = @Id
                 RETURNING *;
             ", [
@@ -291,7 +293,9 @@ namespace BlazorStore.Service
                 new SqliteParameter("StreetAddress", orderHeader.StreetAddress),
                 new SqliteParameter("State", orderHeader.State),
                 new SqliteParameter("City", orderHeader.City),
-                new SqliteParameter("PostalCode", orderHeader.PostalCode)
+                new SqliteParameter("PostalCode", orderHeader.PostalCode),
+                new SqliteParameter("Carrier", orderHeader.Carrier ?? (object)DBNull.Value),
+                new SqliteParameter("Tracking", orderHeader.Tracking ?? (object)DBNull.Value),
             ])).FirstOrDefault()?.ToDto();
 
             return orderHeaderDto;
