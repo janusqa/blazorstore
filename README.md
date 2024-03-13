@@ -642,3 +642,9 @@ Stripe
    Stripe.StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
    builder.Services.AddSyncfusionBlazor();
    ```
+
+Email
+===
+dotnet add BlazorStore.Common package MailKit
+dotnet add BlazorStore.Common package MimeKit
+dotnet add BlazorStore.Common package Microsoft.AspNetCore.Identity.UI
