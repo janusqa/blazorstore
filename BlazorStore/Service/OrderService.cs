@@ -22,19 +22,19 @@ namespace BlazorStore.Service
             _paymentService = ps;
         }
 
-        public async Task<OrderDto?> Get(int entityId, bool tracked)
+        public async Task<OrderDto?> Get(int entityId)
         {
             try
             {
                 var orderHeader = (await _uow.OrderHeaders.FromSqlAsync($@"
                     SELECT * FROM OrderHeaders WHERE Id = @Id;
-                ", [new SqliteParameter("Id", entityId)], tracked)).FirstOrDefault();
+                ", [new SqliteParameter("Id", entityId)])).FirstOrDefault();
 
                 if (orderHeader is not null)
                 {
                     var orderDetails = await _uow.OrderDetails.FromSqlAsync($@"
                         SELECT * FROM OrderDetails WHERE OrderHeaderId = @OrderHeaderId;
-                    ", [new SqliteParameter("OrderHeaderId", entityId)], tracked);
+                    ", [new SqliteParameter("OrderHeaderId", entityId)]);
 
                     return new OrderDto
                     {
@@ -106,27 +106,75 @@ namespace BlazorStore.Service
             }
         }
 
-        public async Task<bool> Cancel(int entityId)
+        public async Task<OrderHeaderDto?> Cancel(int entityId)
         {
             using var transaction = _uow.Transaction();
+
+            OrderHeader? orderHeader = null;
+
             try
             {
-                await _uow.OrderDetails.ExecuteSqlAsync($@"
-                    DELETE FROM OrderDetails WHERE OrderHeaderId = @Id;
-                ", [new SqliteParameter("Id", entityId)]);
+                orderHeader = (await _uow.OrderHeaders.FromSqlAsync($@"
+                    SELECT * FROM OrderHeaders 
+                    WHERE 
+                        Id = @Id
+                    AND (Status = @Pending OR Status = @Approved);
+                    ",
+                [
+                    new SqliteParameter("Id", entityId),
+                    new SqliteParameter("Pending", SD.OrderStatusPending),
+                    new SqliteParameter("Approved", SD.OrderStatusApproved)
+                ])).FirstOrDefault();
 
-                await _uow.OrderHeaders.ExecuteSqlAsync($@"
-                    DELETE FROM OrderHeaders WHERE Id = @Id;
-                ", [new SqliteParameter("Id", entityId)]);
+                if (orderHeader is null)
+                {
+                    transaction.Rollback();
+                    return null;
+                }
+
+                var newStatus = SD.OrderStatusCancelled;
+
+                if (orderHeader.Status == SD.OrderStatusApproved)
+                {
+                    newStatus = SD.OrderStatusRefunded;
+
+                    var isCancelled = _paymentService.Cancel(orderHeader.ToDto());
+
+                    if (!isCancelled)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
+
+                orderHeader = (await _uow.OrderHeaders.SqlQueryAsync<OrderHeader>($@"
+                    UPDATE OrderHeaders 
+                    SET
+                        Status = @NewStatus
+                    WHERE 
+                        Id = @Id 
+                    AND (Status = @Pending OR Status = @Approved)
+                    RETURNING *;
+                ", [
+                    new SqliteParameter("Id", orderHeader.Id),
+                    new SqliteParameter("NewStatus", newStatus),
+                    new SqliteParameter("Pending", SD.OrderStatusPending),
+                    new SqliteParameter("Approved", SD.OrderStatusApproved)
+                ])).FirstOrDefault();
+
+                if (orderHeader is null)
+                {
+                    transaction.Rollback();
+                    return null;
+                }
 
                 transaction.Commit();
-
-                return true;
+                return orderHeader.ToDto();
             }
             catch (Exception)
             {
                 transaction.Rollback();
-                return false;
+                return null;
             }
         }
 

@@ -6,5 +6,6 @@ namespace BlazorStore.Service.IService
     {
         T Checkout(OrderDto Order);
         T GetSession(OrderHeaderDto OrderHeader);
+        bool Cancel(OrderHeaderDto OrderHeader);
     }
 }

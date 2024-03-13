@@ -25,11 +25,15 @@ namespace BlazorStore.DataAccess.Repository
                 : await dbSet.Where(predicate).AsNoTracking().FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate)
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? predicate, bool tracked)
         {
             return predicate is not null
-                ? await dbSet.Where(predicate).ToListAsync()
-                : await dbSet.ToListAsync();
+                ? tracked
+                    ? await dbSet.Where(predicate).ToListAsync()
+                    : await dbSet.Where(predicate).AsNoTracking().ToListAsync()
+                : tracked
+                    ? await dbSet.ToListAsync()
+                    : await dbSet.AsNoTracking().ToListAsync();
         }
 
         public async Task AddAsync(T entity)

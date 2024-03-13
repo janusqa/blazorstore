@@ -50,6 +50,26 @@ namespace BlazorStore.Service
             return session;
         }
 
+        public bool Cancel(OrderHeaderDto order)
+        {
+            var options = new Stripe.RefundCreateOptions
+            {
+                Reason = Stripe.RefundReasons.RequestedByCustomer,
+                PaymentIntent = order.PaymentIntentId
+            };
+
+            try
+            {
+                var service = new Stripe.RefundService();
+                Stripe.Refund refund = service.Create(options);
+                return refund.Status.Equals("succeeded", StringComparison.CurrentCultureIgnoreCase);
+            }
+            catch (Stripe.StripeException)
+            {
+                return false;
+            }
+        }
+
         public Session GetSession(OrderHeaderDto orderHeader)
         {
             var service = new SessionService();
