@@ -22,19 +22,19 @@ namespace BlazorStore.Service
             _paymentService = ps;
         }
 
-        public async Task<OrderDto?> Get(int entityId)
+        public async Task<OrderDto?> Get(int entityId, bool tracked)
         {
             try
             {
                 var orderHeader = (await _uow.OrderHeaders.FromSqlAsync($@"
                     SELECT * FROM OrderHeaders WHERE Id = @Id;
-                ", [new SqliteParameter("Id", entityId)])).FirstOrDefault();
+                ", [new SqliteParameter("Id", entityId)], tracked)).FirstOrDefault();
 
                 if (orderHeader is not null)
                 {
                     var orderDetails = await _uow.OrderDetails.FromSqlAsync($@"
                         SELECT * FROM OrderDetails WHERE OrderHeaderId = @OrderHeaderId;
-                    ", [new SqliteParameter("OrderHeaderId", entityId)]);
+                    ", [new SqliteParameter("OrderHeaderId", entityId)], tracked);
 
                     return new OrderDto
                     {

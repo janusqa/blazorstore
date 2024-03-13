@@ -80,7 +80,8 @@
     =
     SD.paginationDefaultSize)
     {
-        var numRecords = (await _uow.Products.SqlQueryAsync<int>($@"SELECT COUNT(Id) FROM OrderHeaders;", [])).FirstOrDefault();
+        var numRecords = (await _uow.OrderHeaders.SqlQueryAsync<int>($@"SELECT COUNT(Id) FROM OrderHeaders;",
+        [])).FirstOrDefault();
 
         var data = (await _uow.OrderHeaders.FromSqlAsync($@"
 SELECT oh.*
@@ -91,7 +92,7 @@ INNER JOIN
 USING (Id);",
         [
         new SqliteParameter("Offset", offset), new SqliteParameter("Limit", limit)
-        ])).Select(oh => oh.ToDto());
+        ], false)).Select(oh => oh.ToDto());
 
         return (data, numRecords);
     }

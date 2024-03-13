@@ -1,4 +1,4 @@
-@page "/order/{EntityId:int}"
+@page "/order/{entityId:int}"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @attribute [Authorize(Roles = SD.Role_Admin)]
 
@@ -201,7 +201,7 @@ else
     {
         if (EntityId > 0)
         {
-            Order ??= await _orderService.Get(EntityId);
+            Order ??= await _orderService.Get(EntityId, false);
         }
         else
         {

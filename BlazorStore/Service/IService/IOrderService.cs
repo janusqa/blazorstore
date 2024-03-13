@@ -4,7 +4,7 @@ namespace BlazorStore.Service.IService
 {
     public interface IOrderService
     {
-        public Task<OrderDto?> Get(int entityId);
+        public Task<OrderDto?> Get(int entityId, bool tracked = true);
         public Task<IEnumerable<OrderDto>?> GetAll(string? userId = null, string? status = null);
         public Task<OrderDto?> Create(OrderDto orderDto);
         public Task<bool> Cancel(int entityId);
