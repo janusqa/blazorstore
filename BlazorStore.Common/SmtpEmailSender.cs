@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 
-namespace Bookstore.Utility
+namespace BlazorStore.Common
 {
     // we have mocked this class until we get to its implementation as it
     // will cause an error when seeding roles to the DB
@@ -30,24 +30,32 @@ namespace Bookstore.Utility
 
         public async Task SendEmailAsync(string email, string subject, string message)
         {
-            var emailMessage = new MimeMessage
+            try
             {
-                Sender = MailboxAddress.Parse(_uid)
-            };
-            emailMessage.To.Add(MailboxAddress.Parse(email));
-            emailMessage.Subject = subject;
-            var body = new BodyBuilder
-            {
-                HtmlBody = message
-            };
-            emailMessage.Body = body.ToMessageBody();
+                var emailMessage = new MimeMessage
+                {
+                    Sender = MailboxAddress.Parse(_uid)
+                };
+                emailMessage.To.Add(MailboxAddress.Parse(email));
+                emailMessage.Subject = subject;
+                var body = new BodyBuilder
+                {
+                    HtmlBody = message
+                };
+                emailMessage.Body = body.ToMessageBody();
 
-            using var smtp = new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()));
-            smtp.Connect(_server, _port, SecureSocketOptions.StartTls);
-            smtp.Authenticate(_uid, _pid);
-            var result = await smtp.SendAsync(emailMessage);
-            smtp.Disconnect(true);
-            return;
+                using var smtp = new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()));
+                smtp.Connect(_server, _port, SecureSocketOptions.StartTls);
+                smtp.Authenticate(_uid, _pid);
+                var result = await smtp.SendAsync(emailMessage);
+                smtp.Disconnect(true);
+                return;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"SMTP Error: {ex.Message}");
+                return;
+            }
             // return Task.CompletedTask; // use this to mock a service.
         }
     }

@@ -648,3 +648,6 @@ Email
 dotnet add BlazorStore.Common package MailKit
 dotnet add BlazorStore.Common package MimeKit
 dotnet add BlazorStore.Common package Microsoft.AspNetCore.Identity.UI
+Set up server, port in appsettings.json
+Setup uid, pid in user-secrets
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
