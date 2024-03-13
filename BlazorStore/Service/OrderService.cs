@@ -279,11 +279,11 @@ namespace BlazorStore.Service
                     Name = @Name, 
                     PhoneNumber = @PhoneNumber, 
                     StreetAddress = @StreetAddress, 
-                    State = @State, 
                     City = @City, 
+                    State = @State, 
                     PostalCode = @PostalCode,
-                    Carrier = ISNULL(@Carrier, Carrier),
-                    Tracking = ISNULL(@Tracking, Tracking)
+                    Carrier = IFNULL(@Carrier, Carrier),
+                    Tracking = IFNULL(@Tracking, Tracking)
                 WHERE Id = @Id
                 RETURNING *;
             ", [

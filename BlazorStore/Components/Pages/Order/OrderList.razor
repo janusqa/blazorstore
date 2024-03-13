@@ -27,10 +27,12 @@
             <GridColumns>
                 <GridColumn Field=@nameof(OrderHeaderDto.Id) HeaderText="Id" IsPrimaryKey="true" Visible="false" />
                 <GridColumn Field=@nameof(OrderHeaderDto.Name) HeaderText="Name" />
-                <GridColumn Field=@nameof(OrderHeaderDto.Email) HeaderText="Email" />
-                <GridColumn Field=@nameof(OrderHeaderDto.PhoneNumber) HeaderText="Phone Number" />
-                <GridColumn Field=@nameof(OrderHeaderDto.OrderTotal) HeaderText="Order Total" Format="C2" />
-                <GridColumn Field=@nameof(OrderHeaderDto.OrderDate) HeaderText="Order Date" Format="yyyy-dd--MM" />
+                <GridColumn Field=@nameof(OrderHeaderDto.Email) HeaderText="Email" AllowEditing="false" />
+                <GridColumn Field=@nameof(OrderHeaderDto.PhoneNumber) HeaderText="Phone" />
+                <GridColumn Field=@nameof(OrderHeaderDto.OrderTotal) HeaderText="Total" Format="C2" AllowEditing="false" />
+                <GridColumn Field=@nameof(OrderHeaderDto.OrderDate) HeaderText="Order Date" Format="yyyy-dd--MM"
+                    AllowEditing="false" />
+                <GridColumn Field=@nameof(OrderHeaderDto.Status) HeaderText="Status" AllowEditing="false" />
                 <GridColumn HeaderText="Manage">
                     <GridCommandColumns>
                         <GridCommandColumn Type="CommandButtonType.Edit"

@@ -109,43 +109,51 @@ else
                                     <ValidationMessage For="() => Order.OrderHeader.Tracking" />
                                 </div>
                             </div>
-                            <div class="row my-1">
-                                <div class="col-3">Shipping Date</div>
-                                <div class="col-9">
-                                    <InputDate @bind-Value="Order.OrderHeader.ShippingDate" class="form-control" />
-                                    <ValidationMessage For="() => Order.OrderHeader.ShippingDate" />
+                            @if (Order.OrderHeader.Status != SD.OrderStatusApproved && Order.OrderHeader.Status !=
+                               SD.OrderStatusPending)
+                                {
+                                    <div class="row my-1">
+                                        <div class="col-3">Shipping Date</div>
+                                        <div class="col-9">
+                                            <InputDate @bind-Value="Order.OrderHeader.ShippingDate" class="form-control" />
+                                            <ValidationMessage For="() => Order.OrderHeader.ShippingDate" />
+                                        </div>
+                                    </div>
+                                }
+                                <div class="row my-1">
+                                    <div class="col-3">Session ID</div>
+                                    <div class="col-9">
+                                        <InputText @bind-Value="Order.OrderHeader.SessionId" readonly
+                                            class="form-control" />
+                                        <ValidationMessage For="() => Order.OrderHeader.SessionId" />
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row my-1">
-                                <div class="col-3">Session ID</div>
-                                <div class="col-9">
-                                    <InputText @bind-Value="Order.OrderHeader.SessionId" class="form-control" />
-                                    <ValidationMessage For="() => Order.OrderHeader.SessionId" />
+                                <div class="row my-1">
+                                    <div class="col-3">Order Status</div>
+                                    <div class="col-9">
+                                        <InputText @bind-Value="Order.OrderHeader.Status" readonly class="form-control" />
+                                        <ValidationMessage For="() => Order.OrderHeader.Status" />
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row my-1">
-                                <div class="col-3">Order Status</div>
-                                <div class="col-9">
-                                    <InputText @bind-Value="Order.OrderHeader.Status" class="form-control" />
-                                    <ValidationMessage For="() => Order.OrderHeader.Status" />
-                                </div>
-                            </div>
-                            <input type="submit" class="btn btn-warning form-control my-1"
-                                value="Update Order Details" />
-                        </EditForm>
-                    </div>
-                    <div class="col-12 col-lg-5 offset-lg-1">
-                        <h4 class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-primary">Order Summary</span>
-                        </h4>
-                        <ul class="list-group mb-3">
-                            @foreach (var item in Order.OrderDetails)
+                                @if (Order.OrderHeader.Status == SD.OrderStatusApproved)
+                                {
+                                    <button type="submit" class="btn btn-warning form-control my-1">Update Order
+                                        Details</button>
+                                }
+                            </EditForm>
+                        </div>
+                        <div class="col-12 col-lg-5 offset-lg-1">
+                            <h4 class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-primary">Order Summary</span>
+                            </h4>
+                            <ul class="list-group mb-3">
+                                @foreach (var item in Order.OrderDetails)
                                 {
                                     <li class="list-group-item d-flex justify-content-between p-2">
                                         <div class="row container">
                                             <div class="col-8">
                                                 <h6 class="my-0 text-primary">@item.ProductName</h6>
-                                                <small class="text-muted">Price : @(item.Price.ToString("c"))</small><br />
+                                                <small class="text-muted">Price : @item.Price.ToString("c")</small><br />
                                                 <small class="text-muted">Quantity : @item.Count</small>
                                             </div>
                                             <div class="col-4 text-end">
@@ -165,14 +173,22 @@ else
                                     </div>
                                 </li>
                             </ul>
-                            <button class="btn btn-success form-control my-1">Ship Order</button>
-                            <button class="btn btn-danger form-control my-1">Cancel Order</button>
+                            @if (Order.OrderHeader.Status == SD.OrderStatusApproved)
+                            {
+                                <button @onclick="ShipOrder" class="btn btn-success form-control my-1">Ship Order</button>
+                            }
+                            @if (Order.OrderHeader.Status == SD.OrderStatusApproved || Order.OrderHeader.Status ==
+                           SD.OrderStatusPending)
+                            {
+                                <button class="btn btn-danger form-control my-1">Cancel Order</button>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 }
 
 @code {
@@ -195,7 +211,50 @@ else
 
     private async Task UpdateOrder()
     {
+        try
+        {
+            if (Order is not null && Order.OrderHeader is not null)
+            {
+                var orderHeader = await _orderService.UpdateOrderDetails(Order.OrderHeader);
+                if (orderHeader is not null)
+                {
+                    Order = Order with { OrderHeader = orderHeader };
+                    await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "success", "Updated successfully");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "error", ex.Message);
+        }
+    }
 
+    private async Task ShipOrder()
+    {
+        try
+        {
+            if (
+            Order is not null &&
+            Order.OrderHeader is not null &&
+            !string.IsNullOrWhiteSpace(Order.OrderHeader.Tracking) &&
+            !string.IsNullOrWhiteSpace(Order.OrderHeader.Carrier)
+            )
+            {
+                var success = await _orderService.UpdateOrderStatus(Order.OrderHeader.Id, SD.OrderStatusShipped);
+                if (success)
+                {
+                    await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "success", "Order Shipped");
+                } else {
+                    await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "error", "Something went wrong");
+                }
+            } else {
+                await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "error", "Check Order details. Ensure that Carrier and Tracking are set if attempting to ship an order");
+            }
+        }
+        catch (Exception ex)
+        {
+            await _ijsr.InvokeVoidAsync("blazorInterop.ShowToastr", "error", ex.Message);
+        }
     }
 
 }
