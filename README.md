@@ -7,14 +7,16 @@
       EOF"
       ```
    2. sudo snap remove dotnet-sdk && sudo apt remove -y 'dotnet*' 'aspnetcore*' 'netstandard*'
-   3. sudo apt update
-   4. sudo apt upgrade
-   5. wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-   6. sudo dpkg -i packages-microsoft-prod.deb
-   7. rm packages-microsoft-prod.deb
-   8. sudo apt update
-   9. sudo apt upgrade
-   10. sudo apt-get install -y dotnet-sdk-8.0
+   3. navigate to /etc/profile.d and remove any dotnet* bash files
+   4. reboot
+   5. sudo apt update
+   6. sudo apt upgrade
+   7. wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+   8. sudo dpkg -i packages-microsoft-prod.deb
+   9. rm packages-microsoft-prod.deb
+   10. sudo apt update
+   11. sudo apt upgrade
+   12. sudo apt-get install -y dotnet-sdk-8.0
    
 
 2. Install C# plugin for vscode
