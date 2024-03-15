@@ -26,9 +26,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddControllers().AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null); ;
+builder.Services.AddControllers().AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);
 
-// Blazor Authentitication with roles
+// Blazor Authentication with roles
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -40,7 +40,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.S
     .AddDefaultTokenProviders();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-// Add Custmom Autentication
+// Add Custom Authentication
 // add (jwt, could be other types of auth too) authentication
 builder.Services.AddAuthentication().AddGoogle(options =>
 {
@@ -110,12 +110,12 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<BlazorStore.Service.IService.IOrderService, BlazorStore.Service.OrderService>();
 builder.Services.AddScoped<IPaymentService<Stripe.Checkout.Session>, StripeService>();
 
-
-// Configure DPI for client services that will be neccessary on the server if pre-rendering is enabled 
+// Configure DPI for client services that will be necessary on the server if pre-rendering is enabled 
 BlazorStore.Client.CommonServices.ConfigureCommonServices(builder.Services, builder.Configuration);
 
 // add custom components [syncfusion]
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configuration.GetValue<string>("SyncFusion:ApiKey"));
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(
+    builder.Configuration.GetValue<string>("SyncFusion:ApiKey"));
 
 // Stripe Config
 Stripe.StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
@@ -130,10 +130,11 @@ builder.Services.AddCors(options =>
     // This is the policy for the Blazor WASM Client
     options.AddPolicy("BlazorWasmClient", builder =>
         builder
-        .WithOrigins("https://localhost:7036", "http://localhost:5199")
-        .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS")
-        .WithHeaders("Origin", "X-Requested-With", "Content-Type", "Authorization", "X-Xsrf-Token", "X-Forwarded-For", "X-Real-IP")
-        .AllowCredentials()
+            .WithOrigins("https://localhost:7036", "http://localhost:5199")
+            .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS")
+            .WithHeaders("Origin", "X-Requested-With", "Content-Type", "Authorization", "X-Xsrf-Token",
+                "X-Forwarded-For", "X-Real-IP")
+            .AllowCredentials()
     );
 });
 
@@ -173,10 +174,7 @@ if (app.Environment.IsDevelopment())
     app.UseMigrationsEndPoint();
 
     app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "BlazorStoreApi_v1");
-    });
+    app.UseSwaggerUI(options => { options.SwaggerEndpoint("/swagger/v1/swagger.json", "BlazorStoreApi_v1"); });
 }
 else
 {

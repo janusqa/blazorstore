@@ -651,3 +651,10 @@ dotnet add BlazorStore.Common package Microsoft.AspNetCore.Identity.UI
 Set up server, port in appsettings.json
 Setup uid, pid in user-secrets
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+
+error NETSDK1082: There was no runtime pack for Microsoft.AspNetCore.App available for the specified RuntimeIdentifier 'browser-wasm'.
+https://github.com/dotnet/aspnetcore/issues/48230
+```
+Thanks for contacting us. Pages and Views aren't supported on Blazor WebAssembly. So you will have to eliminate the reference to Microsoft.AspNetCore.App from that library to be able to reference it from your Blazor WebAssembly project.
+```

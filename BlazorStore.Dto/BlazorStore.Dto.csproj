@@ -6,20 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <!-- <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup> -->
-
-  <ItemGroup>
-    <ProjectReference Include="..\BlazorStore.Common\BlazorStore.Common.csproj" />
-  </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Extensions\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlazorStore.Common\BlazorStore.Common.csproj" />
   </ItemGroup>
 
 </Project>

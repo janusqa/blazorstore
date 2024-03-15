@@ -23,15 +23,15 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Syncfusion.Blazor.Grid" Version="24.2.6" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="24.2.6" />
-    <ProjectReference Include="..\BlazorStore.Client\BlazorStore.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BlazorStore.Models\BlazorStore.Models.csproj" />
+    <ProjectReference Include="..\BlazorStore.Client\BlazorStore.Client.csproj" />
     <ProjectReference Include="..\BlazorStore.DataAccess\BlazorStore.DataAccess.csproj" />
     <ProjectReference Include="..\BlazorStore.Dto\BlazorStore.Dto.csproj" />
     <ProjectReference Include="..\BlazorStore.PageScript\BlazorStore.PageScript.csproj" />
+    <ProjectReference Include="..\BlazorStore.Models\BlazorStore.Models.csproj" />
   </ItemGroup>
 
   <ItemGroup>
